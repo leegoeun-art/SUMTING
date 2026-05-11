@@ -11,7 +11,7 @@ interface SignupData {
   gender: 'male' | 'female' | 'other';
 }
 
-export default function SignupScreen() {
+export default function SignupPage() {
   const navigate = useNavigate();
   const { setUser } = useAppContext();
   const [data, setData] = useState<SignupData>({

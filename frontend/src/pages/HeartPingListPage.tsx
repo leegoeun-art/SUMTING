@@ -10,7 +10,7 @@ const MOCK_PINGS = [
   { id: 'p2', user: { id: 'r2', nickname: '커피 한 잔', department: '경제학과', mascotType: 'basic' }, type: 'sent' },
 ];
 
-export default function HeartPingListScreen() {
+export default function HeartPingListPage() {
   const navigate = useNavigate();
   const { setSelectedUser } = useAppContext();
   const [tab, setTab] = useState<'received' | 'sent'>('received');

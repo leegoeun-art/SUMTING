@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import MascotImage from '../components/MascotImage';
 
-export default function SplashScreen() {
+export default function SplashPage() {
   const navigate = useNavigate();
 
   return (

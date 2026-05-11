@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
 
-export default function MatchSuccessScreen() {
+export default function MatchSuccessPage() {
   const navigate = useNavigate();
   const { selectedUser, setActiveChat } = useAppContext();
 

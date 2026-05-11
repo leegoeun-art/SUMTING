@@ -6,7 +6,7 @@ import { MASCOTS } from '../constants';
 
 const NICKNAMES = ['수줍은 토끼', '춤추는 구름', '비오는 날의 산책', '햇살 가득한 오후', '비밀의 정원', '우주 여행자'];
 
-export default function ResultScreen() {
+export default function ResultPage() {
   const navigate = useNavigate();
   const { user, setUser } = useAppContext();
 

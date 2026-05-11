@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { PERSONALITY_KEYWORDS } from '../constants';
 
-export default function KeywordSelectionScreen() {
+export default function IdealTypePage() {
   const navigate = useNavigate();
   const { setUser } = useAppContext();
   const [selected, setSelected] = useState<string[]>([]);
@@ -20,15 +20,15 @@ export default function KeywordSelectionScreen() {
   };
 
   const handleComplete = () => {
-    setUser(prev => ({ ...prev, keywords: selected } as any));
-    navigate('/ideal');
+    setUser(prev => ({ ...prev, idealKeywords: selected } as any));
+    navigate('/result');
   };
 
   return (
     <div className="h-full w-full bg-[#0a0a0a] flex flex-col p-6 overflow-y-auto">
       <div className="mt-8 mb-10">
-        <h1 className="text-2xl font-bold mb-3">나를 가장 잘 나타내는<br/>키워드 3개를 골라주세요</h1>
-        <p className="text-gray-400 text-sm">상대방에게 보여질 나만의 매력 포인트예요.</p>
+        <h1 className="text-2xl font-bold mb-3">어떤 분을<br/>만나고 싶나요?</h1>
+        <p className="text-gray-400 text-sm">선호하는 상대방의 키워드 3개를 골라주세요.</p>
       </div>
 
       <div className="flex-1 grid grid-cols-3 gap-3 mb-8">
@@ -41,7 +41,7 @@ export default function KeywordSelectionScreen() {
               whileTap={{ scale: 0.95 }}
               className={`py-3 px-1 text-sm rounded-xl border transition-all ${
                 isSelected
-                ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/30'
+                ? 'bg-pink-500 border-pink-500 text-white shadow-lg shadow-pink-500/30'
                 : 'bg-[#1a1a1a] border-gray-800 text-gray-400'
               }`}
             >

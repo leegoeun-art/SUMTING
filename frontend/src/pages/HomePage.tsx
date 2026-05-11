@@ -14,7 +14,7 @@ const MOCK_RECOMMENDATIONS: RecommendedUser[] = [
   { id: '4', nickname: '구름 한 스푼', department: '경영학부', keywords: ['귀여운', '유머러스한', '엉뚱한'], mascotType: 'basic', matchScore: 79 },
 ];
 
-export default function HomeScreen() {
+export default function HomePage() {
   const navigate = useNavigate();
   const { user, setSelectedUser } = useAppContext();
   const [timeLeft, setTimeLeft] = useState('');

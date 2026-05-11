@@ -7,26 +7,26 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from './context/AppContext';
 
-import SplashScreen from './screens/SplashScreen';
-import StartScreen from './screens/StartScreen';
-import SignupScreen from './screens/SignupScreen';
-import KeywordSelectionScreen from './screens/KeywordSelectionScreen';
-import IdealTypeScreen from './screens/IdealTypeScreen';
-import ResultScreen from './screens/ResultScreen';
-import HomeScreen from './screens/HomeScreen';
-import UserDetailScreen from './screens/UserDetailScreen';
-import HeartPingListScreen from './screens/HeartPingListScreen';
-import MatchSuccessScreen from './screens/MatchSuccessScreen';
-import ChatScreen from './screens/ChatScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import EndingScreen from './screens/EndingScreen';
+import SplashPage from '@/src/pages/SplashPage.tsx';
+import StartPage from '@/src/pages/StartPage.tsx';
+import SignupPage from '@/src/pages/SignupPage.tsx';
+import KeywordSelectionPage from '@/src/pages/KeywordSelectionPage.tsx';
+import IdealTypePage from '@/src/pages/IdealTypePage.tsx';
+import ResultPage from '@/src/pages/ResultPage.tsx';
+import HomePage from '@/src/pages/HomePage.tsx';
+import UserDetailPage from '@/src/pages/UserDetailPage.tsx';
+import HeartPingListPage from '@/src/pages/HeartPingListPage.tsx';
+import MatchSuccessPage from '@/src/pages/MatchSuccessPage.tsx';
+import ChatPage from '@/src/pages/ChatPage.tsx';
+import ProfilePage from '@/src/pages/ProfilePage.tsx';
+import EndingPage from '@/src/pages/EndingPage.tsx';
 
 function AnimatedRoutes() {
   const location = useLocation();
   const { isFinished } = useAppContext();
 
   if (isFinished) {
-    return <EndingScreen />;
+    return <EndingPage />;
   }
 
   return (
@@ -40,19 +40,19 @@ function AnimatedRoutes() {
         className="h-full w-full"
       >
         <Routes location={location}>
-          <Route path="/" element={<SplashScreen />} />
-          <Route path="/start" element={<StartScreen />} />
-          <Route path="/signup" element={<SignupScreen />} />
-          <Route path="/keyword" element={<KeywordSelectionScreen />} />
-          <Route path="/ideal" element={<IdealTypeScreen />} />
-          <Route path="/result" element={<ResultScreen />} />
-          <Route path="/home" element={<HomeScreen />} />
-          <Route path="/detail" element={<UserDetailScreen />} />
-          <Route path="/heartpings" element={<HeartPingListScreen />} />
-          <Route path="/match-success" element={<MatchSuccessScreen />} />
-          <Route path="/chat" element={<ChatScreen />} />
-          <Route path="/profile" element={<ProfileScreen />} />
-          <Route path="/ending" element={<EndingScreen />} />
+          <Route path="/" element={<SplashPage />} />
+          <Route path="/start" element={<StartPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/keyword" element={<KeywordSelectionPage />} />
+          <Route path="/ideal" element={<IdealTypePage />} />
+          <Route path="/result" element={<ResultPage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/detail" element={<UserDetailPage />} />
+          <Route path="/heartpings" element={<HeartPingListPage />} />
+          <Route path="/match-success" element={<MatchSuccessPage />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/ending" element={<EndingPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </motion.div>

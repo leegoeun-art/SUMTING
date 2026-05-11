@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import MascotImage from '../components/MascotImage';
 
-export default function EndingScreen() {
+export default function EndingPage() {
   return (
     <div className="h-full w-full bg-gradient-to-b from-[#0a0a0a] via-[#1a1a2e] to-[#0a0a0a] flex flex-col items-center justify-center p-8 text-center overscroll-none">
       <motion.div

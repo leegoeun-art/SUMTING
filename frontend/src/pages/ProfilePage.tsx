@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
 
-export default function ProfileScreen() {
+export default function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useAppContext();
 

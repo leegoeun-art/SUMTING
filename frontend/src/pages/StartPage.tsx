@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function StartScreen() {
+export default function StartPage() {
   const navigate = useNavigate();
 
   return (

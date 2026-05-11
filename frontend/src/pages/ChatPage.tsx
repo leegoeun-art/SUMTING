@@ -5,7 +5,7 @@ import { useAppContext } from '../context/AppContext';
 import { Message as IMessage } from '../types';
 import MascotImage from '../components/MascotImage';
 
-export default function ChatScreen() {
+export default function ChatPage() {
   const navigate = useNavigate();
   const { activeChat } = useAppContext();
   const [input, setInput] = useState('');
