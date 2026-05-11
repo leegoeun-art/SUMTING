@@ -1,13 +1,22 @@
 import React from 'react';
 import { ChevronLeft, Settings, Shield, Bell, HelpCircle, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
-import { UserProfile } from '../types';
 
-export default function ProfileScreen({ user, onBack }: { user: UserProfile, onBack: () => void }) {
+export default function ProfileScreen() {
+  const navigate = useNavigate();
+  const { user } = useAppContext();
+
+  if (!user) {
+    navigate('/home');
+    return null;
+  }
+
   return (
     <div className="h-full w-full bg-[#0a0a0a] flex flex-col p-6 overflow-y-auto">
       <div className="flex justify-between items-center mb-10">
-        <button onClick={onBack} className="p-2 -ml-2 text-gray-400"><ChevronLeft /></button>
+        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-400"><ChevronLeft /></button>
         <button className="p-2 -mr-2 text-gray-400"><Settings size={22} /></button>
       </div>
 
@@ -19,7 +28,7 @@ export default function ProfileScreen({ user, onBack }: { user: UserProfile, onB
         </div>
         <h2 className="text-2xl font-bold mb-1">{user.nickname || '익명의 숨뭉이'}</h2>
         <p className="text-sm text-gray-500 mb-6">{user.department}</p>
-        
+
         <div className="flex gap-4">
           <div className="bg-[#1a1a1a] px-6 py-2 rounded-2xl border border-gray-800 text-center">
             <span className="block text-xs text-gray-500 mb-1">나이</span>

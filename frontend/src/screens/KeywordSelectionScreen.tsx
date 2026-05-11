@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 import { PERSONALITY_KEYWORDS } from '../constants';
 
-export default function KeywordSelectionScreen({ onComplete }: { onComplete: (keywords: string[]) => void }) {
+export default function KeywordSelectionScreen() {
+  const navigate = useNavigate();
+  const { setUser } = useAppContext();
   const [selected, setSelected] = useState<string[]>([]);
 
   const toggleKeyword = (k: string) => {
@@ -13,6 +17,11 @@ export default function KeywordSelectionScreen({ onComplete }: { onComplete: (ke
         setSelected([...selected, k]);
       }
     }
+  };
+
+  const handleComplete = () => {
+    setUser(prev => ({ ...prev, keywords: selected } as any));
+    navigate('/ideal');
   };
 
   return (
@@ -31,8 +40,8 @@ export default function KeywordSelectionScreen({ onComplete }: { onComplete: (ke
               onClick={() => toggleKeyword(k)}
               whileTap={{ scale: 0.95 }}
               className={`py-3 px-1 text-sm rounded-xl border transition-all ${
-                isSelected 
-                ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/30' 
+                isSelected
+                ? 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-500/30'
                 : 'bg-[#1a1a1a] border-gray-800 text-gray-400'
               }`}
             >
@@ -43,7 +52,7 @@ export default function KeywordSelectionScreen({ onComplete }: { onComplete: (ke
       </div>
 
       <button
-        onClick={() => onComplete(selected)}
+        onClick={handleComplete}
         disabled={selected.length < 3}
         className={`w-full py-4 font-bold rounded-2xl mb-4 sticky bottom-0 transition-all ${
           selected.length === 3 ? 'bg-white text-black' : 'bg-gray-800 text-gray-500'

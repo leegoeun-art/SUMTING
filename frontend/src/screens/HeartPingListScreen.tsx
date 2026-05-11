@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ChevronLeft, Heart, MessageCircle } from 'lucide-react';
+import { ChevronLeft, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
 import { RecommendedUser } from '../types';
 
@@ -8,13 +10,20 @@ const MOCK_PINGS = [
   { id: 'p2', user: { id: 'r2', nickname: '커피 한 잔', department: '경제학과', mascotType: 'basic' }, type: 'sent' },
 ];
 
-export default function HeartPingListScreen({ onBack, onMatch }: { onBack: () => void, onMatch: (u: RecommendedUser) => void }) {
+export default function HeartPingListScreen() {
+  const navigate = useNavigate();
+  const { setSelectedUser } = useAppContext();
   const [tab, setTab] = useState<'received' | 'sent'>('received');
+
+  const handleMatch = (u: RecommendedUser) => {
+    setSelectedUser(u);
+    navigate('/match-success');
+  };
 
   return (
     <div className="h-full w-full bg-[#0a0a0a] flex flex-col p-6">
       <div className="flex items-center mb-8">
-        <button onClick={onBack} className="p-2 -ml-2 text-gray-400 font-bold"><ChevronLeft /></button>
+        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-400 font-bold"><ChevronLeft /></button>
         <h2 className="text-lg font-medium ml-2">하트핑 목록</h2>
       </div>
 
@@ -50,8 +59,8 @@ export default function HeartPingListScreen({ onBack, onMatch }: { onBack: () =>
             </div>
             {tab === 'received' ? (
               <div className="flex gap-2">
-                <button 
-                  onClick={() => onMatch(p.user as any)}
+                <button
+                  onClick={() => handleMatch(p.user as any)}
                   className="w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-pink-500/20"
                 >
                   <Heart size={18} fill="white" />

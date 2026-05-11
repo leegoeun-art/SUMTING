@@ -1,7 +1,10 @@
 import { motion } from 'motion/react';
 import { Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-export default function StartScreen({ onStart }: { onStart: () => void }) {
+export default function StartScreen() {
+  const navigate = useNavigate();
+
   return (
     <div className="h-full w-full bg-[#0a0a0a] flex flex-col items-center p-8 relative overflow-hidden">
       {/* Background elements */}
@@ -29,12 +32,12 @@ export default function StartScreen({ onStart }: { onStart: () => void }) {
       </div>
 
       <button
-        onClick={onStart}
+        onClick={() => navigate('/signup')}
         className="w-full py-4 bg-white text-black font-bold rounded-2xl mb-6 active:scale-95 transition-transform"
       >
         시작하기
       </button>
-      
+
       <p className="text-xs text-gray-500 mb-8">
         로그인 시 서비스 <span className="underline">이용약관</span> 및 <span className="underline">개인정보처리방침</span>에 동의하게 됩니다.
       </p>

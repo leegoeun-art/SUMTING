@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Heart, MessageCircle, User, Bell, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
-import { UserProfile, RecommendedUser } from '../types';
+import { RecommendedUser } from '../types';
 import { FESTIVAL_END_TIME } from '../constants';
 
 const MOCK_RECOMMENDATIONS: RecommendedUser[] = [
@@ -12,17 +14,9 @@ const MOCK_RECOMMENDATIONS: RecommendedUser[] = [
   { id: '4', nickname: '구름 한 스푼', department: '경영학부', keywords: ['귀여운', '유머러스한', '엉뚱한'], mascotType: 'basic', matchScore: 79 },
 ];
 
-export default function HomeScreen({ 
-  user, 
-  onSelectUser, 
-  onViewHeartPings, 
-  onViewProfile 
-}: { 
-  user: UserProfile, 
-  onSelectUser: (u: RecommendedUser) => void,
-  onViewHeartPings: () => void,
-  onViewProfile: () => void
-}) {
+export default function HomeScreen() {
+  const navigate = useNavigate();
+  const { user, setSelectedUser } = useAppContext();
   const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
@@ -47,17 +41,22 @@ export default function HomeScreen({
     return () => clearInterval(timer);
   }, []);
 
+  const handleSelectUser = (u: RecommendedUser) => {
+    setSelectedUser(u);
+    navigate('/detail');
+  };
+
   return (
     <div className="h-full w-full bg-[#0a0a0a] flex flex-col relative overflow-hidden">
       {/* Background Atmosphere */}
       <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-[#1a1a2e] to-transparent opacity-50 z-0" />
       <div className="absolute top-20 right-[-10%] w-64 h-64 bg-purple-500/20 blur-[100px] rounded-full" />
-      
+
       {/* Header */}
       <div className="z-10 p-6 flex justify-between items-center">
         <h1 className="text-xl font-bold tracking-tight text-white">SUMTING</h1>
         <div className="flex gap-4">
-          <button onClick={onViewHeartPings} className="relative p-2 text-white/80 hover:text-white">
+          <button onClick={() => navigate('/heartpings')} className="relative p-2 text-white/80 hover:text-white">
             <Bell size={24} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full" />
           </button>
@@ -91,7 +90,7 @@ export default function HomeScreen({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                onClick={() => onSelectUser(u)}
+                onClick={() => handleSelectUser(u)}
                 className="group relative bg-[#1a1a1a] rounded-[32px] p-6 border border-gray-800 hover:border-purple-500/50 transition-all active:scale-[0.98]"
               >
                 <div className="flex items-center gap-4">
@@ -128,11 +127,11 @@ export default function HomeScreen({
             <Heart size={24} className="fill-white" />
             <span className="text-[10px] mt-1 font-medium">홈</span>
           </button>
-          <button onClick={onViewHeartPings} className="flex flex-col items-center p-2 text-gray-500 hover:text-white transition-colors">
+          <button onClick={() => navigate('/heartpings')} className="flex flex-col items-center p-2 text-gray-500 hover:text-white transition-colors">
             <MessageCircle size={24} />
             <span className="text-[10px] mt-1 font-medium">채팅</span>
           </button>
-          <button onClick={onViewProfile} className="flex flex-col items-center p-2 text-gray-500 hover:text-white transition-colors">
+          <button onClick={() => navigate('/profile')} className="flex flex-col items-center p-2 text-gray-500 hover:text-white transition-colors">
             <User size={24} />
             <span className="text-[10px] mt-1 font-medium">마이</span>
           </button>

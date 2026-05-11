@@ -1,11 +1,14 @@
 import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import MascotImage from '../components/MascotImage';
 
-export default function SplashScreen({ onComplete }: { onComplete: () => void }) {
+export default function SplashScreen() {
+  const navigate = useNavigate();
+
   return (
-    <div 
+    <div
       className="h-full w-full bg-gradient-to-b from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex flex-col items-center justify-center p-8 text-center cursor-pointer"
-      onClick={onComplete}
+      onClick={() => navigate('/start')}
     >
       <motion.div
         initial={{ y: 20, opacity: 0 }}
@@ -19,7 +22,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
         <p className="text-lg text-purple-200 opacity-80">숨 가쁜 축제 속의 특별한 만남</p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         className="absolute bottom-20 text-sm text-purple-300/50"
         animate={{ opacity: [0.3, 0.6, 0.3] }}
         transition={{ repeat: Infinity, duration: 2 }}

@@ -1,13 +1,23 @@
 import { useState } from 'react';
-import { ChevronLeft, Send, Image, Plus } from 'lucide-react';
-import { Chat, Message as IMessage } from '../types';
+import { ChevronLeft, Send, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
+import { Message as IMessage } from '../types';
 import MascotImage from '../components/MascotImage';
 
-export default function ChatScreen({ chat, onBack }: { chat: Chat, onBack: () => void }) {
-  const [messages, setMessages] = useState<IMessage[]>([
-    { id: '1', senderId: chat.partner.id, text: '안녕하세요! 매칭되어서 반가워요 :)', timestamp: '오후 2:30' }
-  ]);
+export default function ChatScreen() {
+  const navigate = useNavigate();
+  const { activeChat } = useAppContext();
   const [input, setInput] = useState('');
+
+  if (!activeChat) {
+    navigate('/home');
+    return null;
+  }
+
+  const [messages, setMessages] = useState<IMessage[]>([
+    { id: '1', senderId: activeChat.partner.id, text: '안녕하세요! 매칭되어서 반가워요 :)', timestamp: '오후 2:30' }
+  ]);
 
   const send = () => {
     if (!input.trim()) return;
@@ -25,14 +35,14 @@ export default function ChatScreen({ chat, onBack }: { chat: Chat, onBack: () =>
     <div className="h-full w-full bg-[#0a0a0a] flex flex-col">
       {/* Header */}
       <div className="p-4 flex items-center border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-10">
-        <button onClick={onBack} className="p-2 -ml-2 text-gray-400"><ChevronLeft /></button>
+        <button onClick={() => navigate('/home')} className="p-2 -ml-2 text-gray-400"><ChevronLeft /></button>
         <div className="flex items-center gap-3 ml-2">
           <div className="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center">
-            <MascotImage type={chat.partner.mascotType} className="w-8 h-8" />
+            <MascotImage type={activeChat.partner.mascotType} className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-white">{chat.partner.nickname}</h3>
-            <p className="text-[10px] text-gray-500">{chat.partner.department}</p>
+            <h3 className="font-bold text-sm text-white">{activeChat.partner.nickname}</h3>
+            <p className="text-[10px] text-gray-500">{activeChat.partner.department}</p>
           </div>
         </div>
       </div>
@@ -48,8 +58,8 @@ export default function ChatScreen({ chat, onBack }: { chat: Chat, onBack: () =>
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[75%] rounded-[24px] px-4 py-3 text-sm ${
-              m.senderId === 'me' 
-              ? 'bg-purple-600 text-white rounded-tr-none' 
+              m.senderId === 'me'
+              ? 'bg-purple-600 text-white rounded-tr-none'
               : 'bg-[#1a1a1a] text-gray-200 rounded-tl-none border border-gray-800'
             }`}>
               {m.text}
@@ -65,14 +75,14 @@ export default function ChatScreen({ chat, onBack }: { chat: Chat, onBack: () =>
       <div className="p-4 bg-[#0a0a0a] border-t border-gray-800 pb-10">
         <div className="flex items-center gap-3 bg-[#1a1a1a] rounded-[24px] px-4 py-2 border border-gray-800 focus-within:border-gray-600 transition-colors">
           <button className="text-gray-500"><Plus size={20} /></button>
-          <input 
+          <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && send()}
             placeholder="메시지를 입력하세요"
             className="flex-1 bg-transparent border-none outline-none text-sm text-white py-2"
           />
-          <button 
+          <button
             onClick={send}
             disabled={!input.trim()}
             className={`p-2 rounded-full ${input.trim() ? 'bg-white text-black' : 'text-gray-600'}`}

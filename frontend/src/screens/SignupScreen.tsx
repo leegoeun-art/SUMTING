@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
 import { DEPARTMENTS } from '../constants';
 
 interface SignupData {
@@ -9,20 +11,26 @@ interface SignupData {
   gender: 'male' | 'female' | 'other';
 }
 
-export default function SignupScreen({ onComplete }: { onComplete: (data: SignupData) => void }) {
+export default function SignupScreen() {
+  const navigate = useNavigate();
+  const { setUser } = useAppContext();
   const [data, setData] = useState<SignupData>({
     department: '',
     age: 20,
     height: 170,
     gender: 'female'
   });
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleComplete = () => {
+    setUser(prev => ({ ...prev, ...data } as any));
+    navigate('/keyword');
+  };
 
   return (
     <div className="h-full w-full bg-[#0a0a0a] flex flex-col p-6">
       <div className="flex items-center mb-8">
-        <button className="p-2 -ml-2 text-gray-400"><ChevronLeft /></button>
+        <button className="p-2 -ml-2 text-gray-400" onClick={() => navigate(-1)}><ChevronLeft /></button>
         <h2 className="text-lg font-medium ml-2">회원가입</h2>
       </div>
 
@@ -41,8 +49,8 @@ export default function SignupScreen({ onComplete }: { onComplete: (data: Signup
                   key={g}
                   onClick={() => setData({ ...data, gender: g })}
                   className={`flex-1 py-3 rounded-xl border transition-all ${
-                    data.gender === g 
-                    ? 'bg-white text-black border-white' 
+                    data.gender === g
+                    ? 'bg-white text-black border-white'
                     : 'bg-transparent text-gray-400 border-gray-800'
                   }`}
                 >
@@ -55,7 +63,7 @@ export default function SignupScreen({ onComplete }: { onComplete: (data: Signup
           {/* Department */}
           <div className="space-y-3 relative">
             <p className="text-sm text-gray-400">학과</p>
-            <button 
+            <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-full py-4 px-4 bg-[#1a1a1a] border border-gray-800 rounded-xl text-left flex justify-between items-center"
             >
@@ -105,7 +113,7 @@ export default function SignupScreen({ onComplete }: { onComplete: (data: Signup
       </div>
 
       <button
-        onClick={() => onComplete(data)}
+        onClick={handleComplete}
         disabled={!data.department}
         className={`w-full py-4 font-bold rounded-2xl mb-4 transition-all ${
           data.department ? 'bg-white text-black' : 'bg-gray-800 text-gray-500 cursor-not-allowed'
