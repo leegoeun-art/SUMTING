@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -14,32 +17,45 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CSRF 설정 (개발 단계나 API 중심일 경우 보통 disable)
                 .csrf(csrf -> csrf.disable())
 
-                // 2. HTTP 요청에 대한 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**").permitAll() // 로그인 관련 경로는 모두 허용
-                        .anyRequest().authenticated() // 그 외 요청은 인증 필요
+                        .requestMatchers("/", "/login/**", "/oauth2/**").permitAll()
+                        .anyRequest().authenticated()
                 )
 
-                // 3. OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // 우리가 만든 서비스 등록
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestResolver(noPkceResolver())
                         )
-                        .defaultSuccessUrl("/main", true) // 로그인 성공 시 이동할 페이지 (컨트롤러에 해당 경로가 있어야 함)
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .defaultSuccessUrl("/home", true)
                 )
 
-                // 4. 로그아웃 설정
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
                 );
 
         return http.build();
+    }
+
+    private OAuth2AuthorizationRequestResolver noPkceResolver() {
+        DefaultOAuth2AuthorizationRequestResolver resolver =
+                new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
+        resolver.setAuthorizationRequestCustomizer(customizer -> {
+            customizer.additionalParameters(params -> {
+                params.remove("code_challenge");
+                params.remove("code_challenge_method");
+            });
+            customizer.attributes(attrs -> attrs.remove("code_verifier"));
+        });
+        return resolver;
     }
 }
