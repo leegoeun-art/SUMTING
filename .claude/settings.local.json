@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\USER\\\\Desktop\\\\SUMTING\\\\SUMTING\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({**{k:v for k,v in d.get\\('dependencies',{}\\).items\\(\\)}, **{k:v for k,v in d.get\\('devDependencies',{}\\).items\\(\\)}}, indent=2\\)\\)\")"
     ]
   }
 }

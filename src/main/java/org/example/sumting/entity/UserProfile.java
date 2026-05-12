@@ -36,12 +36,20 @@ public class UserProfile {
     private String yourKw3;
 
     @Builder
-    public UserProfile(User user, Gender gender, String department, Integer age, Integer height) {
+    public UserProfile(User user, Gender gender, String department, Integer age, Integer height,
+                       String myKw1, String myKw2, String myKw3,
+                       String yourKw1, String yourKw2, String yourKw3) {
         this.user = user;
         this.userId = user.getId();
         this.gender = gender;
         this.department = department;
         this.age = age;
         this.height = height;
+        this.myKw1 = myKw1;
+        this.myKw2 = myKw2;
+        this.myKw3 = myKw3;
+        this.yourKw1 = yourKw1;
+        this.yourKw2 = yourKw2;
+        this.yourKw3 = yourKw3;
     }
 }
