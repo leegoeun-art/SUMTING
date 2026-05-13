@@ -9,6 +9,7 @@ import org.example.sumting.dto.couples.ResponseCouplesDto;
 import java.util.List;
 import org.example.sumting.service.CoupleService;
 import org.example.sumting.service.HeartpingService;
+import org.example.sumting.service.LoadHeartpingService;
 import org.example.sumting.service.ProfileService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ public class Acontroller {
     private final ProfileService profileService;
     private final CoupleService coupleService;
     private final HeartpingService heartpingService;
+    private final LoadHeartpingService loadHeartpingService;
 
     @PostMapping("/profile")
     public void profile(@RequestBody ProfileDto profileDto) {
@@ -38,16 +40,16 @@ public class Acontroller {
     }
 
     @GetMapping("/receiveHeartPing")
-    public ProfileDto receiveHeartPing(@RequestBody String receiver_id){
-        return null;
+    public List<ProfileDto> receiveHeartPing(@RequestBody String nickname){
+        return loadHeartpingService.loadReceive(nickname);
     }
 
-    @GetMapping("/SendHeartPing")
-    public ProfileDto SendHeartPing(@RequestBody String sender_id){
-        return null;
+    @GetMapping("/sendHeartPing")
+    public List<ProfileDto> SendHeartPing(@RequestBody String nickname){
+        return loadHeartpingService.loadSend(nickname) ;
     }
 
-    @PostMapping("/ModifyHeartPing")
+    @PostMapping("/modifyHeartPing")
     public void ModifyHeartPing(@RequestBody ModifyHeartPingDto modifyHeartPingDto){
 
     }

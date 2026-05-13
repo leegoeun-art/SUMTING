@@ -5,6 +5,7 @@ import org.example.sumting.entity.User;
 import org.example.sumting.enums.LikeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface LikesRepository extends JpaRepository<Likes, Long> {
@@ -14,4 +15,10 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
 
     // 맞팔(매칭) 확인을 위해 반대 방향의 데이터가 PENDING 상태인지 확인
     Optional<Likes> findBySenderAndReceiverAndStatus(User sender, User receiver, LikeStatus status);
+
+    //받은 하트핑
+    List<Likes> findAllByReceiver(User receiver);
+
+    //보낸 하트핑
+    List<Likes> findAllBySender(User sender);
 }

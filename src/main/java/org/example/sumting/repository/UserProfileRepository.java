@@ -1,5 +1,6 @@
 package org.example.sumting.repository;
 
+import org.example.sumting.entity.User;
 import org.example.sumting.entity.UserProfile;
 import org.example.sumting.enums.Gender;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,11 +12,17 @@ import java.util.Optional;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
 
-    // user_id로 유저 프로필을 조회. 없으면 Optional.empty() 반환
-    Optional<UserProfile> findByUserId(Long user_id);
+    // nickname 으로 유저 프로필을 조회. 없으면 Optional.empty() 반환
+    Optional<UserProfile> findByNickName(String nickName);
 
-    // 해당 user_id를 가진 유저가 존재하는지 여부만 반환 (중복 닉네임 검사에 사용)
-    boolean existsByUserId(Long user_id);
+    // nickname 으로 유저 프로필을 조회. 없으면 Optional.empty() 반환
+    Optional<UserProfile> findByUserId(Long userId);
+
+    // nickname 으로 user_id 조회
+    User findUserIdByNickName(String nickName);
+
+    // 해당 nickname를 가진 유저가 존재하는지 여부만 반환 (중복 닉네임 검사에 사용)
+    boolean existsByNickName(String nickname);
 
     // 닉네임에 keyword가 포함된 유저 목록 반환 (부분 일치 검색)
     @Query("SELECT up FROM UserProfile up WHERE up.nickName LIKE %:keyword%")
