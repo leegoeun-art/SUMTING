@@ -14,7 +14,8 @@
       "PowerShell(netstat *)",
       "PowerShell(Get-Process *)",
       "Bash(xargs ls -la)",
-      "Bash(xargs cat)"
+      "Bash(xargs cat)",
+      "Bash(ipconfig)"
     ]
   }
 }
