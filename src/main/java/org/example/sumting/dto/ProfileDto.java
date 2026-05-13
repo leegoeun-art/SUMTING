@@ -9,6 +9,7 @@ import org.example.sumting.enums.Gender;
 public class ProfileDto {
 
     private String user_id;
+    private String nickname;
     private boolean gender;
     private String department;
     private int age;

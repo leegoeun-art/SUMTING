@@ -27,6 +27,8 @@ public class UserProfile {
     private Integer age;
     private Integer height;
 
+    private String nickName;
+
     private String myKw1;
     private String myKw2;
     private String myKw3;
@@ -36,12 +38,13 @@ public class UserProfile {
     private String yourKw3;
 
     @Builder
-    public UserProfile(User user, Gender gender, String department, Integer age, Integer height,
+    public UserProfile(User user, Gender gender, String nickName, String department, Integer age, Integer height,
                        String myKw1, String myKw2, String myKw3,
                        String yourKw1, String yourKw2, String yourKw3) {
         this.user = user;
         this.userId = user.getId();
         this.gender = gender;
+        this.nickName = nickName;
         this.department = department;
         this.age = age;
         this.height = height;
