@@ -30,7 +30,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 2. 카카오의 고유 식별자(id) 추출
         // user-name-attribute를 "id"로 설정했다면 oAuth2User.getName()으로 가능
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        Long kakaoId = (Long) attributes.get("id");
+        Long kakaoId = ((Number) attributes.get("id")).longValue();
 
         // 3. 신규 유저 가입 처리
         // existsById를 써도 좋지만, findById를 사용하여 엔티티를 들고 있는 것이 추후 확장성에 좋습니다.

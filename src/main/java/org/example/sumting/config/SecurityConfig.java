@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/", "/assets/**", "/login/**", "/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("/home", true)
+                        .defaultSuccessUrl("/start", true)
                 )
 
                 .logout(logout -> logout

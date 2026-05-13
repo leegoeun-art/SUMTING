@@ -2,10 +2,12 @@ package org.example.sumting.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.example.sumting.enums.Gender;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProfileDto {
 
     private String user_id;

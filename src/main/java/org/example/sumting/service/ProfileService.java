@@ -26,6 +26,7 @@ public class ProfileService {
                 .user(user)
                 .gender(gender)
                 .department(dto.getDepartment())
+                .nickName(dto.getNickname())
                 .age(dto.getAge())
                 .height(dto.getHeight())
                 .myKw1(dto.getMy_kw1())
