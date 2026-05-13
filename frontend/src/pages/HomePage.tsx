@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Clock } from 'lucide-react';
+import { Bell, Clock, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
@@ -8,6 +8,9 @@ import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
 import { RecommendedUser } from '../types';
 import { FESTIVAL_END_TIME } from '../constants';
+
+const DAILY_LIMIT = 5;
+const MOCK_USED_TODAY = 2; // 오늘 보낸 하트핑 수 (추후 API로 교체)
 
 const MOCK_RECOMMENDATIONS: RecommendedUser[] = [
   { id: '1', nickname: '달콤한 바나나', department: '컴퓨터공학과', keywords: ['외향적인', '어른스러운', '열정적인'], mascotType: 'cool', matchScore: 92 },
@@ -49,10 +52,15 @@ export default function HomePage() {
   };
 
   return (
-    <div className="h-full w-full bg-[#0a0a0a] flex flex-col relative overflow-hidden">
-      {/* Background Atmosphere */}
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-[#1a1a2e] to-transparent opacity-50 z-0" />
-      <div className="absolute top-20 right-[-10%] w-64 h-64 bg-purple-500/20 blur-[100px] rounded-full" />
+    <div
+      className="h-full w-full flex flex-col relative overflow-hidden"
+      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
+    >
+      {/* Background glow blobs */}
+      <div className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.25) 0%, transparent 70%)' }} />
+      <div className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }} />
 
       {/* Header */}
       <div className="z-10 px-6 pt-5 pb-2 flex justify-between items-center">
@@ -71,11 +79,11 @@ export default function HomePage() {
       <div className="flex-1 overflow-y-auto z-10 px-6 pb-24">
         {/* Timer Section */}
         <div className="my-6 flex flex-col items-center">
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-4 rounded-[32px] w-full"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="backdrop-blur-md px-6 py-4 rounded-[32px] w-full"
+            style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)' }}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-purple-300 font-medium tracking-widest uppercase mb-2">숨팅 종료까지</p>
+                <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.75)' }}>숨팅 종료까지</p>
                 <div className="flex items-center gap-2">
                   <Clock size={14} className="text-pink-400" />
                   <span className="text-3xl font-mono font-bold text-white tracking-tighter">
@@ -88,10 +96,58 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Heartping Counter */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
+          className="mb-6 rounded-[24px] px-5 py-4"
+          style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(255,255,255,0.25)' }}>
+                <Heart size={14} className="text-white" fill="white" />
+              </div>
+              <span className="text-sm font-semibold text-white">오늘의 하트핑</span>
+            </div>
+            <span
+              className="text-xs font-bold px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff' }}
+            >
+              {DAILY_LIMIT - MOCK_USED_TODAY}개 남음
+            </span>
+          </div>
+
+          {/* 도트 인디케이터 */}
+          <div className="flex items-center gap-2">
+            {Array.from({ length: DAILY_LIMIT }).map((_, i) => {
+              const used = i < MOCK_USED_TODAY;
+              return (
+                <div
+                  key={i}
+                  className="flex-1 h-2 rounded-full transition-all"
+                  style={{
+                    background: used
+                      ? 'rgba(255,255,255,0.25)'
+                      : '#ffffff',
+                    boxShadow: used ? 'none' : '0 0 6px rgba(255,255,255,0.6)',
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          <p className="text-[10px] mt-2.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            축제 3일간 최대 15개 · 하루 {DAILY_LIMIT}개 한도
+          </p>
+        </motion.div>
+
         {/* User Recommendation */}
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="font-bold text-lg">오늘의 인연</h3>
+            <h3 className="font-bold text-lg text-white">오늘의 인연</h3>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
@@ -102,23 +158,25 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 onClick={() => handleSelectUser(u)}
-                className="group relative bg-[#1a1a1a] rounded-[32px] p-6 border border-gray-800 hover:border-purple-500/50 transition-all active:scale-[0.98]"
+                className="group relative rounded-[32px] p-6 transition-all active:scale-[0.98]"
+                style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                    style={{ background: 'rgba(255,255,255,0.25)' }}>
                     <MascotImage type={u.mascotType} className="w-16 h-16" />
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
                       <h4 className="font-bold text-lg text-white">{u.nickname}</h4>
-                      <span className="text-xs font-bold text-pink-400 bg-pink-400/10 px-2 py-1 rounded-full">
+                      <span className="text-xs font-bold text-white bg-white/25 px-2 py-1 rounded-full">
                         {u.matchScore}% Match
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 mb-3">{u.department}</p>
+                    <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.65)' }}>{u.department}</p>
                     <div className="flex flex-wrap gap-2">
                       {u.keywords.map(k => (
-                        <span key={k} className="text-[10px] bg-white/5 px-2 py-1 rounded-lg text-gray-400">
+                        <span key={k} className="text-[10px] px-2 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)' }}>
                           #{k}
                         </span>
                       ))}

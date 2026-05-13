@@ -82,13 +82,13 @@ export default function StartPage() {
   return (
     <div
       className="h-full w-full flex flex-col items-center relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #1A0A3C 0%, #2D1268 45%, #1E0D4E 100%)' }}
+      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
     >
       {/* 글로우 블롭 */}
       <div className="absolute top-[-8%] left-[-15%] w-72 h-72 rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(140,60,220,0.35) 0%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.3) 0%, transparent 70%)' }} />
       <div className="absolute bottom-[15%] right-[-15%] w-72 h-72 rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(220,60,120,0.25) 0%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.25) 0%, transparent 70%)' }} />
 
       {/* Lottie 하트 배경 */}
       <LottieHeartBackground />
@@ -122,10 +122,10 @@ export default function StartPage() {
           transition={{ duration: 0.5, delay: 0.25 }}
           className="flex flex-col items-center gap-0.5 mb-7"
         >
-          <p className="text-sm font-semibold tracking-wide" style={{ color: '#E8C8FF' }}>
+          <p className="text-sm font-semibold tracking-wide" style={{ color: 'rgba(255,255,255,0.9)' }}>
             숨팅 : 수뭉팅
           </p>
-          <p className="text-xs font-medium tracking-widest" style={{ color: '#B89FE0' }}>
+          <p className="text-xs font-medium tracking-widest" style={{ color: 'rgba(255,255,255,0.7)' }}>
             상명대학교 2026 축제
           </p>
         </motion.div>
@@ -136,7 +136,7 @@ export default function StartPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.35 }}
           className="text-sm text-center leading-relaxed"
-          style={{ color: '#D4C0F0' }}
+          style={{ color: 'rgba(255,255,255,0.85)' }}
         >
           사진 없이, 감성으로 연결되는<br />
           48시간 한정 익명 매칭
@@ -151,10 +151,11 @@ export default function StartPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.45 }}
           onClick={() => navigate('/signup')}
-          className="w-full py-4 rounded-2xl font-bold text-white text-base active:scale-95 transition-transform shadow-lg"
+          className="w-full py-4 rounded-2xl font-bold text-base active:scale-95 transition-transform shadow-lg"
           style={{
-            background: 'linear-gradient(90deg, #FF6FA8 0%, #FF3E8A 100%)',
-            boxShadow:  '0 8px 24px rgba(255, 80, 140, 0.40)',
+            background: '#ffffff',
+            color:      '#C62A47',
+            boxShadow:  '0 8px 24px rgba(198,42,71,0.30)',
           }}
         >
           숨팅 시작하기
@@ -166,7 +167,7 @@ export default function StartPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.55 }}
           className="text-[11px]"
-          style={{ color: '#8B7AAE' }}
+          style={{ color: 'rgba(255,255,255,0.6)' }}
         >
           🌟 2026.5.20 00:00 ~ 05.22 23:59
         </motion.p>

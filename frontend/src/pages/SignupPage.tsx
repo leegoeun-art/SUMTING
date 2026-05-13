@@ -4,6 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { DEPARTMENTS } from '../constants';
 import SumungMascot from '../components/SumungMascot';
+import MyKeyword from '../components/signUp/MyKeyword';
+import YourKeyword from '../components/signUp/YourKeyword';
+import SignUpResult from '../components/signUp/SignUpResult';
+
+const NICKNAMES = ['반딧불이', '새벽별', '봄비향기', '달빛소나타', '초록마음', '하늘구름', '은하수별', '아침이슬', '노을빛', '첫눈처럼'];
+const randomNickname = () => NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
 
 // ── 회원가입 데이터 타입 (기존 유지) ──────────────────
 interface SignupData {
@@ -31,12 +37,10 @@ function SelectBtn({
       onClick={onClick}
       className="py-4 rounded-2xl text-sm font-medium transition-all active:scale-95"
       style={{
-        background: selected
-          ? 'linear-gradient(135deg, rgba(124,58,237,0.9), rgba(168,85,247,0.9))'
-          : 'rgba(255,255,255,0.06)',
-        border: `1px solid ${selected ? 'rgba(168,85,247,0.6)' : 'rgba(255,255,255,0.1)'}`,
-        color:  selected ? '#fff' : '#999',
-        boxShadow: selected ? '0 4px 14px rgba(124,58,237,0.35)' : 'none',
+        background: selected ? '#ffffff' : 'rgba(255,255,255,0.15)',
+        border: `1px solid ${selected ? '#ffffff' : 'rgba(255,255,255,0.3)'}`,
+        color:  selected ? '#C62A47' : 'rgba(255,255,255,0.8)',
+        boxShadow: selected ? '0 4px 14px rgba(198,42,71,0.25)' : 'none',
       }}
     >
       {label}
@@ -113,8 +117,8 @@ function Stepper({
         onChange={(e) => onChange(parseInt(e.target.value))}
         className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
         style={{
-          accentColor: '#FF3E8A',
-          background: `linear-gradient(to right, #FF6FA8 0%, #FF3E8A ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.15) ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.15) 100%)`,
+          accentColor: '#C62A47',
+          background: `linear-gradient(to right, #C62A47 0%, #F07085 ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.25) ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.25) 100%)`,
         }}
       />
       <div className="w-full flex justify-between text-[10px] text-gray-600 -mt-5">
@@ -136,6 +140,50 @@ export default function SignupPage() {
     height:     168,
     gender:     'female',
   });
+  const [myKeywords,   setMyKeywords]   = useState<string[]>([]);
+  const [yourKeywords, setYourKeywords] = useState<string[]>([]);
+  const [nickname] = useState(randomNickname);
+
+  // 스텝 5~7은 전체 화면 컴포넌트로 분기
+  if (step === 5) {
+    return (
+      <MyKeyword
+        selected={myKeywords}
+        onToggle={(k) => setMyKeywords(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k])}
+        onNext={() => setStep(6)}
+        onBack={() => setStep(4)}
+      />
+    );
+  }
+  if (step === 6) {
+    return (
+      <YourKeyword
+        selected={yourKeywords}
+        onToggle={(k) => setYourKeywords(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k])}
+        onNext={() => setStep(7)}
+        onBack={() => setStep(5)}
+      />
+    );
+  }
+  if (step === 7) {
+    return (
+      <SignUpResult
+        nickname={nickname}
+        department={data.department}
+        keywords={myKeywords}
+        onEnter={() => {
+          setUser(prev => ({
+            ...prev,
+            ...data,
+            nickname,
+            keywords:      myKeywords,
+            idealKeywords: yourKeywords,
+          } as any));
+          navigate('/home');
+        }}
+      />
+    );
+  }
 
   // 현재 스텝에서 '다음' 활성화 여부
   const canProceed =
@@ -153,9 +201,7 @@ export default function SignupPage() {
     if (step < TOTAL_STEPS) {
       setStep(s => s + 1);
     } else {
-      // 기존 완료 로직 유지
-      setUser(prev => ({ ...prev, ...data } as any));
-      navigate('/home');
+      setStep(5);
     }
   };
 
@@ -164,7 +210,7 @@ export default function SignupPage() {
   return (
     <div
       className="h-full w-full flex flex-col"
-      style={{ background: 'linear-gradient(180deg, #1A0A3C 0%, #120C28 100%)' }}
+      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
     >
       {/* ── 상단: 뒤로가기 + 진행 표시 ── */}
       <div className="px-5 pt-6 pb-3 flex-shrink-0">
@@ -172,7 +218,7 @@ export default function SignupPage() {
           <button onClick={handleBack} className="p-1 -ml-1 text-gray-400 active:text-white transition-colors">
             <ChevronLeft size={22} />
           </button>
-          <span className="text-sm font-medium" style={{ color: '#9B8BBE' }}>
+          <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
             {step} / {TOTAL_STEPS}
           </span>
         </div>
@@ -183,7 +229,7 @@ export default function SignupPage() {
             className="h-full rounded-full transition-all duration-500 ease-out"
             style={{
               width:      `${(step / TOTAL_STEPS) * 100}%`,
-              background: 'linear-gradient(90deg, #FF6FA8, #FF3E8A)',
+              background: 'linear-gradient(90deg, #C62A47, #F07085)',
             }}
           />
         </div>
@@ -196,7 +242,7 @@ export default function SignupPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-white leading-tight">{title}</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#8B7AAE' }}>{subtitle}</p>
+          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.7)' }}>{subtitle}</p>
         </div>
       </div>
 
@@ -242,16 +288,16 @@ export default function SignupPage() {
           disabled={!canProceed}
           className="w-full py-4 rounded-2xl font-bold text-base transition-all active:scale-95"
           style={canProceed ? {
-            background:  'linear-gradient(90deg, #FF6FA8 0%, #FF3E8A 100%)',
-            boxShadow:   '0 8px 24px rgba(255,80,140,0.35)',
-            color:       '#fff',
+            background: '#ffffff',
+            boxShadow:  '0 8px 24px rgba(198,42,71,0.30)',
+            color:      '#C62A47',
           } : {
-            background:  'rgba(255,255,255,0.07)',
-            color:       '#555',
-            cursor:      'not-allowed',
+            background: 'rgba(255,255,255,0.25)',
+            color:      'rgba(255,255,255,0.4)',
+            cursor:     'not-allowed',
           }}
         >
-          {step === TOTAL_STEPS ? '완료' : '다음'}
+          다음
         </button>
       </div>
     </div>
