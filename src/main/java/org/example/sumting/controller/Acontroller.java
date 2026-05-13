@@ -8,6 +8,7 @@ import org.example.sumting.dto.couples.RequestCouplesDto;
 import org.example.sumting.dto.couples.ResponseCouplesDto;
 import java.util.List;
 import org.example.sumting.service.CoupleService;
+import org.example.sumting.service.HeartpingService;
 import org.example.sumting.service.ProfileService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class Acontroller {
     private final ProfileService profileService;
     private final CoupleService coupleService;
+    private final HeartpingService heartpingService;
 
     @PostMapping("/profile")
     public void profile(@RequestBody ProfileDto profileDto) {
@@ -32,7 +34,7 @@ public class Acontroller {
 
     @PostMapping("/heartPing")
     public void heartping(@RequestBody HeartPingDto heartPingDto){
-
+        heartpingService.saveHeartPing(heartPingDto);
     }
 
     @GetMapping("/receiveHeartPing")
