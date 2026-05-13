@@ -14,9 +14,14 @@ import HeartPingListPage from '@/src/pages/HeartPingListPage.tsx';
 import ChatPage from '@/src/pages/ChatPage.tsx';
 import ProfilePage from '@/src/pages/ProfilePage.tsx';
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAppContext();
+  if (isLoading) return null;
+  return user !== null ? <>{children}</> : <Navigate to="/" replace />;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
-  useAppContext(); // context 구독 (현재 라우팅에서 직접 사용하지 않음)
 
   return (
     <AnimatePresence mode="wait">
@@ -31,10 +36,10 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<StartPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/heartpings" element={<HeartPingListPage />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/heartpings" element={<ProtectedRoute><HeartPingListPage /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         </Routes>
       </motion.div>
     </AnimatePresence>

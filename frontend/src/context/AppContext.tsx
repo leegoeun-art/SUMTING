@@ -10,6 +10,7 @@ interface AppContextType {
   activeChat: Chat | null;
   setActiveChat: Dispatch<SetStateAction<Chat | null>>;
   isFinished: boolean;
+  isLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -19,6 +20,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedUser, setSelectedUser] = useState<RecommendedUser | null>(null);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isFinished, setIsFinished] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/me', { credentials: 'include' })
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => { if (data) setUser(data); })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -32,7 +42,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{ user, setUser, selectedUser, setSelectedUser, activeChat, setActiveChat, isFinished }}>
+    <AppContext.Provider value={{ user, setUser, selectedUser, setSelectedUser, activeChat, setActiveChat, isFinished, isLoading }}>
       {children}
     </AppContext.Provider>
   );
