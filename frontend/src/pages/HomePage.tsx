@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Heart, MessageCircle, User, Bell, Clock } from 'lucide-react';
+import { Bell, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
+import SumungMascot from '../components/SumungMascot';
+import NavBar from '../utils/NavBar';
 import { RecommendedUser } from '../types';
 import { FESTIVAL_END_TIME } from '../constants';
 
@@ -43,7 +45,7 @@ export default function HomePage() {
 
   const handleSelectUser = (u: RecommendedUser) => {
     setSelectedUser(u);
-    navigate('/detail');
+    navigate('/heartpings');
   };
 
   return (
@@ -53,8 +55,11 @@ export default function HomePage() {
       <div className="absolute top-20 right-[-10%] w-64 h-64 bg-purple-500/20 blur-[100px] rounded-full" />
 
       {/* Header */}
-      <div className="z-10 p-6 flex justify-between items-center">
-        <h1 className="text-xl font-bold tracking-tight text-white">SUMTING</h1>
+      <div className="z-10 px-6 pt-5 pb-2 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <SumungMascot className="w-10 h-11" />
+          <h1 className="text-xl font-bold tracking-tight text-white">SUMTING</h1>
+        </div>
         <div className="flex gap-4">
           <button onClick={() => navigate('/heartpings')} className="relative p-2 text-white/80 hover:text-white">
             <Bell size={24} />
@@ -65,14 +70,20 @@ export default function HomePage() {
 
       <div className="flex-1 overflow-y-auto z-10 px-6 pb-24">
         {/* Timer Section */}
-        <div className="my-8 flex flex-col items-center">
-          <div className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-4 rounded-[32px] text-center">
-            <p className="text-xs text-purple-300 font-medium tracking-widest uppercase mb-1">숨팅 종료까지</p>
-            <div className="flex items-center gap-3">
-              <Clock size={16} className="text-pink-400" />
-              <span className="text-4xl font-mono font-bold text-white tracking-tighter">
-                {timeLeft}
-              </span>
+        <div className="my-6 flex flex-col items-center">
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-4 rounded-[32px] w-full"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-purple-300 font-medium tracking-widest uppercase mb-2">숨팅 종료까지</p>
+                <div className="flex items-center gap-2">
+                  <Clock size={14} className="text-pink-400" />
+                  <span className="text-3xl font-mono font-bold text-white tracking-tighter">
+                    {timeLeft}
+                  </span>
+                </div>
+              </div>
+              <SumungMascot className="w-16 h-18 -mb-1" />
             </div>
           </div>
         </div>
@@ -120,23 +131,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Bottom Nav */}
-      <div className="absolute bottom-0 left-0 w-full p-4 z-20">
-        <div className="bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 rounded-[24px] p-2 flex justify-around items-center">
-          <button className="flex flex-col items-center p-2 text-white">
-            <Heart size={24} className="fill-white" />
-            <span className="text-[10px] mt-1 font-medium">홈</span>
-          </button>
-          <button onClick={() => navigate('/heartpings')} className="flex flex-col items-center p-2 text-gray-500 hover:text-white transition-colors">
-            <MessageCircle size={24} />
-            <span className="text-[10px] mt-1 font-medium">채팅</span>
-          </button>
-          <button onClick={() => navigate('/profile')} className="flex flex-col items-center p-2 text-gray-500 hover:text-white transition-colors">
-            <User size={24} />
-            <span className="text-[10px] mt-1 font-medium">마이</span>
-          </button>
-        </div>
-      </div>
+      {/* 공통 하단 네비게이션 */}
+      <NavBar />
     </div>
   );
 }

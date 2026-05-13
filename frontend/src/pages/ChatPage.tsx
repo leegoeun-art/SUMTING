@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, Send, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
@@ -9,15 +9,24 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const { activeChat } = useAppContext();
   const [input, setInput] = useState('');
+  // ⚠️ Hooks는 조건문 앞에서 무조건 선언해야 한다 (Rules of Hooks)
+  const [messages, setMessages] = useState<IMessage[]>([]);
 
+  // activeChat이 세팅되면 초기 메시지 주입
+  useEffect(() => {
+    if (activeChat) {
+      setMessages([
+        { id: '1', senderId: activeChat.partner.id, text: '안녕하세요! 매칭되어서 반가워요 :)', timestamp: '오후 2:30' },
+      ]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChat?.partner.id]);
+
+  // activeChat이 없으면 홈으로 리다이렉트
   if (!activeChat) {
     navigate('/home');
     return null;
   }
-
-  const [messages, setMessages] = useState<IMessage[]>([
-    { id: '1', senderId: activeChat.partner.id, text: '안녕하세요! 매칭되어서 반가워요 :)', timestamp: '오후 2:30' }
-  ]);
 
   const send = () => {
     if (!input.trim()) return;

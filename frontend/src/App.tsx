@@ -7,27 +7,16 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAppContext } from './context/AppContext';
 
-import SplashPage from '@/src/pages/SplashPage.tsx';
 import StartPage from '@/src/pages/StartPage.tsx';
 import SignupPage from '@/src/pages/SignupPage.tsx';
-import KeywordSelectionPage from '@/src/pages/KeywordSelectionPage.tsx';
-import IdealTypePage from '@/src/pages/IdealTypePage.tsx';
-import ResultPage from '@/src/pages/ResultPage.tsx';
 import HomePage from '@/src/pages/HomePage.tsx';
-import UserDetailPage from '@/src/pages/UserDetailPage.tsx';
 import HeartPingListPage from '@/src/pages/HeartPingListPage.tsx';
-import MatchSuccessPage from '@/src/pages/MatchSuccessPage.tsx';
 import ChatPage from '@/src/pages/ChatPage.tsx';
 import ProfilePage from '@/src/pages/ProfilePage.tsx';
-import EndingPage from '@/src/pages/EndingPage.tsx';
 
 function AnimatedRoutes() {
   const location = useLocation();
-  const { isFinished } = useAppContext();
-
-  if (isFinished) {
-    return <EndingPage />;
-  }
+  useAppContext(); // context 구독 (현재 라우팅에서 직접 사용하지 않음)
 
   return (
     <AnimatePresence mode="wait">
@@ -40,20 +29,12 @@ function AnimatedRoutes() {
         className="h-full w-full"
       >
         <Routes location={location}>
-          <Route path="/" element={<SplashPage />} />
-          <Route path="/start" element={<StartPage />} />
+          <Route path="/" element={<StartPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/keyword" element={<KeywordSelectionPage />} />
-          <Route path="/ideal" element={<IdealTypePage />} />
-          <Route path="/result" element={<ResultPage />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/detail" element={<UserDetailPage />} />
           <Route path="/heartpings" element={<HeartPingListPage />} />
-          <Route path="/match-success" element={<MatchSuccessPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/ending" element={<EndingPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

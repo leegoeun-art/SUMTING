@@ -1,8 +1,9 @@
 import React from 'react';
-import { ChevronLeft, Settings, Shield, Bell, HelpCircle, LogOut } from 'lucide-react';
+import { ChevronLeft, Settings, Shield, HelpCircle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import MascotImage from '../components/MascotImage';
+import SumungMascot from '../components/SumungMascot';
+import NavBar from '../utils/NavBar';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -22,9 +23,9 @@ export default function ProfilePage() {
 
       {/* User Info */}
       <div className="flex flex-col items-center mb-10">
-        <div className="relative mb-6">
-          <div className="absolute inset-0 bg-purple-500/10 blur-[40px] rounded-full" />
-          <MascotImage type={user.mascotType || 'basic'} className="w-40 h-40 relative" />
+        <div className="relative mb-4">
+          <div className="absolute inset-0 bg-pink-500/15 blur-[50px] rounded-full scale-150" />
+          <SumungMascot className="w-44 h-48 relative" />
         </div>
         <h2 className="text-2xl font-bold mb-1">{user.nickname || '익명의 숨뭉이'}</h2>
         <p className="text-sm text-gray-500 mb-6">{user.department}</p>
@@ -46,7 +47,6 @@ export default function ProfilePage() {
         <section>
           <h3 className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-4 ml-2">계정 설정</h3>
           <div className="bg-[#1a1a1a] rounded-3xl border border-gray-800 overflow-hidden">
-            <MenuItem icon={<Bell size={18} />} label="알림 설정" />
             <MenuItem icon={<Shield size={18} />} label="차단 및 신고 관리" />
           </div>
         </section>
@@ -60,9 +60,12 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      <div className="mt-12 text-center">
+      <div className="mt-12 mb-24 text-center">
         <p className="text-[10px] text-gray-700">SUMTING Version 1.0.0 (Beta)</p>
       </div>
+
+      {/* 공통 하단 네비게이션 */}
+      <NavBar />
     </div>
   );
 }
