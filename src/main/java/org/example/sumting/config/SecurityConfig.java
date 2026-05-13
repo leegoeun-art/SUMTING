@@ -1,5 +1,6 @@
 package org.example.sumting.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.sumting.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +43,13 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl("http://localhost:3000/?from=login", true)
+                )
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                        )
                 )
 
                 .logout(logout -> logout

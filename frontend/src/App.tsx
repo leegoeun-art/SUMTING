@@ -15,9 +15,9 @@ import ChatPage from '@/src/pages/ChatPage.tsx';
 import ProfilePage from '@/src/pages/ProfilePage.tsx';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAppContext();
+  const { isAuthenticated, isLoading } = useAppContext();
   if (isLoading) return null;
-  return user !== null ? <>{children}</> : <Navigate to="/" replace />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
 }
 
 function AnimatedRoutes() {

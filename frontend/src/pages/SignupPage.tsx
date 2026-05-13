@@ -4,14 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { DEPARTMENTS } from '../constants';
 import SumungMascot from '../components/SumungMascot';
-import MyKeyword from '../components/signUp/MyKeyword';
-import YourKeyword from '../components/signUp/YourKeyword';
-import SignUpResult from '../components/signUp/SignUpResult';
 
-const NICKNAMES = ['반딧불이', '새벽별', '봄비향기', '달빛소나타', '초록마음', '하늘구름', '은하수별', '아침이슬', '노을빛', '첫눈처럼'];
-const randomNickname = () => NICKNAMES[Math.floor(Math.random() * NICKNAMES.length)];
-
-// ── 회원가입 데이터 타입 (기존 유지) ──────────────────
+// ── 회원가입 데이터 타입 ──────────────────────────────
 interface SignupData {
   department: string;
   age:        number;
@@ -22,10 +16,10 @@ interface SignupData {
 // ── 스텝별 제목·부제목 ────────────────────────────────
 const TOTAL_STEPS = 4;
 const STEP_CONFIG = [
-  { title: '학과를 알려주세요',  subtitle: '익명으로 보호됩니다 🔒' },
-  { title: '성별을 알려주세요',  subtitle: '익명으로 보호됩니다 🔒' },
-  { title: '나이를 알려주세요',  subtitle: '익명으로 보호됩니다 🔒' },
-  { title: '키를 알려주세요',    subtitle: '익명으로 보호됩니다 🔒' },
+  { title: '학과를 알려주세요', subtitle: '익명으로 보호됩니다 🔒' },
+  { title: '성별을 알려주세요', subtitle: '익명으로 보호됩니다 🔒' },
+  { title: '나이를 알려주세요', subtitle: '익명으로 보호됩니다 🔒' },
+  { title: '키를 알려주세요',   subtitle: '익명으로 보호됩니다 🔒' },
 ];
 
 // ── 공통 선택 버튼 스타일 ─────────────────────────────
@@ -37,9 +31,11 @@ function SelectBtn({
       onClick={onClick}
       className="py-4 rounded-2xl text-sm font-medium transition-all active:scale-95"
       style={{
-        background: selected ? '#ffffff' : 'rgba(255,255,255,0.15)',
-        border: `1px solid ${selected ? '#ffffff' : 'rgba(255,255,255,0.3)'}`,
-        color:  selected ? '#C62A47' : 'rgba(255,255,255,0.8)',
+        background: selected
+          ? '#ffffff'
+          : 'rgba(255,255,255,0.20)',
+        border: `1px solid ${selected ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)'}`,
+        color:  selected ? '#C62A47' : 'rgba(255,255,255,0.85)',
         boxShadow: selected ? '0 4px 14px rgba(198,42,71,0.25)' : 'none',
       }}
     >
@@ -117,8 +113,8 @@ function Stepper({
         onChange={(e) => onChange(parseInt(e.target.value))}
         className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
         style={{
-          accentColor: '#C62A47',
-          background: `linear-gradient(to right, #C62A47 0%, #F07085 ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.25) ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.25) 100%)`,
+          accentColor: '#FF3E8A',
+          background: `linear-gradient(to right, #FF6FA8 0%, #FF3E8A ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.15) ${((value - min) / (max - min)) * 100}%, rgba(255,255,255,0.15) 100%)`,
         }}
       />
       <div className="w-full flex justify-between text-[10px] text-gray-600 -mt-5">
@@ -131,59 +127,16 @@ function Stepper({
 // ── 메인 컴포넌트 ────────────────────────────────────
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { setUser } = useAppContext();
+  const { setUser, kakaoId } = useAppContext();
 
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
   const [data, setData] = useState<SignupData>({
     department: '',
     age:        21,
     height:     168,
     gender:     'female',
   });
-  const [myKeywords,   setMyKeywords]   = useState<string[]>([]);
-  const [yourKeywords, setYourKeywords] = useState<string[]>([]);
-  const [nickname] = useState(randomNickname);
-
-  // 스텝 5~7은 전체 화면 컴포넌트로 분기
-  if (step === 5) {
-    return (
-      <MyKeyword
-        selected={myKeywords}
-        onToggle={(k) => setMyKeywords(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k])}
-        onNext={() => setStep(6)}
-        onBack={() => setStep(4)}
-      />
-    );
-  }
-  if (step === 6) {
-    return (
-      <YourKeyword
-        selected={yourKeywords}
-        onToggle={(k) => setYourKeywords(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k])}
-        onNext={() => setStep(7)}
-        onBack={() => setStep(5)}
-      />
-    );
-  }
-  if (step === 7) {
-    return (
-      <SignUpResult
-        nickname={nickname}
-        department={data.department}
-        keywords={myKeywords}
-        onEnter={() => {
-          setUser(prev => ({
-            ...prev,
-            ...data,
-            nickname,
-            keywords:      myKeywords,
-            idealKeywords: yourKeywords,
-          } as any));
-          navigate('/home');
-        }}
-      />
-    );
-  }
 
   // 현재 스텝에서 '다음' 활성화 여부
   const canProceed =
@@ -197,11 +150,36 @@ export default function SignupPage() {
     else navigate(-1);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < TOTAL_STEPS) {
       setStep(s => s + 1);
-    } else {
-      setStep(5);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id:    kakaoId,
+          gender:     data.gender === 'male',
+          department: data.department,
+          age:        data.age,
+          height:     data.height,
+          my_kw1: null, my_kw2: null, my_kw3: null,
+          your_kw1: null, your_kw2: null, your_kw3: null,
+        }),
+      });
+      // 백엔드가 생성한 닉네임 포함 프로필을 다시 조회
+      const res = await fetch('/api/me', { credentials: 'include', cache: 'no-store' });
+      if (res.ok) {
+        const profile = await res.json();
+        if (profile?.department) setUser(profile);
+      }
+      navigate('/home');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -224,12 +202,12 @@ export default function SignupPage() {
         </div>
 
         {/* 진행 바 */}
-        <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+        <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.25)' }}>
           <div
             className="h-full rounded-full transition-all duration-500 ease-out"
             style={{
               width:      `${(step / TOTAL_STEPS) * 100}%`,
-              background: 'linear-gradient(90deg, #C62A47, #F07085)',
+              background: 'linear-gradient(90deg, #FF6FA8, #FF3E8A)',
             }}
           />
         </div>
@@ -285,9 +263,9 @@ export default function SignupPage() {
       <div className="px-5 pb-8 pt-3 flex-shrink-0">
         <button
           onClick={handleNext}
-          disabled={!canProceed}
+          disabled={!canProceed || submitting}
           className="w-full py-4 rounded-2xl font-bold text-base transition-all active:scale-95"
-          style={canProceed ? {
+          style={canProceed && !submitting ? {
             background: '#ffffff',
             boxShadow:  '0 8px 24px rgba(198,42,71,0.30)',
             color:      '#C62A47',
@@ -297,7 +275,7 @@ export default function SignupPage() {
             cursor:     'not-allowed',
           }}
         >
-          다음
+          {submitting ? '저장 중...' : step === TOTAL_STEPS ? '완료' : '다음'}
         </button>
       </div>
     </div>

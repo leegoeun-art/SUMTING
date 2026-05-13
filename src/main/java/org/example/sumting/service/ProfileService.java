@@ -9,12 +9,33 @@ import org.example.sumting.repository.UserProfileRepository;
 import org.example.sumting.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
 
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
+
+    private static final String[] ADJECTIVES = {
+        "귀여운", "멋진", "따뜻한", "활발한", "설레는", "반짝이는", "다정한", "씩씩한"
+    };
+    private static final String[] NOUNS = {
+        "수뭉", "팅이", "별님", "달님", "봄이", "구름", "햇살", "새벽"
+    };
+
+    private String generateNickname() {
+        Random rng = new Random();
+        String candidate;
+        do {
+            String adj  = ADJECTIVES[rng.nextInt(ADJECTIVES.length)];
+            String noun = NOUNS[rng.nextInt(NOUNS.length)];
+            int    num  = 1000 + rng.nextInt(9000);
+            candidate = adj + noun + num;
+        } while (userProfileRepository.existsByNickName(candidate));
+        return candidate;
+    }
 
     public void saveProfile(ProfileDto dto) {
         User user = userRepository.findById(Long.parseLong(dto.getUser_id()))
@@ -26,7 +47,7 @@ public class ProfileService {
                 .user(user)
                 .gender(gender)
                 .department(dto.getDepartment())
-                .nickName(dto.getNickname())
+                .nickName(generateNickname())
                 .age(dto.getAge())
                 .height(dto.getHeight())
                 .myKw1(dto.getMy_kw1())

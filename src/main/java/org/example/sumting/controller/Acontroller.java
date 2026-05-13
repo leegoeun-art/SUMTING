@@ -42,9 +42,8 @@ public class Acontroller {
         Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
 
         return userProfileRepository.findByUserId(kakaoId)
-                .filter(p -> p.getNickName() != null)
                 .map(p -> {
-                    String gender = p.getGender() == Gender.M ? "male" : "female";
+                    String gender = p.getGender() == Gender.M ? "male" : p.getGender() == Gender.F ? "female" : null;
                     List<String> keywords = Stream.of(p.getMyKw1(), p.getMyKw2(), p.getMyKw3())
                             .filter(Objects::nonNull).toList();
                     List<String> idealKeywords = Stream.of(p.getYourKw1(), p.getYourKw2(), p.getYourKw3())

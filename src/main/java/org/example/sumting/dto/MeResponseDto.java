@@ -12,8 +12,8 @@ public class MeResponseDto {
     private String nickname;
     private String mascotType;
     private String department;
-    private int age;
-    private int height;
+    private Integer age;
+    private Integer height;
     private String gender;
     private List<String> keywords;
     private List<String> idealKeywords;

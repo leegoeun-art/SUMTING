@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import SumungMascot from '../components/SumungMascot';
 import heartLottieUrl from '../assets/heart.lottie?url';
+import { useAppContext } from '../context/AppContext';
 
 // ─────────────────────────────────────────
 // Lottie 하트 위치 정의
@@ -76,8 +78,43 @@ function LottieHeartBackground() {
 // ─────────────────────────────────────────
 // 메인 페이지
 // ─────────────────────────────────────────
+function KakaoIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 3C6.477 3 2 6.61 2 11.077c0 2.868 1.814 5.392 4.563 6.88l-1.163 4.34a.3.3 0 0 0 .46.325l5.012-3.312c.37.04.745.062 1.128.062 5.523 0 10-3.61 10-8.077C22 6.609 17.523 3 12 3z"
+        fill="rgba(0,0,0,0.85)"
+      />
+    </svg>
+  );
+}
+
 export default function StartPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated, isLoading } = useAppContext();
+
+  const fromLogin = new URLSearchParams(location.search).get('from') === 'login';
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!fromLogin) return;
+
+    // 방금 카카오 로그인 완료 → 프로필 유무로 분기
+    if (user) {
+      navigate('/home', { replace: true });     // 케이스 2: 기존 회원
+    } else if (isAuthenticated) {
+      navigate('/signup', { replace: true });   // 케이스 1: 신규 회원
+    }
+  }, [isLoading, fromLogin, user, isAuthenticated, navigate]);
+
+  const handleStart = () => navigate('/home');
+
+  const handleKakaoLogin = () => {
+    window.location.href = '/oauth2/authorization/kakao';
+  };
 
   return (
     <div
@@ -145,21 +182,43 @@ export default function StartPage() {
 
       {/* 하단 영역 */}
       <div className="w-full px-8 pb-8 flex flex-col items-center gap-4 relative z-10">
-        {/* 시작 버튼 */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.45 }}
-          onClick={() => navigate('/signup')}
-          className="w-full py-4 rounded-2xl font-bold text-base active:scale-95 transition-transform shadow-lg"
-          style={{
-            background: '#ffffff',
-            color:      '#C62A47',
-            boxShadow:  '0 8px 24px rgba(198,42,71,0.30)',
-          }}
-        >
-          숨팅 시작하기
-        </motion.button>
+        {/* 시작 / 로그인 버튼 */}
+        {!isLoading && !fromLogin && (
+          isAuthenticated ? (
+            /* 케이스 3: 세션 쿠키 있는 회원 → 버튼 클릭 시 홈 */
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.45 }}
+              onClick={handleStart}
+              className="w-full py-4 rounded-2xl font-bold text-base active:scale-95 transition-transform shadow-lg"
+              style={{
+                background: '#ffffff',
+                color:      '#C62A47',
+                boxShadow:  '0 8px 24px rgba(198,42,71,0.30)',
+              }}
+            >
+              숨팅 시작하기
+            </motion.button>
+          ) : !isAuthenticated ? (
+            /* 비회원 → 카카오 로그인 */
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.45 }}
+              onClick={handleKakaoLogin}
+              className="w-full py-4 rounded-2xl font-bold text-base active:scale-95 transition-transform shadow-lg flex items-center justify-center gap-2"
+              style={{
+                background: '#FEE500',
+                color: 'rgba(0,0,0,0.85)',
+                boxShadow: '0 8px 24px rgba(254, 229, 0, 0.35)',
+              }}
+            >
+              <KakaoIcon />
+              카카오 로그인
+            </motion.button>
+          ) : null
+        )}
 
         {/* 날짜 */}
         <motion.p

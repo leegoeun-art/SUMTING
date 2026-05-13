@@ -6,7 +6,15 @@
       "Bash(npm run:*)",
       "Bash(dir /s /b \"C:\\\\Users\\\\USER\\\\Desktop\\\\SUMTING\\\\SUMTING\")",
       "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({**{k:v for k,v in d.get\\('dependencies',{}\\).items\\(\\)}, **{k:v for k,v in d.get\\('devDependencies',{}\\).items\\(\\)}}, indent=2\\)\\)\")",
-      "Bash(xargs grep -l \"OAuth\\\\|oauth\\\\|kakao\\\\|Kakao\")"
+      "Bash(xargs grep -l \"OAuth\\\\|oauth\\\\|kakao\\\\|Kakao\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(findstr -E \"3000|8080|8443|9090\")",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(netstat *)",
+      "PowerShell(Get-Process *)",
+      "Bash(xargs ls -la)",
+      "Bash(xargs cat)"
     ]
   }
 }
