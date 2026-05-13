@@ -8,6 +8,7 @@ import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
+import { GlowBackground, GRADIENT, GLASS, COLORS } from '../utils/background';
 import { RecommendedUser, Message as IMessage } from '../types';
 
 /* ── Mock 데이터 ── */
@@ -82,7 +83,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
       exit={{ x: '100%' }}
       transition={{ type: 'tween', duration: 0.25 }}
       className="absolute inset-0 z-50 flex flex-col"
-      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
+      style={{ background: GRADIENT }}
     >
       {/* 헤더 */}
       <div
@@ -94,7 +95,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
         </button>
         <div className="flex items-center gap-3 ml-1 flex-1">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.25)' }}>
+            style={GLASS.icon}>
             <MascotImage type={partner.mascotType} className="w-8 h-8" />
           </div>
           <div>
@@ -121,7 +122,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
           <div key={m.id} className={`flex ${m.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
             {m.senderId !== 'me' && (
               <div className="w-8 h-8 rounded-xl flex items-center justify-center mr-2 self-end mb-4 flex-shrink-0"
-                style={{ background: 'rgba(255,255,255,0.25)' }}>
+                style={GLASS.icon}>
                 <MascotImage type={partner.mascotType} className="w-6 h-6" />
               </div>
             )}
@@ -132,7 +133,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
                 }`}
                 style={
                   m.senderId === 'me'
-                    ? { background: '#ffffff', color: '#C62A47', fontWeight: 500 }
+                    ? { background: '#ffffff', color: COLORS.primary, fontWeight: 500 }
                     : { background: 'rgba(255,255,255,0.25)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)' }
                 }
               >
@@ -192,15 +193,7 @@ export default function HeartPingListPage() {
   useAppContext();
 
   return (
-    <div
-      className="h-full w-full flex flex-col relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
-    >
-      {/* 배경 글로우 */}
-      <div className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.25) 0%, transparent 70%)' }} />
-      <div className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }} />
+    <GlowBackground>
 
       {/* 인라인 채팅 화면 */}
       <AnimatePresence>
@@ -237,7 +230,7 @@ export default function HeartPingListPage() {
       <div className="px-6 mb-4 flex-shrink-0 z-10">
         <div
           className="flex p-1 rounded-2xl"
-          style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}
+          style={GLASS.card}
         >
           {TABS.map(({ key, label }) => (
             <button
@@ -266,9 +259,9 @@ export default function HeartPingListPage() {
               {MOCK_RECEIVED.map((u) => (
                 <div key={u.id}
                   className="flex items-center gap-4 p-4 rounded-2xl"
-                  style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}>
+                  style={GLASS.card}>
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
-                    style={{ background: 'rgba(255,255,255,0.25)' }}>
+                    style={GLASS.icon}>
                     <MascotImage type={u.mascotType} className="w-11 h-11" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -310,9 +303,9 @@ export default function HeartPingListPage() {
               {MOCK_SENT.map((item) => (
                 <div key={item.id}
                   className="flex items-center gap-4 p-4 rounded-2xl"
-                  style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}>
+                  style={GLASS.card}>
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
-                    style={{ background: 'rgba(255,255,255,0.25)' }}>
+                    style={GLASS.icon}>
                     <MascotImage type={item.user.mascotType} className="w-11 h-11" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -349,10 +342,10 @@ export default function HeartPingListPage() {
                 <button key={chat.id}
                   onClick={() => setActiveChat(chat.partner)}
                   className="w-full flex items-center gap-4 p-4 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                  style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}>
+                  style={GLASS.card}>
                   <div className="relative flex-shrink-0">
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden"
-                      style={{ background: 'rgba(255,255,255,0.25)' }}>
+                      style={GLASS.icon}>
                       <MascotImage type={chat.partner.mascotType} className="w-11 h-11" />
                     </div>
                     {chat.unread > 0 && (
@@ -379,6 +372,6 @@ export default function HeartPingListPage() {
       </div>
 
       <NavBar />
-    </div>
+    </GlowBackground>
   );
 }

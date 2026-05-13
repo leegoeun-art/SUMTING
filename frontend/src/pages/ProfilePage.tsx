@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
+import { GlowBackground, GLASS } from '../utils/background';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -15,15 +16,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div
-      className="h-full w-full flex flex-col relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
-    >
-      {/* 배경 글로우 */}
-      <div className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.25) 0%, transparent 70%)' }} />
-      <div className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }} />
+    <GlowBackground>
 
       <div className="flex-1 overflow-y-auto pb-28 z-10">
         {/* 상단 버튼 */}
@@ -48,14 +41,14 @@ export default function ProfilePage() {
           <div className="flex gap-3">
             <div
               className="px-8 py-3 rounded-2xl text-center"
-              style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)' }}
+              style={GLASS.cardLight}
             >
               <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.65)' }}>나이</span>
               <span className="font-bold text-white text-sm">{user.age}세</span>
             </div>
             <div
               className="px-8 py-3 rounded-2xl text-center"
-              style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)' }}
+              style={GLASS.cardLight}
             >
               <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.65)' }}>키</span>
               <span className="font-bold text-white text-sm">{user.height}cm</span>
@@ -72,7 +65,7 @@ export default function ProfilePage() {
             </h3>
             <div
               className="rounded-3xl overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}
+              style={GLASS.card}
             >
               <MenuItem icon={<Shield size={18} />} label="차단 및 신고 관리" />
             </div>
@@ -85,7 +78,7 @@ export default function ProfilePage() {
             </h3>
             <div
               className="rounded-3xl overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}
+              style={GLASS.card}
             >
               <MenuItem icon={<HelpCircle size={18} />} label="자주 묻는 질문" />
               <MenuItem icon={<LogOut size={18} />} label="로그아웃" danger />
@@ -99,7 +92,7 @@ export default function ProfilePage() {
       </div>
 
       <NavBar />
-    </div>
+    </GlowBackground>
   );
 }
 

@@ -6,6 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
+import { GlowBackground, GLASS } from '../utils/background';
 import { RecommendedUser } from '../types';
 import { FESTIVAL_END_TIME } from '../constants';
 
@@ -52,15 +53,7 @@ export default function HomePage() {
   };
 
   return (
-    <div
-      className="h-full w-full flex flex-col relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
-    >
-      {/* Background glow blobs */}
-      <div className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.25) 0%, transparent 70%)' }} />
-      <div className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }} />
+    <GlowBackground>
 
       {/* Header */}
       <div className="z-10 px-6 pt-5 pb-2 flex justify-between items-center">
@@ -80,7 +73,7 @@ export default function HomePage() {
         {/* Timer Section */}
         <div className="my-6 flex flex-col items-center">
           <div className="backdrop-blur-md px-6 py-4 rounded-[32px] w-full"
-            style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.35)' }}>
+            style={GLASS.cardLight}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.75)' }}>숨팅 종료까지</p>
@@ -102,12 +95,12 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4 }}
           className="mb-6 rounded-[24px] px-5 py-4"
-          style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}
+          style={GLASS.card}
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(255,255,255,0.25)' }}>
+                style={GLASS.icon}>
                 <Heart size={14} className="text-white" fill="white" />
               </div>
               <span className="text-sm font-semibold text-white">오늘의 하트핑</span>
@@ -159,11 +152,11 @@ export default function HomePage() {
                 transition={{ delay: idx * 0.1 }}
                 onClick={() => handleSelectUser(u)}
                 className="group relative rounded-[32px] p-6 transition-all active:scale-[0.98]"
-                style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' }}
+                style={GLASS.card}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
-                    style={{ background: 'rgba(255,255,255,0.25)' }}>
+                    style={GLASS.icon}>
                     <MascotImage type={u.mascotType} className="w-16 h-16" />
                   </div>
                   <div className="flex-1">
@@ -191,6 +184,6 @@ export default function HomePage() {
 
       {/* 공통 하단 네비게이션 */}
       <NavBar />
-    </div>
+    </GlowBackground>
   );
 }
