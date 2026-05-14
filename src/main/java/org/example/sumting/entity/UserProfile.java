@@ -19,6 +19,7 @@ public class UserProfile {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "nickname")
     private String nickName;
 
     @Enumerated(EnumType.STRING)

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -58,8 +59,9 @@ public class Acontroller {
     }
 
     @PostMapping("/profile")
-    public void profile(@RequestBody ProfileDto profileDto) {
-        profileService.saveProfile(profileDto);
+    public Map<String, String> profile(@RequestBody ProfileDto profileDto) {
+        String nickname = profileService.saveProfile(profileDto);
+        return Map.of("nickname", nickname);
     }
 
     @GetMapping("/couples")

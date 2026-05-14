@@ -9,6 +9,7 @@ import org.example.sumting.repository.UserProfileRepository;
 import org.example.sumting.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import java.util.Random;
 
 @Service
@@ -59,17 +60,20 @@ public class ProfileService {
         return candidate;
     }
 
-    public void saveProfile(ProfileDto dto) {
+    @Transactional
+    public String saveProfile(ProfileDto dto) {
         User user = userRepository.findById(Long.parseLong(dto.getUser_id()))
                 .orElseThrow(() -> new RuntimeException("User not found: " + dto.getUser_id()));
 
         Gender gender = dto.isGender() ? Gender.M : Gender.F;
+        String nickname = generateNickname();
+        System.out.println("---------------------------------------------------------------------nickname: " + nickname);
 
         UserProfile userProfile = UserProfile.builder()
                 .user(user)
+                .nickName(nickname)
                 .gender(gender)
                 .department(dto.getDepartment())
-                .nickName(generateNickname())
                 .age(dto.getAge())
                 .height(dto.getHeight())
                 .myKw1(dto.getMy_kw1())
@@ -81,5 +85,6 @@ public class ProfileService {
                 .build();
 
         userProfileRepository.save(userProfile);
+        return nickname;
     }
 }
