@@ -9,9 +9,9 @@ import NavBar from '../utils/NavBar';
 import { GlowBackground, GLASS } from '../utils/background';
 import { RecommendedUser } from '../types';
 import { FESTIVAL_END_TIME } from '../constants';
+import ProfileModal from '../components/home/ProfileModal';
 
 const DAILY_LIMIT = 5;
-const MOCK_USED_TODAY = 2; // 오늘 보낸 하트핑 수 (추후 API로 교체)
 
 const MOCK_RECOMMENDATIONS: RecommendedUser[] = [
   { id: '1', nickname: '달콤한 바나나', department: '컴퓨터공학과', keywords: ['외향적인', '어른스러운', '열정적인'], mascotType: 'cool', matchScore: 92 },
@@ -20,10 +20,13 @@ const MOCK_RECOMMENDATIONS: RecommendedUser[] = [
   { id: '4', nickname: '구름 한 스푼', department: '경영학부', keywords: ['귀여운', '유머러스한', '엉뚱한'], mascotType: 'basic', matchScore: 79 },
 ];
 
+const MS_24H = 24 * 60 * 60 * 1000;
+
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user, setSelectedUser } = useAppContext();
-  const [timeLeft, setTimeLeft] = useState('');
+  const { user, rejectedUsers, sentPings, addSentPing } = useAppContext();
+  const [timeLeft,   setTimeLeft]   = useState('');
+  const [modalUser,  setModalUser]  = useState<RecommendedUser | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -47,10 +50,35 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSelectUser = (u: RecommendedUser) => {
-    setSelectedUser(u);
-    navigate('/heartpings');
+  // 하트핑 보내기 — 목록에서 제거 + context 등록 + 하트핑 탭으로 이동
+  const handleSendHeartPing = (u: RecommendedUser) => {
+    addSentPing(u);
+    setModalUser(null);
+    navigate('/heartpings', { state: { tab: 'sent' } });
   };
+
+  const sentIds = new Set(sentPings.map(u => u.id));
+  const usedToday = sentPings.length; // 추후 API로 교체
+
+  // 오늘의 인연 필터 & 정렬
+  // - 하트핑 보낸 유저 → 완전 제외
+  // - 24시간 미만 거절 → 완전 제외
+  // - 24시간 이상 거절 → 하단 배치
+  const now = Date.now();
+  const visibleRecommendations = MOCK_RECOMMENDATIONS
+    .filter(u => {
+      if (sentIds.has(u.id)) return false;          // 하트핑 보낸 유저 제외
+      const rejectedAt = rejectedUsers[u.id];
+      if (!rejectedAt) return true;
+      return now - rejectedAt >= MS_24H;            // 24시간 지난 거절만 표시
+    })
+    .sort((a, b) => {
+      const aRejected = rejectedUsers[a.id] ?? 0;
+      const bRejected = rejectedUsers[b.id] ?? 0;
+      if (aRejected && !bRejected) return 1;
+      if (!aRejected && bRejected) return -1;
+      return 0;
+    });
 
   return (
     <GlowBackground>
@@ -109,14 +137,14 @@ export default function HomePage() {
               className="text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff' }}
             >
-              {DAILY_LIMIT - MOCK_USED_TODAY}개 남음
+              {DAILY_LIMIT - usedToday}개 남음
             </span>
           </div>
 
           {/* 도트 인디케이터 */}
           <div className="flex items-center gap-2">
             {Array.from({ length: DAILY_LIMIT }).map((_, i) => {
-              const used = i < MOCK_USED_TODAY;
+              const used = i < usedToday;
               return (
                 <div
                   key={i}
@@ -144,13 +172,13 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6">
-            {MOCK_RECOMMENDATIONS.map((u, idx) => (
+            {visibleRecommendations.map((u, idx) => (
               <motion.div
                 key={u.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                onClick={() => handleSelectUser(u)}
+                onClick={() => setModalUser(u)}
                 className="group relative rounded-[32px] p-6 transition-all active:scale-[0.98]"
                 style={GLASS.card}
               >
@@ -184,6 +212,13 @@ export default function HomePage() {
 
       {/* 공통 하단 네비게이션 */}
       <NavBar />
+
+      {/* 프로필 모달 */}
+      <ProfileModal
+        user={modalUser}
+        onSendHeartPing={handleSendHeartPing}
+        onClose={() => setModalUser(null)}
+      />
     </GlowBackground>
   );
 }

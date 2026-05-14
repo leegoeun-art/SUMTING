@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings, Shield, HelpCircle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
 import { GlowBackground, GLASS } from '../utils/background';
+import QuestionModal from '../components/profile/QuestionModal';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useAppContext();
+  const [showFaq, setShowFaq] = useState(false);
 
   if (!user) {
     navigate('/home');
@@ -80,7 +82,7 @@ export default function ProfilePage() {
               className="rounded-3xl overflow-hidden"
               style={GLASS.card}
             >
-              <MenuItem icon={<HelpCircle size={18} />} label="자주 묻는 질문" />
+              <MenuItem icon={<HelpCircle size={18} />} label="자주 묻는 질문" onClick={() => setShowFaq(true)} />
               <MenuItem icon={<LogOut size={18} />} label="로그아웃" danger />
             </div>
           </section>
@@ -92,15 +94,18 @@ export default function ProfilePage() {
       </div>
 
       <NavBar />
+
+      <QuestionModal visible={showFaq} onClose={() => setShowFaq(false)} />
     </GlowBackground>
   );
 }
 
 function MenuItem({
-  icon, label, danger = false,
-}: { icon: React.ReactNode; label: string; danger?: boolean }) {
+  icon, label, danger = false, onClick,
+}: { icon: React.ReactNode; label: string; danger?: boolean; onClick?: () => void }) {
   return (
     <button
+      onClick={onClick}
       className="w-full flex items-center gap-4 px-6 py-4 active:bg-white/10 transition-colors"
       style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}
     >

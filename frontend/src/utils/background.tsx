@@ -94,6 +94,11 @@ export function GlowBackground({ children, className = '' }: GlowBackgroundProps
         className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }}
       />
+      {/* 바텀 스크림 — NavBar 가독성 확보 */}
+      <div
+        className="absolute bottom-0 left-0 w-full h-40 pointer-events-none z-10"
+        style={{ background: 'linear-gradient(to top, rgba(100,10,25,0.55) 0%, transparent 100%)' }}
+      />
       {children}
     </div>
   );

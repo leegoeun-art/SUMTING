@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  ChevronLeft, Heart, Send, Plus,
-  MoreHorizontal, Check, X, Clock,
-} from 'lucide-react';
+import { Heart, MoreHorizontal, Send, Plus, ChevronLeft } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
 import { GlowBackground, GRADIENT, GLASS, COLORS } from '../utils/background';
 import { RecommendedUser, Message as IMessage } from '../types';
+import Receive from '../components/heartPing/Receive';
+import SendCard from '../components/heartPing/Send';
 
 /* ── Mock 데이터 ── */
-const MOCK_RECEIVED: RecommendedUser[] = [
+const INITIAL_RECEIVED: RecommendedUser[] = [
   {
     id: 'r1', nickname: '달빛토끼', department: '디자인학과',
     mascotType: 'heart', keywords: ['감성적인', '열정적인', '카페탐방'], matchScore: 92,
@@ -23,13 +23,13 @@ const MOCK_RECEIVED: RecommendedUser[] = [
   },
 ];
 
-const MOCK_SENT = [
+const INITIAL_SENT = [
   { id: 's1', user: { id: 'u1', nickname: '달빛토끼',  department: '디자인학과', mascotType: 'heart', keywords: [], matchScore: 0 }, status: 'accepted' as const },
   { id: 's2', user: { id: 'u2', nickname: '별빛여우',  department: '심리학과',   mascotType: 'shy',   keywords: [], matchScore: 0 }, status: 'pending'  as const },
   { id: 's3', user: { id: 'u3', nickname: '솜사탕곰',  department: '경영학과',   mascotType: 'basic', keywords: [], matchScore: 0 }, status: 'pending'  as const },
 ];
 
-const MOCK_CHATS = [
+const INITIAL_CHATS = [
   {
     id: 'c1',
     partner: { id: 'u1', nickname: '달빛토끼', department: '디자인학과', mascotType: 'heart', keywords: [], matchScore: 0 },
@@ -94,8 +94,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
           <ChevronLeft size={22} />
         </button>
         <div className="flex items-center gap-3 ml-1 flex-1">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
-            style={GLASS.icon}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
             <MascotImage type={partner.mascotType} className="w-8 h-8" />
           </div>
           <div>
@@ -121,16 +120,13 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
             {m.senderId !== 'me' && (
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mr-2 self-end mb-4 flex-shrink-0"
-                style={GLASS.icon}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center mr-2 self-end mb-4 flex-shrink-0" style={GLASS.icon}>
                 <MascotImage type={partner.mascotType} className="w-6 h-6" />
               </div>
             )}
             <div className={`flex flex-col gap-1 max-w-[72%] ${m.senderId === 'me' ? 'items-end' : 'items-start'}`}>
               <div
-                className={`rounded-[20px] px-4 py-2.5 text-sm leading-relaxed ${
-                  m.senderId === 'me' ? 'rounded-tr-none' : 'rounded-tl-none'
-                }`}
+                className={`rounded-[20px] px-4 py-2.5 text-sm leading-relaxed ${m.senderId === 'me' ? 'rounded-tr-none' : 'rounded-tl-none'}`}
                 style={
                   m.senderId === 'me'
                     ? { background: '#ffffff', color: COLORS.primary, fontWeight: 500 }
@@ -146,8 +142,10 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
       </div>
 
       {/* 입력창 */}
-      <div className="px-4 py-3 pb-6 flex-shrink-0"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.2)', background: 'rgba(198,42,71,0.2)', backdropFilter: 'blur(12px)' }}>
+      <div
+        className="px-4 py-3 pb-6 flex-shrink-0"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.2)', background: 'rgba(198,42,71,0.2)', backdropFilter: 'blur(12px)' }}
+      >
         <div
           className="flex items-center gap-2 rounded-[24px] px-4 py-2"
           style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)' }}
@@ -165,9 +163,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
             onClick={send}
             disabled={!input.trim()}
             className="p-2 rounded-full flex-shrink-0 transition-all"
-            style={input.trim()
-              ? { background: '#ffffff', color: '#C62A47' }
-              : { color: 'rgba(255,255,255,0.4)' }}
+            style={input.trim() ? { background: '#ffffff', color: '#C62A47' } : { color: 'rgba(255,255,255,0.4)' }}
           >
             <Send size={16} />
           </button>
@@ -182,15 +178,75 @@ type TabType = 'received' | 'sent' | 'chat';
 
 const TABS: { key: TabType; label: string }[] = [
   { key: 'received', label: '받은 하트핑' },
-  { key: 'sent',     label: '보낸 하트ㄹ핑' },
+  { key: 'sent',     label: '보낸 하트핑' },
   { key: 'chat',     label: '1:1 채팅'  },
 ];
 
+/* ── 채팅 항목 타입 ── */
+interface ChatItem {
+  id: string;
+  partner: RecommendedUser;
+  lastMessage: string;
+  lastTime: string;
+  unread: number;
+}
+
 /* ── 메인 컴포넌트 ── */
 export default function HeartPingListPage() {
-  const [tab, setTab]               = useState<TabType>('received');
-  const [activeChat, setActiveChat] = useState<RecommendedUser | null>(null);
-  useAppContext();
+  const { addRejected, sentPings } = useAppContext();
+  const location = useLocation();
+  const initialTab = (location.state as { tab?: TabType } | null)?.tab ?? 'received';
+
+  const [tab,          setTab]          = useState<TabType>(initialTab);
+  const [activeChat,   setActiveChat]   = useState<RecommendedUser | null>(null);
+  const [receivedList, setReceivedList] = useState<RecommendedUser[]>(INITIAL_RECEIVED);
+  const [chatList,     setChatList]     = useState<ChatItem[]>(INITIAL_CHATS);
+
+  /* 나중에 하기 → 채팅 목록만 추가, 받은 하트핑 탭 유지 */
+  const handleLater = (user: RecommendedUser) => {
+    setChatList(prev => {
+      if (prev.some(c => c.partner.id === user.id)) return prev;
+      return [{
+        id:          `c-${user.id}`,
+        partner:     user,
+        lastMessage: '매칭되었어요! 먼저 인사해 보세요 👋',
+        lastTime:    new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        unread:      0,
+      }, ...prev];
+    });
+    setReceivedList(prev => prev.filter(u => u.id !== user.id));
+    // 탭 이동 없음 — 받은 하트핑 화면 유지
+  };
+
+  /* 1:1 채팅 시작하기 → 채팅 목록 추가 후 채팅 탭으로 이동 */
+  const handleStartChat = (user: RecommendedUser) => {
+    // 이미 채팅 목록에 없으면 추가
+    setChatList(prev => {
+      const exists = prev.some(c => c.partner.id === user.id);
+      if (exists) return prev;
+      return [
+        {
+          id:          `c-${user.id}`,
+          partner:     user,
+          lastMessage: '매칭되었어요! 먼저 인사해 보세요 👋',
+          lastTime:    new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+          unread:      0,
+        },
+        ...prev,
+      ];
+    });
+    // 받은 목록에서 제거
+    setReceivedList(prev => prev.filter(u => u.id !== user.id));
+    // 채팅 탭으로 이동 + 채팅 화면 열기
+    setTab('chat');
+    setActiveChat(user);
+  };
+
+  /* 거절 → 받은 목록에서만 제거 + 24시간 홈 노출 차단 등록 */
+  const handleRejected = (id: string) => {
+    setReceivedList(prev => prev.filter(u => u.id !== id));
+    addRejected(id);
+  };
 
   return (
     <GlowBackground>
@@ -228,10 +284,7 @@ export default function HeartPingListPage() {
 
       {/* 탭 바 */}
       <div className="px-6 mb-4 flex-shrink-0 z-10">
-        <div
-          className="flex p-1 rounded-2xl"
-          style={GLASS.card}
-        >
+        <div className="flex p-1 rounded-2xl" style={GLASS.card}>
           {TABS.map(({ key, label }) => (
             <button
               key={key}
@@ -251,85 +304,52 @@ export default function HeartPingListPage() {
       <div className="flex-1 overflow-y-auto px-6 pb-28 z-10">
         <AnimatePresence mode="wait">
 
-          {/* 받은 숨핑 */}
+          {/* 받은 하트핑 */}
           {tab === 'received' && (
             <motion.div key="received"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-              className="space-y-3">
-              {MOCK_RECEIVED.map((u) => (
-                <div key={u.id}
-                  className="flex items-center gap-4 p-4 rounded-2xl"
-                  style={GLASS.card}>
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
-                    style={GLASS.icon}>
-                    <MascotImage type={u.mascotType} className="w-11 h-11" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-white text-sm">{u.nickname}</h4>
-                    <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>{u.department}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {u.keywords.map((k) => (
-                        <span key={k}
-                          className="text-[9px] px-1.5 py-0.5 rounded"
-                          style={{ background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)' }}>
-                          #{k}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2 flex-shrink-0">
-                    <button
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-white"
-                      style={{ background: '#ffffff', boxShadow: '0 4px 10px rgba(198,42,71,0.3)' }}>
-                      <Check size={16} strokeWidth={3} style={{ color: '#C62A47' }} />
-                    </button>
-                    <button
-                      className="w-9 h-9 rounded-full flex items-center justify-center"
-                      style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)' }}>
-                      <X size={16} className="text-white" />
-                    </button>
-                  </div>
-                </div>
+              className="space-y-3"
+            >
+              {receivedList.map((u) => (
+                <Receive
+                  key={u.id}
+                  user={u}
+                  onStartChat={handleStartChat}
+                  onLater={handleLater}
+                  onRejected={handleRejected}
+                />
               ))}
-              {MOCK_RECEIVED.length === 0 && <EmptyState label="아직 받은 하트핑이 없어요" />}
+              {receivedList.length === 0 && <EmptyState label="아직 받은 하트핑이 없어요" />}
             </motion.div>
           )}
 
-          {/* 보낸 숨핑 */}
+          {/* 보낸 하트핑 */}
           {tab === 'sent' && (
             <motion.div key="sent"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-              className="space-y-3">
-              {MOCK_SENT.map((item) => (
-                <div key={item.id}
-                  className="flex items-center gap-4 p-4 rounded-2xl"
-                  style={GLASS.card}>
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
-                    style={GLASS.icon}>
-                    <MascotImage type={item.user.mascotType} className="w-11 h-11" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-white text-sm">{item.user.nickname}</h4>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>{item.user.department}</p>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {item.status === 'accepted' ? (
-                      <span
-                        className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full"
-                        style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff' }}>
-                        <Check size={12} strokeWidth={3} /> 수락됨
-                      </span>
-                    ) : (
-                      <span
-                        className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full"
-                        style={{ background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)' }}>
-                        <Clock size={12} /> 대기중
-                      </span>
-                    )}
-                  </div>
-                </div>
+              className="space-y-3"
+            >
+              {/* context에서 방금 보낸 하트핑 (pending) */}
+              {sentPings.map((user) => (
+                <SendCard
+                  key={`ctx-${user.id}`}
+                  item={{ id: `ctx-${user.id}`, user, status: 'pending' }}
+                />
               ))}
-              {MOCK_SENT.length === 0 && <EmptyState label="아직 보낸 하트핑이 없어요" />}
+              {/* 기존 Mock 데이터 */}
+              {INITIAL_SENT.map((item) => (
+                <SendCard
+                  key={item.id}
+                  item={item}
+                  onOpenChat={(user) => {
+                    setTab('chat');
+                    setActiveChat(user);
+                  }}
+                />
+              ))}
+              {sentPings.length === 0 && INITIAL_SENT.length === 0 && (
+                <EmptyState label="아직 보낸 하트핑이 없어요" />
+              )}
             </motion.div>
           )}
 
@@ -337,20 +357,20 @@ export default function HeartPingListPage() {
           {tab === 'chat' && (
             <motion.div key="chat"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-              className="space-y-3">
-              {MOCK_CHATS.map((chat) => (
+              className="space-y-3"
+            >
+              {chatList.map((chat) => (
                 <button key={chat.id}
                   onClick={() => setActiveChat(chat.partner)}
                   className="w-full flex items-center gap-4 p-4 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                  style={GLASS.card}>
+                  style={GLASS.card}
+                >
                   <div className="relative flex-shrink-0">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden"
-                      style={GLASS.icon}>
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
                       <MascotImage type={chat.partner.mascotType} className="w-11 h-11" />
                     </div>
                     {chat.unread > 0 && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
-                        style={{ background: '#ffffff' }}>
+                      <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: '#ffffff' }}>
                         <span className="text-[8px] font-bold" style={{ color: '#C62A47' }}>{chat.unread}</span>
                       </div>
                     )}
@@ -364,7 +384,7 @@ export default function HeartPingListPage() {
                   </div>
                 </button>
               ))}
-              {MOCK_CHATS.length === 0 && <EmptyState label="아직 채팅이 없어요" />}
+              {chatList.length === 0 && <EmptyState label="아직 채팅이 없어요" />}
             </motion.div>
           )}
 

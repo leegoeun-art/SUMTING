@@ -13,6 +13,14 @@ interface AppContextType {
   isFinished: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
+  /** userId → 거절한 시각(ms) 맵 */
+  rejectedUsers: Record<string, number>;
+  /** 거절 처리 — localStorage에 저장하여 새로고침 후에도 유지 */
+  addRejected: (userId: string) => void;
+  /** 하트핑을 보낸 유저 목록 */
+  sentPings: RecommendedUser[];
+  /** 하트핑 보내기 */
+  addSentPing: (user: RecommendedUser) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -25,6 +33,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isFinished, setIsFinished] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // 거절한 userId → 거절 시각(ms) 맵, localStorage 영속
+  const [rejectedUsers, setRejectedUsers] = useState<Record<string, number>>(() => {
+    try {
+      const stored = localStorage.getItem('sumting_rejected');
+      return stored ? (JSON.parse(stored) as Record<string, number>) : {};
+    } catch { return {}; }
+  });
+
+  const addRejected = (userId: string) => {
+    setRejectedUsers(prev => {
+      const next = { ...prev, [userId]: Date.now() };
+      localStorage.setItem('sumting_rejected', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const [sentPings, setSentPings] = useState<RecommendedUser[]>([]);
+
+  const addSentPing = (user: RecommendedUser) => {
+    setSentPings(prev => {
+      if (prev.some(u => u.id === user.id)) return prev;
+      return [user, ...prev];
+    });
+  };
 
   useEffect(() => {
     fetch('/api/me', { credentials: 'include', redirect: 'manual', cache: 'no-store' })
@@ -56,7 +89,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{ user, setUser, kakaoId, selectedUser, setSelectedUser, activeChat, setActiveChat, isFinished, isLoading, isAuthenticated }}>
+    <AppContext.Provider value={{ user, setUser, kakaoId, selectedUser, setSelectedUser, activeChat, setActiveChat, isFinished, isLoading, isAuthenticated, rejectedUsers, addRejected, sentPings, addSentPing }}>
       {children}
     </AppContext.Provider>
   );
