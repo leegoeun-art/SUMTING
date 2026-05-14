@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const NAV_ITEMS = [
   { label: '홈',         icon: Home,  path: '/home'      },
   { label: '하트핑',     icon: Heart, path: '/heartpings' },
-  { label: '나의 프로필', icon: User,  path: '/profile'   },
+  { label: '나의 프로필', icon: User,  path: '/profiles'   },
 ];
 
 export default function NavBar() {

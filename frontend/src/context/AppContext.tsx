@@ -13,6 +13,7 @@ interface AppContextType {
   isFinished: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
+  logout: () => void;
   /** userId → 거절한 시각(ms) 맵 */
   rejectedUsers: Record<string, number>;
   /** 거절 처리 — localStorage에 저장하여 새로고침 후에도 유지 */
@@ -59,6 +60,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const logout = () => {
+    setUser(null);
+    setKakaoId(null);
+    setIsAuthenticated(false);
+  };
+
   useEffect(() => {
     fetch('/api/me', { credentials: 'include', redirect: 'manual', cache: 'no-store' })
       .then(async res => {
@@ -89,7 +96,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{ user, setUser, kakaoId, selectedUser, setSelectedUser, activeChat, setActiveChat, isFinished, isLoading, isAuthenticated, rejectedUsers, addRejected, sentPings, addSentPing }}>
+    <AppContext.Provider value={{ user, setUser, kakaoId, selectedUser, setSelectedUser, activeChat, setActiveChat, isFinished, isLoading, isAuthenticated, logout, rejectedUsers, addRejected, sentPings, addSentPing }}>
       {children}
     </AppContext.Provider>
   );

@@ -6,14 +6,22 @@ import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
 import { GlowBackground, GLASS } from '../utils/background';
 import QuestionModal from '../components/profile/QuestionModal';
+import LogOutModal from '../components/profile/LogOutModal';
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  const { user, logout } = useAppContext();
   const [showFaq, setShowFaq] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+
+  const handleLogout = async () => {
+    await fetch('/logout', { method: 'POST', credentials: 'include' });
+    logout();
+    navigate('/');
+  };
 
   if (!user) {
-    navigate('/home');
+    navigate('/');
     return null;
   }
 
@@ -83,7 +91,7 @@ export default function ProfilePage() {
               style={GLASS.card}
             >
               <MenuItem icon={<HelpCircle size={18} />} label="자주 묻는 질문" onClick={() => setShowFaq(true)} />
-              <MenuItem icon={<LogOut size={18} />} label="로그아웃" danger />
+              <MenuItem icon={<LogOut size={18} />} label="로그아웃" danger onClick={() => setShowLogout(true)} />
             </div>
           </section>
         </div>
@@ -96,6 +104,7 @@ export default function ProfilePage() {
       <NavBar />
 
       <QuestionModal visible={showFaq} onClose={() => setShowFaq(false)} />
+      <LogOutModal visible={showLogout} onClose={() => setShowLogout(false)} onConfirm={handleLogout} />
     </GlowBackground>
   );
 }

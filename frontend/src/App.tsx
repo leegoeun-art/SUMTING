@@ -39,7 +39,7 @@ function AnimatedRoutes() {
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/heartpings" element={<ProtectedRoute><HeartPingListPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/profiles" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         </Routes>
       </motion.div>
     </AnimatePresence>
