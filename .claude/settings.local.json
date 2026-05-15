@@ -18,7 +18,12 @@
       "Bash(ipconfig)",
       "Bash(powershell -Command ' *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\somga\\\\Desktop\\\\SUMTING\" -Directory)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER\\\\Desktop\\\\SUMTING\\\\SUMTING\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(xargs ls -1)",
+      "Bash(./mvnw compile *)",
+      "Bash(mvn compile *)"
     ]
   }
 }

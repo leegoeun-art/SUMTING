@@ -4,6 +4,8 @@ import org.example.sumting.entity.Likes;
 import org.example.sumting.entity.User;
 import org.example.sumting.enums.LikeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,4 +23,14 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
 
     //보낸 하트핑
     List<Likes> findAllBySender(User sender);
+
+    // 두 유저가 MATCHED 상태인지 확인 (방향 무관)
+    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM Likes l " +
+           "WHERE l.status = :status AND " +
+           "((l.sender.id = :a AND l.receiver.id = :b) OR (l.sender.id = :b AND l.receiver.id = :a))")
+    boolean existsMatchBetween(@Param("a") Long a, @Param("b") Long b, @Param("status") LikeStatus status);
+
+    // 특정 유저의 모든 매칭 목록 조회
+    @Query("SELECT l FROM Likes l WHERE l.status = :status AND (l.sender.id = :userId OR l.receiver.id = :userId)")
+    List<Likes> findAllMatchedByUserId(@Param("userId") Long userId, @Param("status") LikeStatus status);
 }

@@ -1,42 +1,93 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Send, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Client } from '@stomp/stompjs';
 import { useAppContext } from '../context/AppContext';
 import { Message as IMessage } from '../types';
 import MascotImage from '../components/MascotImage';
 
+interface ChatMessageResponse {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  content: string;
+  createdAt: string;
+}
+
+function formatTime(isoStr: string): string {
+  return new Date(isoStr).toLocaleTimeString('ko-KR', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+function toDisplayMessage(m: ChatMessageResponse, kakaoId: string | null): IMessage {
+  return {
+    id: m.id.toString(),
+    senderId: m.senderId.toString() === kakaoId ? 'me' : m.senderId.toString(),
+    text: m.content,
+    timestamp: formatTime(m.createdAt),
+  };
+}
+
 export default function ChatPage() {
   const navigate = useNavigate();
-  const { activeChat } = useAppContext();
-  const [input, setInput] = useState('');
-  // ⚠️ Hooks는 조건문 앞에서 무조건 선언해야 한다 (Rules of Hooks)
+  const { activeChat, kakaoId } = useAppContext();
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const [input, setInput] = useState('');
+  const stompClientRef = useRef<Client | null>(null);
 
-  // activeChat이 세팅되면 초기 메시지 주입
   useEffect(() => {
-    if (activeChat) {
-      setMessages([
-        { id: '1', senderId: activeChat.partner.id, text: '안녕하세요! 매칭되어서 반가워요 :)', timestamp: '오후 2:30' },
-      ]);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeChat?.partner.id]);
+    if (!activeChat) return;
 
-  // activeChat이 없으면 홈으로 리다이렉트
+    const partnerId = activeChat.partner.id;
+
+    // 채팅 내역 로드
+    fetch(`/api/chat/messages?partnerId=${partnerId}`, { credentials: 'include' })
+      .then(res => res.ok ? res.json() : [])
+      .then((data: ChatMessageResponse[]) => {
+        setMessages(data.map(m => toDisplayMessage(m, kakaoId)));
+      })
+      .catch(() => {});
+
+    // WebSocket 연결
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      onConnect: () => {
+        client.subscribe('/user/queue/chat', frame => {
+          const msg: ChatMessageResponse = JSON.parse(frame.body);
+          // 현재 열려있는 채팅 상대의 메시지만 표시
+          if (
+            msg.senderId.toString() === partnerId ||
+            msg.receiverId.toString() === partnerId
+          ) {
+            setMessages(prev => [...prev, toDisplayMessage(msg, kakaoId)]);
+          }
+        });
+      },
+    });
+
+    client.activate();
+    stompClientRef.current = client;
+
+    return () => {
+      client.deactivate();
+      stompClientRef.current = null;
+    };
+  }, [activeChat?.partner.id, kakaoId]);
+
   if (!activeChat) {
     navigate('/home');
     return null;
   }
 
   const send = () => {
-    if (!input.trim()) return;
-    const newMessage: IMessage = {
-      id: Date.now().toString(),
-      senderId: 'me',
-      text: input,
-      timestamp: '오후 2:45'
-    };
-    setMessages([...messages, newMessage]);
+    if (!input.trim() || !stompClientRef.current?.connected) return;
+    stompClientRef.current.publish({
+      destination: '/app/chat.send',
+      body: JSON.stringify({ receiverId: activeChat.partner.id, content: input }),
+    });
     setInput('');
   };
 

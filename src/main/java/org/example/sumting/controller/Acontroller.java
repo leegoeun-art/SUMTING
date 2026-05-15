@@ -1,19 +1,26 @@
 package org.example.sumting.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.sumting.dto.ChatMessageResponseDto;
 import org.example.sumting.dto.HeartPingDto;
+import org.example.sumting.dto.MatchedPartnerDto;
 import org.example.sumting.dto.MeResponseDto;
 import org.example.sumting.dto.ModifyHeartPingDto;
 import org.example.sumting.dto.ProfileDto;
 import org.example.sumting.dto.couples.RequestCouplesDto;
 import org.example.sumting.dto.couples.ResponseCouplesDto;
+import org.example.sumting.entity.Likes;
 import org.example.sumting.entity.UserProfile;
 import org.example.sumting.enums.Gender;
+import org.example.sumting.enums.LikeStatus;
+import org.example.sumting.repository.LikesRepository;
+import org.example.sumting.repository.MessageRepository;
 import org.example.sumting.repository.UserProfileRepository;
 import org.example.sumting.service.CoupleService;
 import org.example.sumting.service.HeartpingService;
 import org.example.sumting.service.LoadHeartpingService;
 import org.example.sumting.service.ProfileService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -21,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,6 +45,8 @@ public class Acontroller {
     private final HeartpingService heartpingService;
     private final LoadHeartpingService loadHeartpingService;
     private final UserProfileRepository userProfileRepository;
+    private final LikesRepository likesRepository;
+    private final MessageRepository messageRepository;
 
     @GetMapping("/me")
     public ResponseEntity<MeResponseDto> me(@AuthenticationPrincipal OAuth2User oAuth2User) {
@@ -87,5 +97,36 @@ public class Acontroller {
     @PostMapping("/modifyHeartPing")
     public void ModifyHeartPing(@RequestBody ModifyHeartPingDto modifyHeartPingDto){
 
+    }
+
+    @GetMapping("/chat/messages")
+    public ResponseEntity<List<ChatMessageResponseDto>> getChatMessages(
+            @RequestParam Long partnerId,
+            @AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        if (!likesRepository.existsMatchBetween(myId, partnerId, LikeStatus.MATCHED)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<ChatMessageResponseDto> messages = messageRepository.findConversation(myId, partnerId)
+            .stream()
+            .map(m -> new ChatMessageResponseDto(m.getId(), m.getSenderId(), m.getReceiverId(), m.getContent(), m.getCreatedAt()))
+            .toList();
+        return ResponseEntity.ok(messages);
+    }
+
+    @GetMapping("/chat/matches")
+    public ResponseEntity<List<MatchedPartnerDto>> getMatches(@AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        List<MatchedPartnerDto> partners = likesRepository.findAllMatchedByUserId(myId, LikeStatus.MATCHED)
+            .stream()
+            .map(l -> {
+                Long partnerId = l.getSender().getId().equals(myId) ? l.getReceiver().getId() : l.getSender().getId();
+                return userProfileRepository.findByUserId(partnerId)
+                    .map(p -> new MatchedPartnerDto(String.valueOf(partnerId), p.getNickName(), p.getDepartment(), "default"))
+                    .orElse(null);
+            })
+            .filter(Objects::nonNull)
+            .toList();
+        return ResponseEntity.ok(partners);
     }
 }
