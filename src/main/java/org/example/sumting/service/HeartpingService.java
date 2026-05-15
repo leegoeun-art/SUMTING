@@ -7,6 +7,8 @@ import org.example.sumting.entity.User;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.repository.LikesRepository;
 import org.example.sumting.repository.UserRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,5 +42,29 @@ public class HeartpingService {
                     reverseLike.updateStatus(LikeStatus.MATCHED);
                     likes.updateStatus(LikeStatus.MATCHED);
                 });
+    }
+
+    @Transactional
+    public void approveHeartPing(Long myId, Long senderId) {
+        User sender = userRepository.findById(senderId).orElseThrow();
+        User receiver = userRepository.findById(myId).orElseThrow();
+
+        Likes likes = likesRepository
+                .findBySenderAndReceiverAndStatus(sender, receiver, LikeStatus.PENDING)
+                .orElseThrow(() -> new IllegalStateException("수락할 하트핑이 없습니다."));
+
+        likes.updateStatus(LikeStatus.MATCHED);
+    }
+
+    @Transactional
+    public void rejectHeartPing(Long myId, Long senderId) {
+        User sender = userRepository.findById(senderId).orElseThrow();
+        User receiver = userRepository.findById(myId).orElseThrow();
+
+        Likes likes = likesRepository
+                .findBySenderAndReceiverAndStatus(sender, receiver, LikeStatus.PENDING)
+                .orElseThrow(() -> new IllegalStateException("거절할 하트핑이 없습니다."));
+
+        likes.updateStatus(LikeStatus.REJECTED);
     }
 }

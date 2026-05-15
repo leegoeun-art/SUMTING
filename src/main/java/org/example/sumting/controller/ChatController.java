@@ -24,6 +24,8 @@ public class ChatController {
     private final LikesRepository likesRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    // 클라이언트가 /app/chat.send로 메시지를 전송하면 호출된다.
+    // 두 사용자가 MATCHED 상태인지 확인 후 메시지를 저장하고, 발신자와 수신자 모두에게 실시간으로 전달한다.
     @MessageMapping("/chat.send")
     @Transactional
     public void send(@Payload ChatMessageDto dto, Principal principal) {

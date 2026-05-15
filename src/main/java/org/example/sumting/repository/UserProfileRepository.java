@@ -1,6 +1,5 @@
 package org.example.sumting.repository;
 
-import org.example.sumting.entity.User;
 import org.example.sumting.entity.UserProfile;
 import org.example.sumting.enums.Gender;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,9 +16,6 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     // nickname 으로 유저 프로필을 조회. 없으면 Optional.empty() 반환
     Optional<UserProfile> findByUserId(Long userId);
-
-    // nickname 으로 user_id 조회
-    User findUserIdByNickName(String nickName);
 
     // 해당 nickname를 가진 유저가 존재하는지 여부만 반환 (중복 닉네임 검사에 사용)
     boolean existsByNickName(String nickname);

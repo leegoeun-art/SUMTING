@@ -10,6 +10,7 @@ import java.util.List;
 public class MeResponseDto {
     private String id;
     private String nickname;
+    private Integer heart;
     private String mascotType;
     private String department;
     private Integer age;

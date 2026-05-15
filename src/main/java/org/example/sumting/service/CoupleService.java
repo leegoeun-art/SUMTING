@@ -1,7 +1,6 @@
 package org.example.sumting.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.sumting.dto.couples.RequestCouplesDto;
 import org.example.sumting.dto.couples.ResponseCouplesDto;
 import org.example.sumting.entity.UserProfile;
 import org.example.sumting.repository.UserProfileRepository;
@@ -19,8 +18,8 @@ public class CoupleService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
 
-    public List<ResponseCouplesDto> loadCouples(RequestCouplesDto dto) {
-        UserProfile myProfile = userProfileRepository.findById(dto.getUser_id())
+    public List<ResponseCouplesDto> loadCouples(Long userId) {
+        UserProfile myProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<String> myKws = Stream.of(myProfile.getMyKw1(), myProfile.getMyKw2(), myProfile.getMyKw3())
@@ -29,7 +28,7 @@ public class CoupleService {
 
         if (myKws.isEmpty()) return List.of();
 
-        return userProfileRepository.findMatchingCouples(dto.getUser_id(), myProfile.getGender(), myKws)
+        return userProfileRepository.findMatchingCouples(userId, myProfile.getGender(), myKws)
                 .stream()
                 .map(up -> new ResponseCouplesDto(
                         String.valueOf(up.getUserId()),

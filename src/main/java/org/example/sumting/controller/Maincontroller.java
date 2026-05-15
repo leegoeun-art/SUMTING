@@ -7,10 +7,7 @@ import org.example.sumting.dto.MatchedPartnerDto;
 import org.example.sumting.dto.MeResponseDto;
 import org.example.sumting.dto.ModifyHeartPingDto;
 import org.example.sumting.dto.ProfileDto;
-import org.example.sumting.dto.couples.RequestCouplesDto;
 import org.example.sumting.dto.couples.ResponseCouplesDto;
-import org.example.sumting.entity.Likes;
-import org.example.sumting.entity.UserProfile;
 import org.example.sumting.enums.Gender;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.repository.LikesRepository;
@@ -39,7 +36,7 @@ import java.util.stream.Stream;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-public class Acontroller {
+public class Maincontroller {
     private final ProfileService profileService;
     private final CoupleService coupleService;
     private final HeartpingService heartpingService;
@@ -48,9 +45,12 @@ public class Acontroller {
     private final LikesRepository likesRepository;
     private final MessageRepository messageRepository;
 
+    /*
+    // 현재 로그인한 사용자의 프로필 정보를 반환한다. 프로필이 없으면 204 No Content를 반환한다.
     @GetMapping("/me")
     public ResponseEntity<MeResponseDto> me(@AuthenticationPrincipal OAuth2User oAuth2User) {
         Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        int remainHeart = loadHeartpingService.loadRemainHeart(kakaoId);
 
         return userProfileRepository.findByUserId(kakaoId)
                 .map(p -> {
@@ -60,7 +60,7 @@ public class Acontroller {
                     List<String> idealKeywords = Stream.of(p.getYourKw1(), p.getYourKw2(), p.getYourKw3())
                             .filter(Objects::nonNull).toList();
                     return ResponseEntity.ok(new MeResponseDto(
-                            String.valueOf(kakaoId), p.getNickName(), "default",
+                            String.valueOf(kakaoId), p.getNickName(), remainHeart, "default",
                             p.getDepartment(), p.getAge(), p.getHeight(),
                             gender, keywords, idealKeywords
                     ));
@@ -68,37 +68,51 @@ public class Acontroller {
                 .orElse(ResponseEntity.noContent().build());
     }
 
+    // 사용자 프로필(닉네임, 학과, 나이, 키, 성별, 키워드 등)을 저장하고 닉네임을 반환한다.
     @PostMapping("/profile")
     public Map<String, String> profile(@RequestBody ProfileDto profileDto) {
         String nickname = profileService.saveProfile(profileDto);
         return Map.of("nickname", nickname);
     }
 
+    // 현재 로그인한 사용자의 키워드 기반으로 매칭 후보 목록을 조회한다.
     @GetMapping("/couples")
-    public List<ResponseCouplesDto> couples(@RequestBody RequestCouplesDto requestCouplesDto) {
-        return coupleService.loadCouples(requestCouplesDto);
+    public List<ResponseCouplesDto> couples(@AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long userId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        return coupleService.loadCouples(userId);
     }
 
+    // 상대방에게 하트핑(좋아요)을 전송하고 Likes 엔티티를 저장한다.
     @PostMapping("/heartPing")
     public void heartping(@RequestBody HeartPingDto heartPingDto){
         heartpingService.saveHeartPing(heartPingDto);
     }
 
+    // 현재 로그인한 사용자가 받은 하트핑 목록을 조회한다.
     @GetMapping("/receiveHeartPing")
-    public List<ProfileDto> receiveHeartPing(@RequestBody String nickname){
-        return loadHeartpingService.loadReceive(nickname);
+    public List<ProfileDto> receiveHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long userId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        System.out.println("userId: " + userId);
+        return loadHeartpingService.loadReceive(userId);
     }
 
+    // 현재 로그인한 사용자가 보낸 하트핑 목록을 조회한다.
     @GetMapping("/sendHeartPing")
-    public List<ProfileDto> SendHeartPing(@RequestBody String nickname){
-        return loadHeartpingService.loadSend(nickname) ;
+    public List<ProfileDto> sendHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long userId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        System.out.println("userId: " + userId);
+        return loadHeartpingService.loadSend(userId);
     }
 
+    // 받은 하트핑의 수락/거절 상태를 변경한다. (미구현)
     @PostMapping("/modifyHeartPing")
     public void ModifyHeartPing(@RequestBody ModifyHeartPingDto modifyHeartPingDto){
 
     }
 
+     */
+
+    // 매칭된 특정 상대방과의 채팅 메시지 전체 목록을 조회한다. 매칭 상태가 아니면 403을 반환한다.
     @GetMapping("/chat/messages")
     public ResponseEntity<List<ChatMessageResponseDto>> getChatMessages(
             @RequestParam Long partnerId,
@@ -114,6 +128,7 @@ public class Acontroller {
         return ResponseEntity.ok(messages);
     }
 
+    // 현재 사용자와 MATCHED 상태인 모든 상대방 목록을 조회한다.
     @GetMapping("/chat/matches")
     public ResponseEntity<List<MatchedPartnerDto>> getMatches(@AuthenticationPrincipal OAuth2User oAuth2User) {
         Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
