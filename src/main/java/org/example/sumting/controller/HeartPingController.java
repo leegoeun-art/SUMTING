@@ -3,7 +3,7 @@ package org.example.sumting.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.sumting.dto.HeartPingDto;
 import org.example.sumting.dto.ModifyHeartPingDto;
-import org.example.sumting.dto.ProfileDto;
+import org.example.sumting.dto.SentHeartPingDto;
 import org.example.sumting.service.HeartpingService;
 import org.example.sumting.service.LoadHeartpingService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,14 +29,14 @@ public class HeartPingController {
 
     // 현재 로그인한 사용자가 받은 하트핑 목록을 조회한다.
     @GetMapping("/receiveHeartPing")
-    public List<ProfileDto> receiveHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User) {
+    public List<SentHeartPingDto> receiveHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User) {
         Long userId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
         return loadHeartpingService.loadReceive(userId);
     }
 
     // 현재 로그인한 사용자가 보낸 하트핑 목록을 조회한다.
     @GetMapping("/sendHeartPing")
-    public List<ProfileDto> sendHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User) {
+    public List<SentHeartPingDto> sendHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User) {
         Long userId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
         return loadHeartpingService.loadSend(userId);
     }

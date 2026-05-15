@@ -1,7 +1,7 @@
 package org.example.sumting.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.sumting.dto.ProfileDto;
+import org.example.sumting.dto.SentHeartPingDto;
 import org.example.sumting.entity.Likes;
 import org.example.sumting.entity.User;
 import org.example.sumting.entity.UserProfile;
@@ -25,47 +25,46 @@ public class LoadHeartpingService {
         return userRepository.findHeartById(kakaoId);
     }
 
-    public List<ProfileDto> loadReceive(Long userId) {
+    public List<SentHeartPingDto> loadReceive(Long userId) {
         User me = userRepository.findById(userId).orElseThrow();
         List<Likes> receivedLikes = likesRepository.findAllByReceiver(me);
 
         return receivedLikes.stream()
                 .map(likes -> {
-                    UserProfile senderProfile = userProfileRepository
-                            .findByUserId(likes.getSender().getId())
-                            .orElseThrow();
-                    return toDto(senderProfile);
+                    UserProfile p = userProfileRepository
+                            .findByUserId(likes.getSender().getId()).orElseThrow();
+                    return new SentHeartPingDto(
+                            String.valueOf(p.getUserId()), p.getNickName(),
+                            p.getGender().name().equals("M"), p.getDepartment(),
+                            p.getAge(), p.getHeight(),
+                            p.getMyKw1(), p.getMyKw2(), p.getMyKw3(),
+                            p.getYourKw1(), p.getYourKw2(), p.getYourKw3(),
+                            likes.getStatus()
+                    );
                 })
                 .collect(Collectors.toList());
     }
 
 
 
-    public List<ProfileDto> loadSend(Long userId) {
+    public List<SentHeartPingDto> loadSend(Long userId) {
         User me = userRepository.findById(userId).orElseThrow();
         List<Likes> sentLikes = likesRepository.findAllBySender(me);
 
         return sentLikes.stream()
-                .map(likes -> toDto(
-                        userProfileRepository.findByUserId(likes.getReceiver().getId()).orElseThrow()
-                ))
+                .map(likes -> {
+                    UserProfile p = userProfileRepository
+                            .findByUserId(likes.getReceiver().getId()).orElseThrow();
+                    return new SentHeartPingDto(
+                            String.valueOf(p.getUserId()), p.getNickName(),
+                            p.getGender().name().equals("M"), p.getDepartment(),
+                            p.getAge(), p.getHeight(),
+                            p.getMyKw1(), p.getMyKw2(), p.getMyKw3(),
+                            p.getYourKw1(), p.getYourKw2(), p.getYourKw3(),
+                            likes.getStatus()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
-    private ProfileDto toDto(UserProfile profile) {
-        return new ProfileDto(
-                String.valueOf(profile.getUserId()),
-                profile.getNickName(),
-                profile.getGender().name().equals("M"),
-                profile.getDepartment(),
-                profile.getAge(),
-                profile.getHeight(),
-                profile.getMyKw1(),
-                profile.getMyKw2(),
-                profile.getMyKw3(),
-                profile.getYourKw1(),
-                profile.getYourKw2(),
-                profile.getYourKw3()
-        );
-    }
 }
