@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Shield, HelpCircle, LogOut } from 'lucide-react';
+import { Settings, HelpCircle, FileText } from 'lucide-react';
 
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
@@ -7,14 +7,24 @@ import NavBar from '../utils/NavBar';
 import { GlowBackground, GLASS } from '../utils/background';
 import QuestionModal from '../components/profile/QuestionModal';
 import LogOutModal from '../components/profile/LogOutModal';
+import PrivacyModal from '../components/profile/PrivacyModal';
 
 export default function ProfilePage() {
   const { user, logout } = useAppContext();
   const [showFaq, setShowFaq] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const handleLogout = async () => {
     await fetch('/logout', { method: 'POST', credentials: 'include' });
+    logout();
+    window.location.href =
+      'https://kauth.kakao.com/oauth/logout?client_id=31a7d5d4e54711631ace5fb8be607dc2&logout_redirect_uri=http://localhost:3000/';
+  };
+
+  const handleWithdraw = async () => {
+    await fetch('/api/me', { method: 'DELETE', credentials: 'include' });
     logout();
     window.location.href =
       'https://kauth.kakao.com/oauth/logout?client_id=31a7d5d4e54711631ace5fb8be607dc2&logout_redirect_uri=http://localhost:3000/';
@@ -75,18 +85,45 @@ export default function ProfilePage() {
 
         {/* 메뉴 섹션 */}
         <div className="px-6 space-y-5">
-          <section>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
-              style={{ color: 'rgba(255,255,255,0.80)' }}>
-              계정 설정
-            </h3>
-            <div
-              className="rounded-3xl overflow-hidden"
-              style={GLASS.card}
-            >
-              <MenuItem icon={<Shield size={18} />} label="차단 및 신고 관리" />
-            </div>
-          </section>
+          {user?.keywords && user.keywords.length > 0 && (
+            <section>
+              <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
+                style={{ color: 'rgba(255,255,255,0.80)' }}>
+                나의 키워드
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {user.keywords.map(kw => (
+                  <span
+                    key={kw}
+                    className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
+                    style={GLASS.cardLight}
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {user?.idealKeywords && user.idealKeywords.length > 0 && (
+            <section>
+              <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
+                style={{ color: 'rgba(255,255,255,0.80)' }}>
+                원하는 키워드
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {user.idealKeywords.map(kw => (
+                  <span
+                    key={kw}
+                    className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
+                    style={GLASS.cardLight}
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
 
           <section>
             <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
@@ -98,7 +135,23 @@ export default function ProfilePage() {
               style={GLASS.card}
             >
               <MenuItem icon={<HelpCircle size={18} />} label="자주 묻는 질문" onClick={() => setShowFaq(true)} />
-              <MenuItem icon={<LogOut size={18} />} label="로그아웃" danger onClick={() => setShowLogout(true)} />
+              <MenuItem icon={<FileText size={18} />} label="개인정보처리방침" onClick={() => setShowPrivacy(true)} />
+              <div className="flex" style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+                <button
+                  onClick={() => setShowLogout(true)}
+                  className="flex-1 py-4 text-sm font-medium active:bg-white/10 transition-colors"
+                  style={{ color: '#ffb3b3', borderRight: '1px solid rgba(255,255,255,0.15)' }}
+                >
+                  로그아웃
+                </button>
+                <button
+                  onClick={() => setShowWithdraw(true)}
+                  className="flex-1 py-4 text-sm font-medium active:bg-white/10 transition-colors"
+                  style={{ color: '#ffb3b3' }}
+                >
+                  탈퇴
+                </button>
+              </div>
             </div>
           </section>
         </div>
@@ -111,7 +164,9 @@ export default function ProfilePage() {
       <NavBar />
 
       <QuestionModal visible={showFaq} onClose={() => setShowFaq(false)} />
+      <PrivacyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
       <LogOutModal visible={showLogout} onClose={() => setShowLogout(false)} onConfirm={handleLogout} />
+      <LogOutModal visible={showWithdraw} onClose={() => setShowWithdraw(false)} onConfirm={handleWithdraw} type="withdraw" />
     </GlowBackground>
   );
 }

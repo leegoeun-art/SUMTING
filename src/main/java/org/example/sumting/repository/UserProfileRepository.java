@@ -20,6 +20,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     // 해당 nickname를 가진 유저가 존재하는지 여부만 반환 (중복 닉네임 검사에 사용)
     boolean existsByNickName(String nickname);
 
+    void deleteByUserId(Long userId);
+
     // 닉네임에 keyword가 포함된 유저 목록 반환 (부분 일치 검색)
     @Query("SELECT up FROM UserProfile up WHERE up.nickName LIKE %:keyword%")
     List<UserProfile> searchByNickName(@Param("keyword") String keyword);

@@ -10,7 +10,10 @@ import org.example.sumting.service.ProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -54,5 +57,16 @@ public class ProfileController {
     public Map<String, String> profile(@RequestBody ProfileDto profileDto) {
         String nickname = profileService.saveProfile(profileDto);
         return Map.of("nickname", nickname);
+    }
+
+    // 현재 로그인한 사용자의 계정과 모든 관련 데이터를 삭제한다.
+    @DeleteMapping("/me")
+    @Transactional
+    public ResponseEntity<?> withdraw(@AuthenticationPrincipal OAuth2User oAuth2User,
+                                      HttpServletRequest request) {
+        Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        profileService.withdraw(kakaoId);
+        request.getSession().invalidate();
+        return ResponseEntity.ok().build();
     }
 }

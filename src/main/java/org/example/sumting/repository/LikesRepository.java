@@ -42,4 +42,8 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     int updateStatusBetween(@Param("a") Long a, @Param("b") Long b,
                             @Param("oldStatus") LikeStatus oldStatus,
                             @Param("newStatus") LikeStatus newStatus);
+
+    @Modifying
+    @Query("DELETE FROM Likes l WHERE l.sender.id = :userId OR l.receiver.id = :userId")
+    void deleteAllByUserId(@Param("userId") Long userId);
 }

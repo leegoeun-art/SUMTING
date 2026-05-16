@@ -29,4 +29,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Modifying
     @Query("UPDATE Message m SET m.isRead = true WHERE m.receiverId = :receiverId AND m.senderId = :senderId AND (m.isRead = false OR m.isRead IS NULL)")
     void markAsRead(@Param("receiverId") Long receiverId, @Param("senderId") Long senderId);
+
+    @Modifying
+    @Query("DELETE FROM Message m WHERE m.senderId = :userId OR m.receiverId = :userId")
+    void deleteAllByUserId(@Param("userId") Long userId);
 }

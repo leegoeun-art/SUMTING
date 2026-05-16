@@ -5,6 +5,9 @@ import org.example.sumting.dto.ProfileDto;
 import org.example.sumting.entity.User;
 import org.example.sumting.entity.UserProfile;
 import org.example.sumting.enums.Gender;
+import org.example.sumting.repository.LikesRepository;
+import org.example.sumting.repository.MessageRepository;
+import org.example.sumting.repository.ReportRepository;
 import org.example.sumting.repository.UserProfileRepository;
 import org.example.sumting.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,9 @@ public class ProfileService {
 
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
+    private final LikesRepository likesRepository;
+    private final MessageRepository messageRepository;
+    private final ReportRepository reportRepository;
 
     private static final String[] ADJECTIVES = {
         "귀여운", "멋진", "따뜻한", "활발한", "설레는", "반짝이는", "다정한", "씩씩한",
@@ -86,5 +92,14 @@ public class ProfileService {
 
         userProfileRepository.save(userProfile);
         return nickname;
+    }
+
+    @Transactional
+    public void withdraw(Long userId) {
+        messageRepository.deleteAllByUserId(userId);
+        reportRepository.deleteAllByUserId(userId);
+        likesRepository.deleteAllByUserId(userId);
+        userProfileRepository.deleteByUserId(userId);
+        userRepository.deleteById(userId);
     }
 }
