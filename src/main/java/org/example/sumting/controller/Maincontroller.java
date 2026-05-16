@@ -2,19 +2,14 @@ package org.example.sumting.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.sumting.dto.ChatMessageResponseDto;
-import org.example.sumting.dto.HeartPingDto;
 import org.example.sumting.dto.MatchedPartnerDto;
-import org.example.sumting.dto.MeResponseDto;
-import org.example.sumting.dto.ModifyHeartPingDto;
-import org.example.sumting.dto.ProfileDto;
-import org.example.sumting.dto.couples.ResponseCouplesDto;
-import org.example.sumting.enums.Gender;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.repository.LikesRepository;
 import org.example.sumting.repository.MessageRepository;
 import org.example.sumting.repository.UserProfileRepository;
 import org.example.sumting.service.CoupleService;
 import org.example.sumting.service.HeartpingService;
+import org.example.sumting.service.FirebasePushService;
 import org.example.sumting.service.LoadHeartpingService;
 import org.example.sumting.service.ProfileService;
 import org.springframework.http.HttpStatus;
@@ -31,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api")
@@ -41,6 +35,7 @@ public class Maincontroller {
     private final CoupleService coupleService;
     private final HeartpingService heartpingService;
     private final LoadHeartpingService loadHeartpingService;
+    private final FirebasePushService firebasePushService;
     private final UserProfileRepository userProfileRepository;
     private final LikesRepository likesRepository;
     private final MessageRepository messageRepository;
@@ -111,6 +106,24 @@ public class Maincontroller {
     }
 
      */
+
+    // [테스트용] 현재 로그인한 사용자에게 매칭 푸시 알림을 직접 전송한다.
+    @PostMapping("/push/test")
+    public ResponseEntity<?> testPush(@AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        firebasePushService.sendMatchNotification(kakaoId);
+        return ResponseEntity.ok().build();
+    }
+
+    // FCM 토큰을 DB에 저장한다.
+    @PostMapping("/push/register")
+    public ResponseEntity<?> registerPushToken(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        firebasePushService.registerFcmToken(body.get("fcmToken"), kakaoId);
+        return ResponseEntity.ok().build();
+    }
 
     // 매칭된 특정 상대방과의 채팅 메시지 전체 목록을 조회한다. 매칭 상태가 아니면 403을 반환한다.
     @GetMapping("/chat/messages")

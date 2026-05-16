@@ -7,8 +7,6 @@ import org.example.sumting.entity.User;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.repository.LikesRepository;
 import org.example.sumting.repository.UserRepository;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +16,7 @@ public class HeartpingService {
 
     private final LikesRepository likesRepository;
     private final UserRepository userRepository;
+    private final FirebasePushService firebasePushService;
 
     @Transactional
     public void saveHeartPing(HeartPingDto heartPingDto) {
@@ -41,6 +40,9 @@ public class HeartpingService {
                 .ifPresent(reverseLike -> {
                     reverseLike.updateStatus(LikeStatus.MATCHED);
                     likes.updateStatus(LikeStatus.MATCHED);
+
+                    firebasePushService.sendMatchNotification(sender.getId());
+                    firebasePushService.sendMatchNotification(receiver.getId());
                 });
     }
 
@@ -54,6 +56,8 @@ public class HeartpingService {
                 .orElseThrow(() -> new IllegalStateException("수락할 하트핑이 없습니다."));
 
         likes.updateStatus(LikeStatus.MATCHED);
+        firebasePushService.sendMatchNotification(sender.getId());
+        firebasePushService.sendMatchNotification(receiver.getId());
     }
 
     @Transactional

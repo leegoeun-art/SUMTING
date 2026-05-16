@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Settings, Shield, HelpCircle, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAppContext } from '../context/AppContext';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
@@ -9,7 +9,6 @@ import QuestionModal from '../components/profile/QuestionModal';
 import LogOutModal from '../components/profile/LogOutModal';
 
 export default function ProfilePage() {
-  const navigate = useNavigate();
   const { user, logout } = useAppContext();
   const [showFaq, setShowFaq] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -17,7 +16,8 @@ export default function ProfilePage() {
   const handleLogout = async () => {
     await fetch('/logout', { method: 'POST', credentials: 'include' });
     logout();
-    navigate('/');
+    window.location.href =
+      'https://kauth.kakao.com/oauth/logout?client_id=31a7d5d4e54711631ace5fb8be607dc2&logout_redirect_uri=http://localhost:3000/';
   };
 
   // user가 없으면 골격 UI 표시 (로그인은 됐지만 프로필 미완성 or 로딩 중)

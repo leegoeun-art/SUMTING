@@ -5,6 +5,7 @@ import Profile, { SignupData } from '../components/signUp/Profile';
 import MyKeyword from '../components/signUp/MyKeyword';
 import YourKeyword from '../components/signUp/YourKeyword';
 import SignUpResult from '../components/signUp/SignUpResult';
+import { registerPushToken } from '../firebase';
 
 type View = 'profile' | 'myKeyword' | 'yourKeyword' | 'result';
 
@@ -80,12 +81,17 @@ export default function SignupPage() {
     );
   }
 
+  const handleEnter = async () => {
+    await registerPushToken();
+    navigate('/home');
+  };
+
   return (
     <SignUpResult
       nickname={nickname}
       department={profileData?.department ?? ''}
       keywords={myKeywords}
-      onEnter={() => navigate('/home')}
+      onEnter={handleEnter}
     />
   );
 }

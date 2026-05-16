@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 import { UserProfile, RecommendedUser, Chat } from '../types';
 import { FESTIVAL_END_TIME } from '../constants';
+import { registerPushToken } from '../firebase';
 
 interface AppContextType {
   user: UserProfile | null;
@@ -84,6 +85,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // department가 있으면 회원가입 완료된 회원
         if (data?.department) setUser(data);
         setIsLoading(false);
+        if (data) registerPushToken().catch(() => {});
       })
       .catch(() => setIsLoading(false));
   }, []);

@@ -23,7 +23,12 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(xargs ls -1)",
       "Bash(./mvnw compile *)",
-      "Bash(mvn compile *)"
+      "Bash(mvn compile *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\somga\\\\Desktop\\\\SUMTING\" -Recurse -Directory)",
+      "Bash(Select-Object -First 30)",
+      "Bash(Format-Table FullName)",
+      "PowerShell(Copy-Item *)",
+      "Bash(git check-ignore *)"
     ]
   }
 }

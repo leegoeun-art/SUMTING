@@ -39,3 +39,14 @@ build/
 # src/main/resources/*.yml
 
 *.env
+.env*
+frontend/.env*
+
+### Sensitive config files ###
+src/main/resources/firebase-service-account.json
+src/main/resources/*.yml
+src/main/resources/*.yaml
+
+### Firebase client config (contains API keys & VAPID key) ###
+frontend/src/firebase.ts
+frontend/public/firebase-messaging-sw.js

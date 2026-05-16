@@ -17,11 +17,17 @@ public class User {
 
     private int heart = 5;
 
+    private String fcmToken;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder
     public User(Long id) {
         this.id = id;
+    }
+
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }

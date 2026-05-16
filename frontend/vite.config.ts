@@ -54,6 +54,10 @@ export default defineConfig(({mode}) => {
           target: 'http://localhost:8080',
           changeOrigin: true,
         },
+        '/api/push/test': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
       },
     },
   };
