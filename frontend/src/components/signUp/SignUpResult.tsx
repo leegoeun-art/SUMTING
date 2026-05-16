@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { DEPARTMENT_MASCOT } from '../../constants';
+import { GRADIENT } from '../../utils/background';
 
 import imgBasic      from '../../assets/basic.png';
 import imgBusiness   from '../../assets/business.png';
@@ -35,7 +36,7 @@ export default function SignUpResult({ nickname, department, keywords, onEnter }
   return (
     <div
       className="h-full w-full flex flex-col items-center relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
+      style={{ background: GRADIENT }}
     >
       {/* 배경 글로우 */}
       <div className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"

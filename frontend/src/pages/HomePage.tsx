@@ -7,6 +7,8 @@ import MascotImage from '../components/MascotImage';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
 import { GlowBackground, GLASS } from '../utils/background';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import heartLottieUrl from '../assets/heart.lottie?url';
 import { RecommendedUser } from '../types';
 import { FESTIVAL_END_TIME, DEPARTMENT_MASCOT } from '../constants';
 import ProfileModal from '../components/home/ProfileModal';
@@ -133,8 +135,13 @@ export default function HomePage() {
 
       {/* Header */}
       <div className="z-10 px-6 pt-5 pb-2 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <SumungMascot className="w-10 h-11" />
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)' }}
+          >
+            <Heart size={15} fill="white" className="text-white" />
+          </div>
           <h1 className="font-display text-xl font-bold tracking-tight text-white">SUMTING</h1>
         </div>
         <div className="flex gap-4">
@@ -160,7 +167,7 @@ export default function HomePage() {
                   </span>
                 </div>
               </div>
-              <SumungMascot className="w-16 h-18 -mb-1" />
+              <SumungMascot className="w-28 h-30 -mb-4" />
             </div>
           </div>
         </div>
@@ -223,7 +230,7 @@ export default function HomePage() {
             {/* 로딩 중 */}
             {loadingCouples && (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <SumungMascot className="w-14 h-16 animate-pulse" />
+                <DotLottieReact src={heartLottieUrl} loop autoplay style={{ width: 80, height: 80 }} />
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>인연을 찾고 있어요...</p>
               </div>
             )}
@@ -231,7 +238,7 @@ export default function HomePage() {
             {/* 데이터 없음 */}
             {!loadingCouples && visibleRecommendations.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <SumungMascot className="w-14 h-16" />
+                <DotLottieReact src={heartLottieUrl} loop autoplay style={{ width: 96, height: 96 }} />
                 <p className="text-sm font-semibold text-white">오늘의 인연이 없어요</p>
                 <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.75)' }}>
                   내일 다시 확인해보세요 💌

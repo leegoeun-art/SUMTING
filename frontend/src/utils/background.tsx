@@ -3,13 +3,13 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import heartLottieUrl from '../assets/heart.lottie?url';
 
 export const COLORS = {
-  primary:     '#FF7B8A',  // 웜 로즈 핑크
-  primaryMid:  '#FFB3BA',  // 웜 파스텔 핑크
-  primaryPale: '#FFE0E4',  // 웜 블러쉬
+  primary:     '#FF8C78',  // 웜 코랄 핑크
+  primaryMid:  '#FFB8A5',  // 웜 파스텔 피치
+  primaryPale: '#FFE2D5',  // 웜 블러쉬 크림
   kakao:       '#FEE500',
 } as const;
 
-export const GRADIENT = 'linear-gradient(160deg, #FF7B8A 0%, #FFB3BA 55%, #FFE0E4 100%)';
+export const GRADIENT = 'linear-gradient(160deg, #FF8C78 0%, #FFB8A5 55%, #FFE2D5 100%)';
 
 // 자주 쓰이는 glass-morphism 스타일
 export const GLASS = {

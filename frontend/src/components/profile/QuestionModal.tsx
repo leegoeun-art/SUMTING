@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import { GLASS } from '../../utils/background';
+import { GLASS, GRADIENT } from '../../utils/background';
 
 interface FaqItem {
   q: string;
@@ -156,7 +156,7 @@ export default function QuestionModal({ visible, onClose }: QuestionModalProps) 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-[90] flex flex-col"
-          style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
+          style={{ background: GRADIENT }}
         >
           {/* 헤더 */}
           <div

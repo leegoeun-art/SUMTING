@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { KEYWORD_CATEGORIES } from '../constants';
 import Profile, { SignupData } from '../components/signUp/Profile';
 import MyKeyword from '../components/signUp/MyKeyword';
 import YourKeyword from '../components/signUp/YourKeyword';
@@ -19,11 +20,23 @@ export default function SignupPage() {
   const [yourKeywords, setYourKeywords] = useState<string[]>([]);
   const [nickname, setNickname] = useState('');
 
-  const toggleMyKw = (k: string) =>
-    setMyKeywords(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
+  const makeSelectKw = (setter: React.Dispatch<React.SetStateAction<string[]>>) =>
+    (keyword: string, categoryLabel: string) => {
+      const cat = KEYWORD_CATEGORIES.find(c => c.label === categoryLabel);
+      if (!cat) return;
+      setter(prev => {
+        if (prev.includes(keyword)) return prev.filter(k => k !== keyword);
+        const catSelected = prev.filter(k => cat.keywords.includes(k));
+        if (catSelected.length >= cat.max) {
+          if (cat.max === 1) return [...prev.filter(k => !cat.keywords.includes(k)), keyword];
+          return prev;
+        }
+        return [...prev, keyword];
+      });
+    };
 
-  const toggleYourKw = (k: string) =>
-    setYourKeywords(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
+  const selectMyKw = makeSelectKw(setMyKeywords);
+  const selectYourKw = makeSelectKw(setYourKeywords);
 
   const handleSubmit = async () => {
     if (!profileData) return;
@@ -63,7 +76,7 @@ export default function SignupPage() {
     return (
       <MyKeyword
         selected={myKeywords}
-        onToggle={toggleMyKw}
+        onSelect={selectMyKw}
         onNext={() => setView('yourKeyword')}
         onBack={() => setView('profile')}
       />
@@ -74,7 +87,7 @@ export default function SignupPage() {
     return (
       <YourKeyword
         selected={yourKeywords}
-        onToggle={toggleYourKw}
+        onSelect={selectYourKw}
         onNext={handleSubmit}
         onBack={() => setView('myKeyword')}
       />

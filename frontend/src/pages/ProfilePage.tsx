@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Settings, Shield, HelpCircle, LogOut } from 'lucide-react';
 
 import { useAppContext } from '../context/AppContext';
-import SumungMascot from '../components/SumungMascot';
+import MascotImage from '../components/MascotImage';
 import NavBar from '../utils/NavBar';
 import { GlowBackground, GLASS } from '../utils/background';
 import QuestionModal from '../components/profile/QuestionModal';
@@ -46,7 +46,7 @@ export default function ProfilePage() {
               className="absolute inset-0 rounded-full scale-150 blur-[40px]"
               style={{ background: 'rgba(255,255,255,0.2)' }}
             />
-            <SumungMascot className="w-40 h-44 relative" />
+            <MascotImage type={user?.mascotType ?? 'basic'} className="w-40 h-44 relative" />
           </div>
           <h2 className="text-2xl font-bold text-white mb-1">{displayUser.nickname || '익명의 수뭉이'}</h2>
           <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.88)' }}>{displayUser.department}</p>

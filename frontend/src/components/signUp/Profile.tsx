@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { DEPARTMENTS } from '../../constants';
 import SumungMascot from '../SumungMascot';
+import { GRADIENT } from '../../utils/background';
 
 export interface SignupData {
   department: string;
@@ -139,7 +140,7 @@ export default function Profile({ onComplete, onBack }: Props) {
   return (
     <div
       className="h-full w-full flex flex-col"
-      style={{ background: 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)' }}
+      style={{ background: GRADIENT }}
     >
       <div className="px-5 pt-6 pb-3 flex-shrink-0">
         <div className="flex items-center gap-3 mb-3">
@@ -162,8 +163,8 @@ export default function Profile({ onComplete, onBack }: Props) {
       </div>
 
       <div className="px-5 pt-3 pb-5 flex items-center gap-3 flex-shrink-0">
-        <div className="w-12 h-14 flex-shrink-0">
-          <SumungMascot className="w-12 h-14" />
+        <div className="w-16 h-20 flex-shrink-0">
+          <SumungMascot className="w-16 h-20" />
         </div>
         <div>
           <h1 className="text-xl font-bold text-white leading-tight">{title}</h1>
