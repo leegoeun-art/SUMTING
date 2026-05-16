@@ -25,12 +25,13 @@ function formatTime(isoStr: string): string {
 }
 
 interface MatchedPartnerApiItem {
-  userId:      string;
-  nickname:    string;
-  department:  string;
-  mascotType:  string;
-  lastMessage: string | null;
-  lastTime:    string | null;
+  userId:       string;
+  nickname:     string;
+  department:   string;
+  mascotType:   string;
+  lastMessage:  string | null;
+  lastTime:     string | null;
+  unreadCount:  number;
 }
 
 interface ChatItem {
@@ -58,7 +59,7 @@ function toApiChatItem(item: MatchedPartnerApiItem): ChatItem {
     },
     lastMessage: item.lastMessage ?? '매칭되었어요! 먼저 인사해 보세요 👋',
     lastTime:    item.lastTime ? formatTime(item.lastTime) : '',
-    unread:      0,
+    unread:      item.unreadCount,
   };
 }
 
@@ -140,6 +141,7 @@ const Chatting = forwardRef<ChattingHandle, ChattingProps>((_props, ref) => {
           key={chat.id}
           onClick={() => {
             setActiveChat({ id: chat.id, partner: chat.partner, unreadCount: chat.unread });
+            setChatList(prev => prev.map(c => c.id === chat.id ? { ...c, unread: 0 } : c));
             navigate('/chat');
           }}
           className="w-full flex items-center gap-4 p-4 rounded-2xl text-left active:scale-[0.98] transition-transform"

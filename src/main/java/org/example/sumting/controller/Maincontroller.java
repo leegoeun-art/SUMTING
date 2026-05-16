@@ -3,6 +3,7 @@ package org.example.sumting.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.sumting.dto.ChatMessageResponseDto;
 import org.example.sumting.dto.MatchedPartnerDto;
+import org.example.sumting.dto.ReadReceiptDto;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.entity.Report;
 import org.example.sumting.repository.LikesRepository;
@@ -16,6 +17,7 @@ import org.example.sumting.service.LoadHeartpingService;
 import org.example.sumting.service.ProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,7 @@ public class Maincontroller {
     private final LikesRepository likesRepository;
     private final MessageRepository messageRepository;
     private final ReportRepository reportRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /*
     // 현재 로그인한 사용자의 프로필 정보를 반환한다. 프로필이 없으면 204 No Content를 반환한다.
@@ -132,8 +135,9 @@ public class Maincontroller {
         return ResponseEntity.ok().build();
     }
 
-    // 매칭된 특정 상대방과의 채팅 메시지 전체 목록을 조회한다. 매칭 상태가 아니면 403을 반환한다.
+    // 매칭된 특정 상대방과의 채팅 메시지 전체 목록을 조회하고 읽음 처리한다. 매칭 상태가 아니면 403을 반환한다.
     @GetMapping("/chat/messages")
+    @Transactional
     public ResponseEntity<List<ChatMessageResponseDto>> getChatMessages(
             @RequestParam Long partnerId,
             @AuthenticationPrincipal OAuth2User oAuth2User) {
@@ -141,11 +145,25 @@ public class Maincontroller {
         if (!likesRepository.existsMatchBetween(myId, partnerId, LikeStatus.MATCHED)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        messageRepository.markAsRead(myId, partnerId);
+        messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId));
         List<ChatMessageResponseDto> messages = messageRepository.findConversation(myId, partnerId)
             .stream()
-            .map(m -> new ChatMessageResponseDto(m.getId(), m.getSenderId(), m.getReceiverId(), m.getContent(), m.getCreatedAt()))
+            .map(m -> new ChatMessageResponseDto(m.getId(), m.getSenderId(), m.getReceiverId(), m.getContent(), m.getCreatedAt(), m.isRead()))
             .toList();
         return ResponseEntity.ok(messages);
+    }
+
+    // 채팅방의 상대방 메시지를 모두 읽음 처리한다.
+    @PostMapping("/chat/read")
+    @Transactional
+    public ResponseEntity<?> markChatAsRead(
+            @RequestParam Long partnerId,
+            @AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        messageRepository.markAsRead(myId, partnerId);
+        messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId));
+        return ResponseEntity.ok().build();
     }
 
     // 상대방을 신고하고 차단한다. 신고 사유를 저장하고 likes 상태를 EXITED로 변경한다.
@@ -189,7 +207,8 @@ public class Maincontroller {
                         List<Message> msgs = messageRepository.findLastMessage(myId, partnerId, PageRequest.of(0, 1));
                         String lastMessage = msgs.isEmpty() ? null : msgs.get(0).getContent();
                         String lastTime = msgs.isEmpty() ? null : msgs.get(0).getCreatedAt().toString();
-                        return new MatchedPartnerDto(String.valueOf(partnerId), p.getNickName(), p.getDepartment(), "default", lastMessage, lastTime);
+                        long unreadCount = messageRepository.countUnread(myId, partnerId);
+                        return new MatchedPartnerDto(String.valueOf(partnerId), p.getNickName(), p.getDepartment(), "default", lastMessage, lastTime, unreadCount);
                     })
                     .orElse(null);
             })

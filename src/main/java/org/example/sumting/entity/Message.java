@@ -28,11 +28,20 @@ public class Message {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @Getter(AccessLevel.NONE)
+    @Column
+    private Boolean isRead = false;
+
     @Builder
     public Message(Long senderId, Long receiverId, String content) {
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.content = content;
         this.createdAt = LocalDateTime.now();
+        this.isRead = false;
+    }
+
+    public boolean isRead() {
+        return Boolean.TRUE.equals(isRead);
     }
 }

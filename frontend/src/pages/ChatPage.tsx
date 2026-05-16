@@ -14,6 +14,7 @@ interface ChatMessageResponse {
   receiverId: number;
   content: string;
   createdAt: string;
+  isRead: boolean;
 }
 
 function formatTime(isoStr: string): string {
@@ -30,6 +31,7 @@ function toDisplayMessage(m: ChatMessageResponse, kakaoId: string | null): IMess
     senderId:  m.senderId.toString() === kakaoId ? 'me' : m.senderId.toString(),
     text:      m.content,
     timestamp: formatTime(m.createdAt),
+    isRead:    m.isRead,
   };
 }
 
@@ -47,7 +49,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!activeChat) return;
-    localStorage.setItem(`sumting_chat_read_${activeChat.id}`, new Date().toISOString());
+    fetch(`/api/chat/read?partnerId=${activeChat.partner.id}`, { method: 'POST', credentials: 'include' });
   }, [activeChat?.id]);
 
   useEffect(() => {
@@ -71,8 +73,14 @@ export default function ChatPage() {
             msg.receiverId.toString() === partnerId
           ) {
             setMessages(prev => [...prev, toDisplayMessage(msg, kakaoId)]);
-            localStorage.setItem(`sumting_chat_read_${activeChat.id}`, new Date().toISOString());
+            fetch(`/api/chat/read?partnerId=${partnerId}`, { method: 'POST', credentials: 'include' });
           }
+        });
+
+        client.subscribe('/user/queue/chat-read', () => {
+          setMessages(prev => prev.map(m =>
+            m.senderId === 'me' ? { ...m, isRead: true } : m
+          ));
         });
       },
     });
@@ -175,7 +183,14 @@ export default function ChatPage() {
               >
                 {m.text}
               </div>
-              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.70)' }}>{m.timestamp}</span>
+              <div className="flex items-center gap-1">
+                {m.senderId === 'me' && (
+                  <span className="text-[9px] font-medium" style={{ color: m.isRead ? 'rgba(255,255,255,0.55)' : 'rgba(255,230,180,0.95)' }}>
+                    {m.isRead ? '읽음' : '안읽음'}
+                  </span>
+                )}
+                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.70)' }}>{m.timestamp}</span>
+              </div>
             </div>
           </div>
         ))}

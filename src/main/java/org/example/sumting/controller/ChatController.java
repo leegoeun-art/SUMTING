@@ -47,7 +47,7 @@ public class ChatController {
 
         ChatMessageResponseDto response = new ChatMessageResponseDto(
             saved.getId(), saved.getSenderId(), saved.getReceiverId(),
-            saved.getContent(), saved.getCreatedAt()
+            saved.getContent(), saved.getCreatedAt(), false
         );
 
         // 수신자와 발신자 모두에게 전송

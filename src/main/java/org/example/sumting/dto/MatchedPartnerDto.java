@@ -12,4 +12,5 @@ public class MatchedPartnerDto {
     private String mascotType;
     private String lastMessage;
     private String lastTime;
+    private long unreadCount;
 }

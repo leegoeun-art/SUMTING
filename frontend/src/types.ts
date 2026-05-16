@@ -28,6 +28,7 @@ export interface Message {
   senderId: string;
   text: string;
   timestamp: string;
+  isRead: boolean;
 }
 
 export interface Chat {
