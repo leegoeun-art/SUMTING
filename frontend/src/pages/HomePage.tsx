@@ -8,25 +8,47 @@ import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
 import { GlowBackground, GLASS } from '../utils/background';
 import { RecommendedUser } from '../types';
-import { FESTIVAL_END_TIME } from '../constants';
+import { FESTIVAL_END_TIME, DEPARTMENT_MASCOT } from '../constants';
 import ProfileModal from '../components/home/ProfileModal';
 
 const DAILY_LIMIT = 5;
-
-const MOCK_RECOMMENDATIONS: RecommendedUser[] = [
-  { id: '1', nickname: '달콤한 바나나', department: '컴퓨터공학과', keywords: ['외향적인', '어른스러운', '열정적인'], mascotType: 'cool', matchScore: 92 },
-  { id: '2', nickname: '새벽녘 산책자', department: '미술대학', keywords: ['내향적인', '차분한', '시크한'], mascotType: 'shy', matchScore: 88 },
-  { id: '3', nickname: '여름밤의 꿈', department: '심리학과', keywords: ['다정한', '솔직한', '긍정적인'], mascotType: 'heart', matchScore: 85 },
-  { id: '4', nickname: '구름 한 스푼', department: '경영학부', keywords: ['귀여운', '유머러스한', '엉뚱한'], mascotType: 'basic', matchScore: 79 },
-];
-
 const MS_24H = 24 * 60 * 60 * 1000;
+
+/** GET /api/couples 응답 형태 */
+interface CouplesApiItem {
+  user_id:    string;
+  nickname:   string;
+  department: string;
+  my_kw1:     string | null;
+  my_kw2:     string | null;
+  my_kw3:     string | null;
+}
+
+/** API 응답 → RecommendedUser 변환 */
+function toRecommendedUser(item: CouplesApiItem): RecommendedUser {
+  return {
+    id:         item.user_id,
+    nickname:   item.nickname,
+    department: item.department,
+    keywords:   [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
+    mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
+    matchScore: 0,
+  };
+}
+
+/** 내 이상형 키워드와 상대 키워드의 일치율 계산 (0 / 33 / 66 / 100) */
+function computeMatchScore(theirKeywords: string[], myIdealKeywords: string[]): number {
+  const matchCount = theirKeywords.filter(k => myIdealKeywords.includes(k)).length;
+  return Math.round((matchCount / 3) * 100);
+}
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { user, rejectedUsers, sentPings, addSentPing } = useAppContext();
-  const [timeLeft,   setTimeLeft]   = useState('');
-  const [modalUser,  setModalUser]  = useState<RecommendedUser | null>(null);
+  const [timeLeft,        setTimeLeft]        = useState('');
+  const [modalUser,       setModalUser]       = useState<RecommendedUser | null>(null);
+  const [recommendations, setRecommendations] = useState<RecommendedUser[]>([]);
+  const [loadingCouples,  setLoadingCouples]  = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -50,27 +72,53 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 하트핑 보내기 — 목록에서 제거 + context 등록 + 하트핑 탭으로 이동
+  // GET /api/couples — 추천 상대 목록 로드
+  useEffect(() => {
+    fetch('/api/couples', { credentials: 'include' })
+      .then(res => (res.ok ? res.json() : []))
+      .then((data: CouplesApiItem[]) => setRecommendations(data.map(toRecommendedUser)))
+      .catch(() => {})
+      .finally(() => setLoadingCouples(false));
+    console.log(recommendations);
+  }, []);
+
+  // 하트핑 보내기 — API 호출 + context 등록 + 하트핑 탭으로 이동
   const handleSendHeartPing = (u: RecommendedUser) => {
+    if (heartRemaining === 0) {
+      alert('오늘의 하트핑을 다 사용하셨습니다!');
+      return;
+    }
+    if (user) {
+      fetch('/api/heartPing', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senderId: Number(user.id), receiverId: Number(u.id) }),
+      }).catch(() => {});
+    }
     addSentPing(u);
     setModalUser(null);
     navigate('/heartpings', { state: { tab: 'sent' } });
   };
 
   const sentIds = new Set(sentPings.map(u => u.id));
-  const usedToday = sentPings.length; // 추후 API로 교체
+  const heartRemaining = user?.heart ?? DAILY_LIMIT;
+  const usedToday = DAILY_LIMIT - heartRemaining;
+
+  const idealKeywords = user?.idealKeywords ?? [];
 
   // 오늘의 인연 필터 & 정렬
   // - 하트핑 보낸 유저 → 완전 제외
   // - 24시간 미만 거절 → 완전 제외
   // - 24시간 이상 거절 → 하단 배치
   const now = Date.now();
-  const visibleRecommendations = MOCK_RECOMMENDATIONS
+  const visibleRecommendations = recommendations
+    .map(u => ({ ...u, matchScore: computeMatchScore(u.keywords, idealKeywords) }))
     .filter(u => {
-      if (sentIds.has(u.id)) return false;          // 하트핑 보낸 유저 제외
+      if (sentIds.has(u.id)) return false;
       const rejectedAt = rejectedUsers[u.id];
       if (!rejectedAt) return true;
-      return now - rejectedAt >= MS_24H;            // 24시간 지난 거절만 표시
+      return now - rejectedAt >= MS_24H;
     })
     .sort((a, b) => {
       const aRejected = rejectedUsers[a.id] ?? 0;
@@ -137,7 +185,7 @@ export default function HomePage() {
               className="text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff' }}
             >
-              <span className="font-numeral">{DAILY_LIMIT - usedToday}</span>개 남음
+              <span className="font-numeral">{heartRemaining}</span>개 남음
             </span>
           </div>
 
@@ -172,7 +220,26 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-6">
-            {visibleRecommendations.map((u, idx) => (
+            {/* 로딩 중 */}
+            {loadingCouples && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <SumungMascot className="w-14 h-16 animate-pulse" />
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>인연을 찾고 있어요...</p>
+              </div>
+            )}
+
+            {/* 데이터 없음 */}
+            {!loadingCouples && visibleRecommendations.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <SumungMascot className="w-14 h-16" />
+                <p className="text-sm font-semibold text-white">오늘의 인연이 없어요</p>
+                <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  내일 다시 확인해보세요 💌
+                </p>
+              </div>
+            )}
+
+            {!loadingCouples && visibleRecommendations.map((u, idx) => (
               <motion.div
                 key={u.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -190,9 +257,11 @@ export default function HomePage() {
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
                       <h4 className="font-bold text-lg text-white">{u.nickname}</h4>
-                      <span className="font-numeral text-xs font-bold text-white bg-white/25 px-2 py-1 rounded-full">
-                        {u.matchScore}% Match
-                      </span>
+                      {u.matchScore > 0 && (
+                        <span className="font-numeral text-xs font-bold text-white bg-white/25 px-2 py-1 rounded-full">
+                          {u.matchScore}% Match
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.88)' }}>{u.department}</p>
                     <div className="flex flex-wrap gap-2">

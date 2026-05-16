@@ -8,6 +8,7 @@ export interface UserProfile {
   age: number;
   height: number;
   gender: Gender;
+  heart: number;
   keywords: string[];
   idealKeywords: string[];
 }

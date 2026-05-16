@@ -34,6 +34,26 @@ export default defineConfig(({mode}) => {
           target: 'http://localhost:8080',
           changeOrigin: true,
         },
+        '/api/couples': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
+        '/api/heartPing': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
+        '/api/receiveHeartPing': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
+        '/api/sendHeartPing': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
+        '/api/approveHeartPing': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+        },
       },
     },
   };

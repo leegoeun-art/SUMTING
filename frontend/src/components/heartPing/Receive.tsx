@@ -10,20 +10,33 @@ interface ReceiveProps {
   user: RecommendedUser;
   /** 1:1 채팅 시작하기 — 채팅 탭으로 이동 */
   onStartChat: (user: RecommendedUser) => void;
-  /** 나중에 하기 — 받은 하트핑 탭 유지 */
-  onLater: (user: RecommendedUser) => void;
   /** 거절 확정 후 호출 */
   onRejected: (id: string) => void;
 }
 
-export default function Receive({ user, onStartChat, onLater, onRejected }: ReceiveProps) {
+export default function Receive({ user, onStartChat, onRejected }: ReceiveProps) {
   const [showSuccess,       setShowSuccess]       = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
 
-  const handleAccept = () => setShowSuccess(true);
+  const handleAccept = () => {
+    fetch('/api/approveHeartPing', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Number(user.id)),
+    }).catch(() => {});
+    setShowSuccess(true);
+  };
+
   const handleReject = () => setShowRejectConfirm(true);
 
   const confirmReject = () => {
+    fetch('/api/rejectHeartPing', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Number(user.id)),
+    }).catch(() => {});
     setShowRejectConfirm(false);
     onRejected(user.id);
   };
@@ -33,10 +46,7 @@ export default function Receive({ user, onStartChat, onLater, onRejected }: Rece
     onStartChat(user); // 채팅 탭으로 이동
   };
 
-  const handleLater = () => {
-    setShowSuccess(false);
-    onLater(user); // 받은 하트핑 탭 유지
-  };
+  const handleLater = () => setShowSuccess(false);
 
   return (
     <>

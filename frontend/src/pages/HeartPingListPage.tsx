@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, MoreHorizontal, Send, Plus, ChevronLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
@@ -8,26 +8,58 @@ import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
 import { GlowBackground, GRADIENT, GLASS, COLORS } from '../utils/background';
 import { RecommendedUser, Message as IMessage } from '../types';
+import { DEPARTMENT_MASCOT } from '../constants';
 import Receive from '../components/heartPing/Receive';
 import SendCard from '../components/heartPing/Send';
 
-/* ── Mock 데이터 ── */
-const INITIAL_RECEIVED: RecommendedUser[] = [
-  {
-    id: 'r1', nickname: '달빛토끼', department: '디자인학과',
-    mascotType: 'heart', keywords: ['감성적인', '열정적인', '카페탐방'], matchScore: 92,
-  },
-  {
-    id: 'r2', nickname: '별빛여우', department: '심리학과',
-    mascotType: 'shy', keywords: ['다정한', '빠른 답장', '새벽감성'], matchScore: 85,
-  },
-];
+/* ── 하트핑 API 공통 응답 형태 (receive / send 동일 구조) ── */
+interface HeartPingApiItem {
+  user_id:    string;
+  nickname:   string;
+  gender:     boolean;
+  department: string;
+  age:        number;
+  height:     number;
+  my_kw1:     string | null;
+  my_kw2:     string | null;
+  my_kw3:     string | null;
+  your_kw1:   string | null;
+  your_kw2:   string | null;
+  your_kw3:   string | null;
+  status:     string;
+}
 
-const INITIAL_SENT = [
-  { id: 's1', user: { id: 'u1', nickname: '달빛토끼',  department: '디자인학과', mascotType: 'heart', keywords: [], matchScore: 0 }, status: 'accepted' as const },
-  { id: 's2', user: { id: 'u2', nickname: '별빛여우',  department: '심리학과',   mascotType: 'shy',   keywords: [], matchScore: 0 }, status: 'pending'  as const },
-  { id: 's3', user: { id: 'u3', nickname: '솜사탕곰',  department: '경영학과',   mascotType: 'basic', keywords: [], matchScore: 0 }, status: 'pending'  as const },
-];
+interface SentItem {
+  id:     string;
+  user:   RecommendedUser;
+  status: 'accepted' | 'pending';
+}
+
+function toReceivedUser(item: HeartPingApiItem): RecommendedUser {
+  return {
+    id:         item.user_id,
+    nickname:   item.nickname,
+    department: item.department,
+    keywords:   [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
+    mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
+    matchScore: 0,
+  };
+}
+
+function toSentItem(item: HeartPingApiItem): SentItem {
+  return {
+    id:   item.user_id,
+    user: {
+      id:         item.user_id,
+      nickname:   item.nickname,
+      department: item.department,
+      keywords:   [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
+      mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
+      matchScore: 0,
+    },
+    status: item.status?.toUpperCase() === 'MATCHED' ? 'accepted' : 'pending',
+  };
+}
 
 const INITIAL_CHATS = [
   {
@@ -199,24 +231,31 @@ export default function HeartPingListPage() {
 
   const [tab,          setTab]          = useState<TabType>(initialTab);
   const [activeChat,   setActiveChat]   = useState<RecommendedUser | null>(null);
-  const [receivedList, setReceivedList] = useState<RecommendedUser[]>(INITIAL_RECEIVED);
+  const [receivedList, setReceivedList] = useState<RecommendedUser[]>([]);
+  const [apiSentList,  setApiSentList]  = useState<SentItem[]>([]);
   const [chatList,     setChatList]     = useState<ChatItem[]>(INITIAL_CHATS);
 
-  /* 나중에 하기 → 채팅 목록만 추가, 받은 하트핑 탭 유지 */
-  const handleLater = (user: RecommendedUser) => {
-    setChatList(prev => {
-      if (prev.some(c => c.partner.id === user.id)) return prev;
-      return [{
-        id:          `c-${user.id}`,
-        partner:     user,
-        lastMessage: '매칭되었어요! 먼저 인사해 보세요 👋',
-        lastTime:    new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
-        unread:      0,
-      }, ...prev];
-    });
-    setReceivedList(prev => prev.filter(u => u.id !== user.id));
-    // 탭 이동 없음 — 받은 하트핑 화면 유지
-  };
+  // GET /api/receiveHeartPing — 받은 하트핑 목록 로드 (PENDING 상태만 표시)
+  useEffect(() => {
+    fetch('/api/receiveHeartPing', { credentials: 'include' })
+      .then(res => (res.ok ? res.json() : []))
+      .then((data: HeartPingApiItem[]) =>
+        setReceivedList(
+          data
+            .filter(item => item.status?.toUpperCase() === 'PENDING')
+            .map(toReceivedUser)
+        )
+      )
+      .catch(() => {});
+  }, []);
+
+  // GET /api/sendHeartPing — 보낸 하트핑 목록 로드
+  useEffect(() => {
+    fetch('/api/sendHeartPing', { credentials: 'include' })
+      .then(res => (res.ok ? res.json() : []))
+      .then((data: HeartPingApiItem[]) => setApiSentList(data.map(toSentItem)))
+      .catch(() => {});
+  }, []);
 
   /* 1:1 채팅 시작하기 → 채팅 목록 추가 후 채팅 탭으로 이동 */
   const handleStartChat = (user: RecommendedUser) => {
@@ -315,7 +354,7 @@ export default function HeartPingListPage() {
                   key={u.id}
                   user={u}
                   onStartChat={handleStartChat}
-                  onLater={handleLater}
+
                   onRejected={handleRejected}
                 />
               ))}
@@ -329,25 +368,25 @@ export default function HeartPingListPage() {
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               className="space-y-3"
             >
-              {/* context에서 방금 보낸 하트핑 (pending) */}
-              {sentPings.map((user) => (
-                <SendCard
-                  key={`ctx-${user.id}`}
-                  item={{ id: `ctx-${user.id}`, user, status: 'pending' }}
-                />
-              ))}
-              {/* 기존 Mock 데이터 */}
-              {INITIAL_SENT.map((item) => (
+              {/* API로 조회한 보낸 하트핑 */}
+              {apiSentList.map((item) => (
                 <SendCard
                   key={item.id}
                   item={item}
-                  onOpenChat={(user) => {
-                    setTab('chat');
-                    setActiveChat(user);
-                  }}
+                  onOpenChat={(u) => { setTab('chat'); setActiveChat(u); }}
                 />
               ))}
-              {sentPings.length === 0 && INITIAL_SENT.length === 0 && (
+              {/* 방금 보낸 하트핑 — API 응답 전 optimistic 표시 */}
+              {sentPings
+                .filter(u => !apiSentList.some(s => s.user.id === u.id))
+                .map(u => (
+                  <SendCard
+                    key={`ctx-${u.id}`}
+                    item={{ id: `ctx-${u.id}`, user: u, status: 'pending' }}
+                  />
+                ))
+              }
+              {apiSentList.length === 0 && sentPings.length === 0 && (
                 <EmptyState label="아직 보낸 하트핑이 없어요" />
               )}
             </motion.div>
