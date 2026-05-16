@@ -22,6 +22,29 @@ public class FirebasePushService {
                 .ifPresent(user -> user.updateFcmToken(fcmToken));
     }
 
+    public void sendChatNotification(Long receiverId, Long senderId, String content) {
+        User user = userRepository.findById(receiverId).orElse(null);
+        if (user == null || user.getFcmToken() == null) return;
+
+        String preview = content.length() > 40 ? content.substring(0, 40) + "…" : content;
+
+        Message message = Message.builder()
+                .setToken(user.getFcmToken())
+                .setNotification(Notification.builder()
+                        .setTitle("새 메시지가 도착했어요 💬")
+                        .setBody(preview)
+                        .build())
+                .putData("type", "chat")
+                .putData("senderId", senderId.toString())
+                .build();
+
+        try {
+            FirebaseMessaging.getInstance().send(message);
+        } catch (FirebaseMessagingException e) {
+            // 알림 실패해도 채팅은 정상 동작
+        }
+    }
+
     public void sendMatchNotification(Long kakaoUserId) {
         User user = userRepository.findById(kakaoUserId).orElse(null);
         if (user == null || user.getFcmToken() == null) return;

@@ -7,6 +7,7 @@ import org.example.sumting.entity.Message;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.repository.LikesRepository;
 import org.example.sumting.repository.MessageRepository;
+import org.example.sumting.service.FirebasePushService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,6 +23,7 @@ public class ChatController {
     private final MessageRepository messageRepository;
     private final LikesRepository likesRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final FirebasePushService firebasePushService;
 
     // 클라이언트가 /app/chat.send로 메시지를 전송하면 호출된다.
     // 두 사용자가 MATCHED 상태인지 확인 후 메시지를 저장하고, 발신자와 수신자 모두에게 실시간으로 전달한다.
@@ -51,6 +53,8 @@ public class ChatController {
         // 수신자와 발신자 모두에게 전송
         messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/chat", response);
         messagingTemplate.convertAndSendToUser(receiverId.toString(), "/queue/chat", response);
+
+        firebasePushService.sendChatNotification(receiverId, senderId, dto.getContent());
     }
 
     private Long extractKakaoId(Principal principal) {
