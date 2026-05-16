@@ -117,6 +117,13 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
               )}
             </div>
 
+            {/* 받은 하트핑 안내 */}
+            {user.status === 'received' && (
+              <p className="text-center text-xs font-medium pb-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                💗 이 사람이 나에게 하트핑을 보냈어요!
+              </p>
+            )}
+
             {/* 하단 버튼 영역 */}
             <div className="px-6 pt-2 flex gap-3"
               style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
@@ -131,18 +138,29 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
               >
                 닫기
               </button>
-              <button
-                onClick={() => onSendHeartPing(user)}
-                className="flex-[2] py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
-                style={{
-                  background: '#ffffff',
-                  color: '#C62A47',
-                  boxShadow: '0 8px 24px rgba(198,42,71,0.35)',
-                }}
-              >
-                <Heart size={16} fill="#C62A47" />
-                하트핑 보내기
-              </button>
+              {user.status === 'pending' ? (
+                <button
+                  disabled
+                  className="flex-[2] py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2"
+                  style={{ background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.5)' }}
+                >
+                  <Heart size={16} />
+                  하트핑 보냄 💌
+                </button>
+              ) : (
+                <button
+                  onClick={() => onSendHeartPing(user)}
+                  className="flex-[2] py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
+                  style={{
+                    background: '#ffffff',
+                    color: '#C62A47',
+                    boxShadow: '0 8px 24px rgba(198,42,71,0.35)',
+                  }}
+                >
+                  <Heart size={16} fill="#C62A47" />
+                  하트핑 보내기
+                </button>
+              )}
             </div>
           </motion.div>
         </motion.div>

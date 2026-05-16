@@ -29,6 +29,8 @@ public class HeartpingService {
             throw new IllegalStateException("이미 heartping을 보냈습니다.");
         }
 
+        sender.decrementHeart();
+
         Likes likes = Likes.builder()
                 .sender(sender)
                 .receiver(receiver)

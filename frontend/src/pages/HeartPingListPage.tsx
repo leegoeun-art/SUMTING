@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, MoreHorizontal, Send, Plus, ChevronLeft } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Heart, MoreHorizontal } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import MascotImage from '../components/MascotImage';
 import SumungMascot from '../components/SumungMascot';
 import NavBar from '../utils/NavBar';
-import { GlowBackground, GRADIENT, GLASS, COLORS } from '../utils/background';
-import { RecommendedUser, Message as IMessage } from '../types';
+import { GlowBackground, GLASS } from '../utils/background';
+import { RecommendedUser } from '../types';
 import { DEPARTMENT_MASCOT } from '../constants';
 import Receive from '../components/heartPing/Receive';
 import SendCard from '../components/heartPing/Send';
+import Chatting, { ChattingHandle } from '../components/heartPing/Chatting';
 
-/* ── 하트핑 API 공통 응답 형태 (receive / send 동일 구조) ── */
+/* ── 하트핑 API 공통 응답 형태 ── */
 interface HeartPingApiItem {
   user_id:    string;
   nickname:   string;
@@ -61,151 +61,15 @@ function toSentItem(item: HeartPingApiItem): SentItem {
   };
 }
 
-const INITIAL_CHATS = [
-  {
-    id: 'c1',
-    partner: { id: 'u1', nickname: '달빛토끼', department: '디자인학과', mascotType: 'heart', keywords: [], matchScore: 0 },
-    lastMessage: '맞아요ㅎㅎ 축제 어디서 봐요?',
-    lastTime: '22:17',
-    unread: 1,
-  },
-];
-
-const INITIAL_MESSAGES: IMessage[] = [
-  { id: '1', senderId: 'u1', text: '안녕하세요! 숨팅 매칭됐네요 ✨',       timestamp: '22:14' },
-  { id: '2', senderId: 'me', text: '안녕하세요! 저도 기대하고 있었어요 🌙', timestamp: '22:15' },
-  { id: '3', senderId: 'u1', text: '디자인학과 다니시나요? 작품 보고 싶어요', timestamp: '22:16' },
-  { id: '4', senderId: 'me', text: '맞아요ㅎㅎ 축제 어디서 봐요?',          timestamp: '22:17' },
-];
-
-/* ── 빈 상태 ── */
 function EmptyState({ label }: { label: string }) {
   return (
     <div className="h-56 flex flex-col items-center justify-center">
-      <SumungMascot className="w-24 h-28 mb-3" style={{ opacity: 0.5 }} />
+      <SumungMascot className="w-24 h-28 mb-3 opacity-50" />
       <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{label}</p>
     </div>
   );
 }
 
-/* ── 인라인 채팅 화면 ── */
-function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () => void }) {
-  const [messages, setMessages] = useState<IMessage[]>(INITIAL_MESSAGES);
-  const [input, setInput]       = useState('');
-
-  const send = () => {
-    if (!input.trim()) return;
-    setMessages(prev => [
-      ...prev,
-      {
-        id:        Date.now().toString(),
-        senderId:  'me',
-        text:      input,
-        timestamp: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
-      },
-    ]);
-    setInput('');
-  };
-
-  return (
-    <motion.div
-      key="chat-view"
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      transition={{ type: 'tween', duration: 0.25 }}
-      className="absolute inset-0 z-50 flex flex-col"
-      style={{ background: GRADIENT }}
-    >
-      {/* 헤더 */}
-      <div
-        className="flex items-center px-4 py-3 border-b flex-shrink-0"
-        style={{ borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(198,42,71,0.3)', backdropFilter: 'blur(12px)' }}
-      >
-        <button onClick={onBack} className="p-2 -ml-2 text-white/80">
-          <ChevronLeft size={22} />
-        </button>
-        <div className="flex items-center gap-3 ml-1 flex-1">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
-            <MascotImage type={partner.mascotType} className="w-8 h-8" />
-          </div>
-          <div>
-            <h3 className="font-bold text-sm text-white">{partner.nickname}</h3>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.88)' }}>{partner.department} · 익명 채팅</p>
-          </div>
-        </div>
-        <button className="p-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-          <MoreHorizontal size={20} />
-        </button>
-      </div>
-
-      {/* 메시지 목록 */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        <div className="flex justify-center">
-          <span
-            className="text-[10px] px-3 py-1 rounded-full"
-            style={{ background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.3)' }}
-          >
-            익명으로 보호되는 채팅입니다 🔒
-          </span>
-        </div>
-        {messages.map((m) => (
-          <div key={m.id} className={`flex ${m.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
-            {m.senderId !== 'me' && (
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mr-2 self-end mb-4 flex-shrink-0" style={GLASS.icon}>
-                <MascotImage type={partner.mascotType} className="w-6 h-6" />
-              </div>
-            )}
-            <div className={`flex flex-col gap-1 max-w-[72%] ${m.senderId === 'me' ? 'items-end' : 'items-start'}`}>
-              <div
-                className={`rounded-[20px] px-4 py-2.5 text-sm leading-relaxed ${m.senderId === 'me' ? 'rounded-tr-none' : 'rounded-tl-none'}`}
-                style={
-                  m.senderId === 'me'
-                    ? { background: '#ffffff', color: COLORS.primary, fontWeight: 500 }
-                    : { background: 'rgba(255,255,255,0.25)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)' }
-                }
-              >
-                {m.text}
-              </div>
-              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.70)' }}>{m.timestamp}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 입력창 */}
-      <div
-        className="px-4 py-3 pb-6 flex-shrink-0"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.2)', background: 'rgba(198,42,71,0.2)', backdropFilter: 'blur(12px)' }}
-      >
-        <div
-          className="flex items-center gap-2 rounded-[24px] px-4 py-2"
-          style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)' }}
-        >
-          <button style={{ color: 'rgba(255,255,255,0.80)' }} className="flex-shrink-0"><Plus size={20} /></button>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && send()}
-            placeholder="메시지를 입력하세요"
-            className="flex-1 bg-transparent outline-none text-sm py-2"
-            style={{ color: '#ffffff' }}
-          />
-          <button
-            onClick={send}
-            disabled={!input.trim()}
-            className="p-2 rounded-full flex-shrink-0 transition-all"
-            style={input.trim() ? { background: '#ffffff', color: '#C62A47' } : { color: 'rgba(255,255,255,0.60)' }}
-          >
-            <Send size={16} />
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-/* ── 탭 타입 ── */
 type TabType = 'received' | 'sent' | 'chat';
 
 const TABS: { key: TabType; label: string }[] = [
@@ -214,29 +78,19 @@ const TABS: { key: TabType; label: string }[] = [
   { key: 'chat',     label: '1:1 채팅'  },
 ];
 
-/* ── 채팅 항목 타입 ── */
-interface ChatItem {
-  id: string;
-  partner: RecommendedUser;
-  lastMessage: string;
-  lastTime: string;
-  unread: number;
-}
-
-/* ── 메인 컴포넌트 ── */
 export default function HeartPingListPage() {
-  const { addRejected, sentPings } = useAppContext();
+  const { addRejected, sentPings, setActiveChat } = useAppContext();
   const location = useLocation();
+  const navigate = useNavigate();
   const initialTab = (location.state as { tab?: TabType } | null)?.tab ?? 'received';
+  const chattingRef = useRef<ChattingHandle>(null);
 
   const [tab,          setTab]          = useState<TabType>(initialTab);
-  const [activeChat,   setActiveChat]   = useState<RecommendedUser | null>(null);
   const [receivedList, setReceivedList] = useState<RecommendedUser[]>([]);
   const [apiSentList,  setApiSentList]  = useState<SentItem[]>([]);
-  const [chatList,     setChatList]     = useState<ChatItem[]>(INITIAL_CHATS);
 
-  // GET /api/receiveHeartPing — 받은 하트핑 목록 로드 (PENDING 상태만 표시)
   useEffect(() => {
+    if (tab !== 'received') return;
     fetch('/api/receiveHeartPing', { credentials: 'include' })
       .then(res => (res.ok ? res.json() : []))
       .then((data: HeartPingApiItem[]) =>
@@ -247,41 +101,22 @@ export default function HeartPingListPage() {
         )
       )
       .catch(() => {});
-  }, []);
+  }, [tab]);
 
-  // GET /api/sendHeartPing — 보낸 하트핑 목록 로드
   useEffect(() => {
+    if (tab !== 'sent') return;
     fetch('/api/sendHeartPing', { credentials: 'include' })
       .then(res => (res.ok ? res.json() : []))
       .then((data: HeartPingApiItem[]) => setApiSentList(data.map(toSentItem)))
       .catch(() => {});
-  }, []);
+  }, [tab]);
 
-  /* 1:1 채팅 시작하기 → 채팅 목록 추가 후 채팅 탭으로 이동 */
   const handleStartChat = (user: RecommendedUser) => {
-    // 이미 채팅 목록에 없으면 추가
-    setChatList(prev => {
-      const exists = prev.some(c => c.partner.id === user.id);
-      if (exists) return prev;
-      return [
-        {
-          id:          `c-${user.id}`,
-          partner:     user,
-          lastMessage: '매칭되었어요! 먼저 인사해 보세요 👋',
-          lastTime:    new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
-          unread:      0,
-        },
-        ...prev,
-      ];
-    });
-    // 받은 목록에서 제거
+    chattingRef.current?.addChat(user);
     setReceivedList(prev => prev.filter(u => u.id !== user.id));
-    // 채팅 탭으로 이동 + 채팅 화면 열기
     setTab('chat');
-    setActiveChat(user);
   };
 
-  /* 거절 → 받은 목록에서만 제거 + 24시간 홈 노출 차단 등록 */
   const handleRejected = (id: string) => {
     setReceivedList(prev => prev.filter(u => u.id !== id));
     addRejected(id);
@@ -289,13 +124,6 @@ export default function HeartPingListPage() {
 
   return (
     <GlowBackground>
-
-      {/* 인라인 채팅 화면 */}
-      <AnimatePresence>
-        {activeChat && (
-          <ChatView key="chat-view" partner={activeChat} onBack={() => setActiveChat(null)} />
-        )}
-      </AnimatePresence>
 
       {/* 헤더 */}
       <div className="px-6 pt-6 pb-3 flex items-center justify-between flex-shrink-0 z-10">
@@ -343,7 +171,6 @@ export default function HeartPingListPage() {
       <div className="flex-1 overflow-y-auto px-6 pb-28 z-10">
         <AnimatePresence mode="wait">
 
-          {/* 받은 하트핑 */}
           {tab === 'received' && (
             <motion.div key="received"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
@@ -354,7 +181,6 @@ export default function HeartPingListPage() {
                   key={u.id}
                   user={u}
                   onStartChat={handleStartChat}
-
                   onRejected={handleRejected}
                 />
               ))}
@@ -362,21 +188,18 @@ export default function HeartPingListPage() {
             </motion.div>
           )}
 
-          {/* 보낸 하트핑 */}
           {tab === 'sent' && (
             <motion.div key="sent"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               className="space-y-3"
             >
-              {/* API로 조회한 보낸 하트핑 */}
               {apiSentList.map((item) => (
                 <SendCard
                   key={item.id}
                   item={item}
-                  onOpenChat={(u) => { setTab('chat'); setActiveChat(u); }}
+                  onOpenChat={(u) => { setActiveChat({ id: `c-${u.id}`, partner: u, unreadCount: 0 }); navigate('/chat'); }}
                 />
               ))}
-              {/* 방금 보낸 하트핑 — API 응답 전 optimistic 표시 */}
               {sentPings
                 .filter(u => !apiSentList.some(s => s.user.id === u.id))
                 .map(u => (
@@ -392,38 +215,11 @@ export default function HeartPingListPage() {
             </motion.div>
           )}
 
-          {/* 1:1 채팅 목록 */}
           {tab === 'chat' && (
             <motion.div key="chat"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-              className="space-y-3"
             >
-              {chatList.map((chat) => (
-                <button key={chat.id}
-                  onClick={() => setActiveChat(chat.partner)}
-                  className="w-full flex items-center gap-4 p-4 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                  style={GLASS.card}
-                >
-                  <div className="relative flex-shrink-0">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
-                      <MascotImage type={chat.partner.mascotType} className="w-11 h-11" />
-                    </div>
-                    {chat.unread > 0 && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: '#ffffff' }}>
-                        <span className="text-[8px] font-bold" style={{ color: '#C62A47' }}>{chat.unread}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-bold text-white text-sm">{chat.partner.nickname}</h4>
-                      <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.72)' }}>{chat.lastTime}</span>
-                    </div>
-                    <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.82)' }}>{chat.lastMessage}</p>
-                  </div>
-                </button>
-              ))}
-              {chatList.length === 0 && <EmptyState label="아직 채팅이 없어요" />}
+              <Chatting ref={chattingRef} />
             </motion.div>
           )}
 

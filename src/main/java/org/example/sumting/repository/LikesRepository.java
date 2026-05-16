@@ -4,6 +4,7 @@ import org.example.sumting.entity.Likes;
 import org.example.sumting.entity.User;
 import org.example.sumting.enums.LikeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -33,4 +34,12 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     // 특정 유저의 모든 매칭 목록 조회
     @Query("SELECT l FROM Likes l WHERE l.status = :status AND (l.sender.id = :userId OR l.receiver.id = :userId)")
     List<Likes> findAllMatchedByUserId(@Param("userId") Long userId, @Param("status") LikeStatus status);
+
+    // 두 유저 사이의 likes 상태를 일괄 변경 (방향 무관)
+    @Modifying
+    @Query("UPDATE Likes l SET l.status = :newStatus WHERE l.status = :oldStatus AND " +
+           "((l.sender.id = :a AND l.receiver.id = :b) OR (l.sender.id = :b AND l.receiver.id = :a))")
+    int updateStatusBetween(@Param("a") Long a, @Param("b") Long b,
+                            @Param("oldStatus") LikeStatus oldStatus,
+                            @Param("newStatus") LikeStatus newStatus);
 }

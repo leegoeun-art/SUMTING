@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.sumting.dto.ChatMessageResponseDto;
 import org.example.sumting.dto.MatchedPartnerDto;
 import org.example.sumting.enums.LikeStatus;
+import org.example.sumting.entity.Report;
 import org.example.sumting.repository.LikesRepository;
 import org.example.sumting.repository.MessageRepository;
+import org.example.sumting.repository.ReportRepository;
 import org.example.sumting.repository.UserProfileRepository;
 import org.example.sumting.service.CoupleService;
 import org.example.sumting.service.HeartpingService;
@@ -16,12 +18,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import org.example.sumting.entity.Message;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +45,7 @@ public class Maincontroller {
     private final UserProfileRepository userProfileRepository;
     private final LikesRepository likesRepository;
     private final MessageRepository messageRepository;
+    private final ReportRepository reportRepository;
 
     /*
     // 현재 로그인한 사용자의 프로필 정보를 반환한다. 프로필이 없으면 204 No Content를 반환한다.
@@ -141,6 +148,34 @@ public class Maincontroller {
         return ResponseEntity.ok(messages);
     }
 
+    // 상대방을 신고하고 차단한다. 신고 사유를 저장하고 likes 상태를 EXITED로 변경한다.
+    @PostMapping("/chat/report")
+    @Transactional
+    public ResponseEntity<?> reportUser(
+            @RequestParam Long partnerId,
+            @RequestParam String reason,
+            @AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        reportRepository.save(Report.builder()
+                .reporterId(myId)
+                .reportedId(partnerId)
+                .reason(reason)
+                .build());
+        likesRepository.updateStatusBetween(myId, partnerId, LikeStatus.MATCHED, LikeStatus.EXITED);
+        return ResponseEntity.ok().build();
+    }
+
+    // 채팅방을 나가면 두 유저 사이의 likes 상태를 EXITED로 변경한다.
+    @PostMapping("/chat/leave")
+    @Transactional
+    public ResponseEntity<?> leaveChat(
+            @RequestParam Long partnerId,
+            @AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        likesRepository.updateStatusBetween(myId, partnerId, LikeStatus.MATCHED, LikeStatus.EXITED);
+        return ResponseEntity.ok().build();
+    }
+
     // 현재 사용자와 MATCHED 상태인 모든 상대방 목록을 조회한다.
     @GetMapping("/chat/matches")
     public ResponseEntity<List<MatchedPartnerDto>> getMatches(@AuthenticationPrincipal OAuth2User oAuth2User) {
@@ -150,7 +185,12 @@ public class Maincontroller {
             .map(l -> {
                 Long partnerId = l.getSender().getId().equals(myId) ? l.getReceiver().getId() : l.getSender().getId();
                 return userProfileRepository.findByUserId(partnerId)
-                    .map(p -> new MatchedPartnerDto(String.valueOf(partnerId), p.getNickName(), p.getDepartment(), "default"))
+                    .map(p -> {
+                        List<Message> msgs = messageRepository.findLastMessage(myId, partnerId, PageRequest.of(0, 1));
+                        String lastMessage = msgs.isEmpty() ? null : msgs.get(0).getContent();
+                        String lastTime = msgs.isEmpty() ? null : msgs.get(0).getCreatedAt().toString();
+                        return new MatchedPartnerDto(String.valueOf(partnerId), p.getNickName(), p.getDepartment(), "default", lastMessage, lastTime);
+                    })
                     .orElse(null);
             })
             .filter(Objects::nonNull)

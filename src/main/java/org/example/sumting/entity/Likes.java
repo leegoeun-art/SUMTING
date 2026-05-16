@@ -37,7 +37,7 @@ public class Likes {
     private User receiver;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('PENDING', 'MATCHED', 'REJECTED') DEFAULT 'PENDING'")
+    @Column(columnDefinition = "ENUM('PENDING', 'MATCHED', 'REJECTED', 'EXITED') DEFAULT 'PENDING'")
     private LikeStatus status = LikeStatus.PENDING;
 
     @Column(name = "created_at", insertable = false, updatable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")

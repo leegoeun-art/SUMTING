@@ -10,4 +10,6 @@ public class MatchedPartnerDto {
     private String nickname;
     private String department;
     private String mascotType;
+    private String lastMessage;
+    private String lastTime;
 }

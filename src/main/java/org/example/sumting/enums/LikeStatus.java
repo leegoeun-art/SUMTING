@@ -1,5 +1,5 @@
 package org.example.sumting.enums;
 
 public enum LikeStatus {
-    PENDING, MATCHED, REJECTED
+    PENDING, MATCHED, REJECTED, EXITED
 }

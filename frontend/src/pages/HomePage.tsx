@@ -24,6 +24,7 @@ interface CouplesApiItem {
   my_kw1:     string | null;
   my_kw2:     string | null;
   my_kw3:     string | null;
+  status:     string;
 }
 
 /** API 응답 → RecommendedUser 변환 */
@@ -35,6 +36,7 @@ function toRecommendedUser(item: CouplesApiItem): RecommendedUser {
     keywords:   [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
     mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
     matchScore: 0,
+    status:     (item.status as RecommendedUser['status']) ?? 'none',
   };
 }
 
@@ -46,7 +48,7 @@ function computeMatchScore(theirKeywords: string[], myIdealKeywords: string[]): 
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user, rejectedUsers, sentPings, addSentPing } = useAppContext();
+  const { user, rejectedUsers, addSentPing, setActiveChat } = useAppContext();
   const [timeLeft,        setTimeLeft]        = useState('');
   const [modalUser,       setModalUser]       = useState<RecommendedUser | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendedUser[]>([]);
@@ -84,7 +86,7 @@ export default function HomePage() {
     console.log(recommendations);
   }, []);
 
-  // 하트핑 보내기 — API 호출 + context 등록 + 하트핑 탭으로 이동
+  // 하트핑 보내기 — API 호출 + 상태 낙관적 업데이트 + 하트핑 탭으로 이동
   const handleSendHeartPing = (u: RecommendedUser) => {
     if (heartRemaining === 0) {
       alert('오늘의 하트핑을 다 사용하셨습니다!');
@@ -98,12 +100,12 @@ export default function HomePage() {
         body: JSON.stringify({ senderId: Number(user.id), receiverId: Number(u.id) }),
       }).catch(() => {});
     }
+    setRecommendations(prev => prev.map(r => r.id === u.id ? { ...r, status: 'pending' as const } : r));
     addSentPing(u);
     setModalUser(null);
     navigate('/heartpings', { state: { tab: 'sent' } });
   };
 
-  const sentIds = new Set(sentPings.map(u => u.id));
   const heartRemaining = user?.heart ?? DAILY_LIMIT;
   const usedToday = DAILY_LIMIT - heartRemaining;
 
@@ -117,7 +119,6 @@ export default function HomePage() {
   const visibleRecommendations = recommendations
     .map(u => ({ ...u, matchScore: computeMatchScore(u.keywords, idealKeywords) }))
     .filter(u => {
-      if (sentIds.has(u.id)) return false;
       const rejectedAt = rejectedUsers[u.id];
       if (!rejectedAt) return true;
       return now - rejectedAt >= MS_24H;
@@ -252,14 +253,41 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                onClick={() => setModalUser(u)}
+                onClick={() => {
+                  if (u.status === 'matched') {
+                    setActiveChat({ id: `c-${u.id}`, partner: u, unreadCount: 0 });
+                    navigate('/chat');
+                  } else {
+                    setModalUser(u);
+                  }
+                }}
                 className="group relative rounded-[32px] p-6 transition-all active:scale-[0.98]"
                 style={GLASS.card}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
-                    style={GLASS.icon}>
-                    <MascotImage type={u.mascotType} className="w-16 h-16" />
+                  <div className="relative flex-shrink-0">
+                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                      style={GLASS.icon}>
+                      <MascotImage type={u.mascotType} className="w-16 h-16" />
+                    </div>
+                    {u.status === 'matched' && (
+                      <span className="absolute -top-2 -right-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(255,255,255,0.95)', color: '#C62A47', boxShadow: '0 2px 8px rgba(198,42,71,0.3)' }}>
+                        ✨ 매칭
+                      </span>
+                    )}
+                    {u.status === 'received' && (
+                      <span className="absolute -top-2 -right-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: '#C62A47', color: '#ffffff', boxShadow: '0 2px 8px rgba(198,42,71,0.4)' }}>
+                        💗 받음
+                      </span>
+                    )}
+                    {u.status === 'pending' && (
+                      <span className="absolute -top-2 -right-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.4)' }}>
+                        💌 보냄
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">

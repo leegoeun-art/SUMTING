@@ -58,6 +58,11 @@ export default defineConfig(({mode}) => {
           target: 'http://localhost:8080',
           changeOrigin: true,
         },
+        '/api': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+          // 필요한 경우 주소 뒤의 쿼리 스트링(?partnerId=...)까지 안전하게 전달합니다.
+        }
       },
     },
   };

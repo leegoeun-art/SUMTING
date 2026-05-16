@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Send, Plus } from 'lucide-react';
+import { ChevronLeft, Send, Plus, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import { Client } from '@stomp/stompjs';
 import { useAppContext } from '../context/AppContext';
 import { Message as IMessage } from '../types';
 import MascotImage from '../components/MascotImage';
+import { GRADIENT, GLASS, COLORS } from '../utils/background';
 
 interface ChatMessageResponse {
   id: number;
@@ -24,9 +26,9 @@ function formatTime(isoStr: string): string {
 
 function toDisplayMessage(m: ChatMessageResponse, kakaoId: string | null): IMessage {
   return {
-    id: m.id.toString(),
-    senderId: m.senderId.toString() === kakaoId ? 'me' : m.senderId.toString(),
-    text: m.content,
+    id:        m.id.toString(),
+    senderId:  m.senderId.toString() === kakaoId ? 'me' : m.senderId.toString(),
+    text:      m.content,
     timestamp: formatTime(m.createdAt),
   };
 }
@@ -34,35 +36,42 @@ function toDisplayMessage(m: ChatMessageResponse, kakaoId: string | null): IMess
 export default function ChatPage() {
   const navigate = useNavigate();
   const { activeChat, kakaoId } = useAppContext();
-  const [messages, setMessages] = useState<IMessage[]>([]);
-  const [input, setInput] = useState('');
-  const stompClientRef = useRef<Client | null>(null);
+  const [messages, setMessages]     = useState<IMessage[]>([]);
+  const [input, setInput]           = useState('');
+  const [menuOpen, setMenuOpen]         = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [reportStep, setReportStep]     = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const stompClientRef              = useRef<Client | null>(null);
+  const bottomRef                   = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!activeChat) return;
+    localStorage.setItem(`sumting_chat_read_${activeChat.id}`, new Date().toISOString());
+  }, [activeChat?.id]);
 
+  useEffect(() => {
+    if (!activeChat) return;
     const partnerId = activeChat.partner.id;
 
-    // 채팅 내역 로드
     fetch(`/api/chat/messages?partnerId=${partnerId}`, { credentials: 'include' })
-      .then(res => res.ok ? res.json() : [])
-      .then((data: ChatMessageResponse[]) => {
-        setMessages(data.map(m => toDisplayMessage(m, kakaoId)));
-      })
+      .then(res => (res.ok ? res.json() : []))
+      .then((data: ChatMessageResponse[]) =>
+        setMessages(data.map(m => toDisplayMessage(m, kakaoId)))
+      )
       .catch(() => {});
 
-    // WebSocket 연결
     const client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
       onConnect: () => {
         client.subscribe('/user/queue/chat', frame => {
           const msg: ChatMessageResponse = JSON.parse(frame.body);
-          // 현재 열려있는 채팅 상대의 메시지만 표시
           if (
             msg.senderId.toString() === partnerId ||
             msg.receiverId.toString() === partnerId
           ) {
             setMessages(prev => [...prev, toDisplayMessage(msg, kakaoId)]);
+            localStorage.setItem(`sumting_chat_read_${activeChat.id}`, new Date().toISOString());
           }
         });
       },
@@ -77,10 +86,32 @@ export default function ChatPage() {
     };
   }, [activeChat?.partner.id, kakaoId]);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   if (!activeChat) {
-    navigate('/home');
+    navigate('/heartpings');
     return null;
   }
+
+  const closeMenu = () => { setMenuOpen(false); setConfirmLeave(false); setReportStep(false); setReportReason(''); };
+
+  const handleReport = async () => {
+    await fetch(
+      `/api/chat/report?partnerId=${activeChat.partner.id}&reason=${encodeURIComponent(reportReason)}`,
+      { method: 'POST', credentials: 'include' }
+    );
+    navigate('/heartpings', { state: { tab: 'chat' } });
+  };
+
+  const handleLeave = async () => {
+    await fetch(`/api/chat/leave?partnerId=${activeChat.partner.id}`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    navigate('/heartpings', { state: { tab: 'chat' } });
+  };
 
   const send = () => {
     if (!input.trim() || !stompClientRef.current?.connected) return;
@@ -92,65 +123,206 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="h-full w-full bg-[#0a0a0a] flex flex-col">
-      {/* Header */}
-      <div className="p-4 flex items-center border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-10">
-        <button onClick={() => navigate('/home')} className="p-2 -ml-2 text-gray-400"><ChevronLeft /></button>
-        <div className="flex items-center gap-3 ml-2">
-          <div className="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center">
+    <div className="h-full w-full flex flex-col relative" style={{ background: GRADIENT }}>
+      {/* 헤더 */}
+      <div
+        className="flex items-center px-4 py-3 border-b flex-shrink-0"
+        style={{ borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(255,140,120,0.3)', backdropFilter: 'blur(12px)' }}
+      >
+        <button onClick={() => navigate('/heartpings', { state: { tab: 'chat' } })} className="p-2 -ml-2 text-white/80">
+          <ChevronLeft size={22} />
+        </button>
+        <div className="flex items-center gap-3 ml-1 flex-1">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
             <MascotImage type={activeChat.partner.mascotType} className="w-8 h-8" />
           </div>
           <div>
             <h3 className="font-bold text-sm text-white">{activeChat.partner.nickname}</h3>
-            <p className="text-[10px] text-gray-500">{activeChat.partner.department}</p>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.88)' }}>{activeChat.partner.department} · 익명 채팅</p>
           </div>
         </div>
+        <button onClick={() => setMenuOpen(true)} className="p-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <MoreHorizontal size={20} />
+        </button>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      {/* 메시지 목록 */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <div className="flex justify-center">
-          <span className="text-[10px] bg-white/5 text-gray-500 px-3 py-1 rounded-full border border-white/5">
-            익명 대화가 시작되었습니다 (48시간 후 폭파)
+          <span
+            className="text-[10px] px-3 py-1 rounded-full"
+            style={{ background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.3)' }}
+          >
+            익명으로 보호되는 채팅입니다 🔒
           </span>
         </div>
 
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[75%] rounded-[24px] px-4 py-3 text-sm ${
-              m.senderId === 'me'
-              ? 'bg-purple-600 text-white rounded-tr-none'
-              : 'bg-[#1a1a1a] text-gray-200 rounded-tl-none border border-gray-800'
-            }`}>
-              {m.text}
-              <div className={`text-[9px] mt-1 opacity-50 ${m.senderId === 'me' ? 'text-right' : 'text-left'}`}>
-                {m.timestamp}
+            {m.senderId !== 'me' && (
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center mr-2 self-end mb-4 flex-shrink-0" style={GLASS.icon}>
+                <MascotImage type={activeChat.partner.mascotType} className="w-6 h-6" />
               </div>
+            )}
+            <div className={`flex flex-col gap-1 max-w-[72%] ${m.senderId === 'me' ? 'items-end' : 'items-start'}`}>
+              <div
+                className={`rounded-[20px] px-4 py-2.5 text-sm leading-relaxed ${m.senderId === 'me' ? 'rounded-tr-none' : 'rounded-tl-none'}`}
+                style={
+                  m.senderId === 'me'
+                    ? { background: '#ffffff', color: COLORS.primary, fontWeight: 500 }
+                    : { background: 'rgba(255,255,255,0.25)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)' }
+                }
+              >
+                {m.text}
+              </div>
+              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.70)' }}>{m.timestamp}</span>
             </div>
           </div>
         ))}
+        <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 bg-[#0a0a0a] border-t border-gray-800 pb-10">
-        <div className="flex items-center gap-3 bg-[#1a1a1a] rounded-[24px] px-4 py-2 border border-gray-800 focus-within:border-gray-600 transition-colors">
-          <button className="text-gray-500"><Plus size={20} /></button>
+      {/* 입력창 */}
+      <div
+        className="px-4 py-3 pb-6 flex-shrink-0"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,140,120,0.2)', backdropFilter: 'blur(12px)' }}
+      >
+        <div
+          className="flex items-center gap-2 rounded-[24px] px-4 py-2"
+          style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)' }}
+        >
+          <button style={{ color: 'rgba(255,255,255,0.80)' }} className="flex-shrink-0">
+            <Plus size={20} />
+          </button>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && send()}
+            onKeyDown={(e) => e.key === 'Enter' && send()}
             placeholder="메시지를 입력하세요"
-            className="flex-1 bg-transparent border-none outline-none text-sm text-white py-2"
+            className="flex-1 bg-transparent outline-none text-sm py-2"
+            style={{ color: '#ffffff' }}
           />
           <button
             onClick={send}
             disabled={!input.trim()}
-            className={`p-2 rounded-full ${input.trim() ? 'bg-white text-black' : 'text-gray-600'}`}
+            className="p-2 rounded-full flex-shrink-0 transition-all"
+            style={input.trim() ? { background: '#ffffff', color: COLORS.primary } : { color: 'rgba(255,255,255,0.60)' }}
           >
-            <Send size={18} />
+            <Send size={16} />
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <>
+            {/* 오버레이 */}
+            <motion.div
+              className="absolute inset-0 z-20"
+              style={{ background: 'rgba(0,0,0,0.45)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={closeMenu}
+            />
+
+            {/* 바텀시트 */}
+            <motion.div
+              className="absolute bottom-0 left-0 right-0 z-30 rounded-t-3xl"
+              style={{
+                background: 'rgba(220,80,80,0.92)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.25)',
+              }}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {reportStep ? (
+                <div className="flex flex-col py-2">
+                  <div className="w-10 h-1 rounded-full mx-auto mt-3 mb-1" style={{ background: 'rgba(255,255,255,0.35)' }} />
+                  <p className="text-white font-bold text-sm text-center py-3">신고 사유를 선택해주세요</p>
+                  {['욕설 / 비방', '불쾌한 내용', '스팸', '기타'].map((reason) => (
+                    <button
+                      key={reason}
+                      className="w-full px-6 py-3.5 text-left text-sm font-medium active:bg-white/10 flex items-center justify-between"
+                      style={{ color: reportReason === reason ? '#ffffff' : 'rgba(255,255,255,0.75)' }}
+                      onClick={() => setReportReason(reason)}
+                    >
+                      <span>{reason}</span>
+                      {reportReason === reason && <span className="text-base">✓</span>}
+                    </button>
+                  ))}
+                  <div className="flex gap-3 px-6 mt-3 pb-8">
+                    <button
+                      className="flex-1 py-3 rounded-2xl text-sm font-bold"
+                      style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff' }}
+                      onClick={() => { setReportStep(false); setReportReason(''); }}
+                    >
+                      취소
+                    </button>
+                    <button
+                      className="flex-1 py-3 rounded-2xl text-sm font-bold"
+                      style={reportReason
+                        ? { background: '#ffffff', color: COLORS.primary }
+                        : { background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.4)' }}
+                      disabled={!reportReason}
+                      onClick={handleReport}
+                    >
+                      신고하기
+                    </button>
+                  </div>
+                </div>
+              ) : !confirmLeave ? (
+                <div className="flex flex-col py-2">
+                  <div className="w-10 h-1 rounded-full mx-auto mt-3 mb-3" style={{ background: 'rgba(255,255,255,0.35)' }} />
+                  <button
+                    className="w-full px-6 py-4 text-left text-sm font-medium text-white active:bg-white/10"
+                    onClick={() => setReportStep(true)}
+                  >
+                    차단 및 신고
+                  </button>
+                  <div style={{ height: 1, background: 'rgba(255,255,255,0.18)', margin: '0 24px' }} />
+                  <button
+                    className="w-full px-6 py-4 text-left text-sm font-medium active:bg-white/10"
+                    style={{ color: '#FFD0C8' }}
+                    onClick={() => setConfirmLeave(true)}
+                  >
+                    방 나가기
+                  </button>
+                  <div className="pb-6" />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center px-6 pt-6 pb-8 gap-3">
+                  <div className="w-10 h-1 rounded-full mb-1" style={{ background: 'rgba(255,255,255,0.35)' }} />
+                  <p className="font-bold text-white text-base text-center">채팅방을 나가시겠어요?</p>
+                  <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    나가면 이 채팅방은 목록에서 사라져요
+                  </p>
+                  <div className="flex gap-3 w-full mt-3">
+                    <button
+                      className="flex-1 py-3 rounded-2xl text-sm font-bold"
+                      style={{ background: 'rgba(255,255,255,0.2)', color: '#ffffff' }}
+                      onClick={closeMenu}
+                    >
+                      취소
+                    </button>
+                    <button
+                      className="flex-1 py-3 rounded-2xl text-sm font-bold"
+                      style={{ background: '#ffffff', color: COLORS.primary }}
+                      onClick={handleLeave}
+                    >
+                      나가기
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -30,4 +30,13 @@ public class User {
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
     }
+
+    public void decrementHeart() {
+        if (this.heart <= 0) throw new IllegalStateException("하트가 부족합니다.");
+        this.heart--;
+    }
+
+    public void resetHeart() {
+        this.heart = 5;
+    }
 }
