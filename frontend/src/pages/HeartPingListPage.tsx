@@ -51,7 +51,7 @@ function EmptyState({ label }: { label: string }) {
   return (
     <div className="h-56 flex flex-col items-center justify-center">
       <SumungMascot className="w-24 h-28 mb-3" style={{ opacity: 0.5 }} />
-      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>
+      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{label}</p>
     </div>
   );
 }
@@ -99,7 +99,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
           </div>
           <div>
             <h3 className="font-bold text-sm text-white">{partner.nickname}</h3>
-            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.65)' }}>{partner.department} · 익명 채팅</p>
+            <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.88)' }}>{partner.department} · 익명 채팅</p>
           </div>
         </div>
         <button className="p-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
@@ -135,7 +135,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
               >
                 {m.text}
               </div>
-              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{m.timestamp}</span>
+              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.70)' }}>{m.timestamp}</span>
             </div>
           </div>
         ))}
@@ -150,7 +150,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
           className="flex items-center gap-2 rounded-[24px] px-4 py-2"
           style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)' }}
         >
-          <button style={{ color: 'rgba(255,255,255,0.6)' }} className="flex-shrink-0"><Plus size={20} /></button>
+          <button style={{ color: 'rgba(255,255,255,0.80)' }} className="flex-shrink-0"><Plus size={20} /></button>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -163,7 +163,7 @@ function ChatView({ partner, onBack }: { partner: RecommendedUser; onBack: () =>
             onClick={send}
             disabled={!input.trim()}
             className="p-2 rounded-full flex-shrink-0 transition-all"
-            style={input.trim() ? { background: '#ffffff', color: '#C62A47' } : { color: 'rgba(255,255,255,0.4)' }}
+            style={input.trim() ? { background: '#ffffff', color: '#C62A47' } : { color: 'rgba(255,255,255,0.60)' }}
           >
             <Send size={16} />
           </button>
@@ -278,7 +278,7 @@ export default function HeartPingListPage() {
               />
             ))}
           </div>
-          <button style={{ color: 'rgba(255,255,255,0.7)' }}><MoreHorizontal size={20} /></button>
+          <button style={{ color: 'rgba(255,255,255,0.85)' }}><MoreHorizontal size={20} /></button>
         </div>
       </div>
 
@@ -292,7 +292,7 @@ export default function HeartPingListPage() {
               className="flex-1 py-2.5 text-xs font-bold rounded-xl transition-all"
               style={tab === key
                 ? { background: '#ffffff', color: '#C62A47', boxShadow: '0 4px 12px rgba(198,42,71,0.25)' }
-                : { color: 'rgba(255,255,255,0.65)' }}
+                : { color: 'rgba(255,255,255,0.85)' }}
             >
               {label}
             </button>
@@ -378,9 +378,9 @@ export default function HeartPingListPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="font-bold text-white text-sm">{chat.partner.nickname}</h4>
-                      <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{chat.lastTime}</span>
+                      <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.72)' }}>{chat.lastTime}</span>
                     </div>
-                    <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>{chat.lastMessage}</p>
+                    <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.82)' }}>{chat.lastMessage}</p>
                   </div>
                 </button>
               ))}

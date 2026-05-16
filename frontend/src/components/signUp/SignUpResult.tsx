@@ -1,5 +1,25 @@
 import { motion } from 'motion/react';
-import SumungMascot from '../SumungMascot';
+import { DEPARTMENT_MASCOT } from '../../constants';
+
+import imgBasic      from '../../assets/basic.png';
+import imgBusiness   from '../../assets/business.png';
+import imgComputer   from '../../assets/computer.png';
+import imgArt        from '../../assets/art.png';
+import imgMusic      from '../../assets/music.png';
+import imgSport      from '../../assets/sport.png';
+import imgRibbonBoy  from '../../assets/ribbonboy.png';
+import imgRibbonGirl from '../../assets/ribbongirl.png';
+
+const MASCOT_IMAGES: Record<string, string> = {
+  basic:      imgBasic,
+  business:   imgBusiness,
+  computer:   imgComputer,
+  art:        imgArt,
+  music:      imgMusic,
+  sport:      imgSport,
+  ribbonboy:  imgRibbonBoy,
+  ribbongirl: imgRibbonGirl,
+};
 
 interface Props {
   nickname: string;
@@ -9,6 +29,9 @@ interface Props {
 }
 
 export default function SignUpResult({ nickname, department, keywords, onEnter }: Props) {
+  const mascotKey = DEPARTMENT_MASCOT[department] ?? 'basic';
+  const mascotSrc = MASCOT_IMAGES[mascotKey];
+
   return (
     <div
       className="h-full w-full flex flex-col items-center relative overflow-hidden"
@@ -32,7 +55,7 @@ export default function SignUpResult({ nickname, department, keywords, onEnter }
           캐릭터 생성 완료
         </motion.p>
 
-        {/* 마스코트 원형 */}
+        {/* 마스코트 원형 — 학과별 수뭉이 */}
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -40,7 +63,11 @@ export default function SignUpResult({ nickname, department, keywords, onEnter }
           className="w-32 h-32 rounded-full flex items-center justify-center mb-5"
           style={{ background: 'rgba(255,255,255,0.25)', border: '2px solid rgba(255,255,255,0.4)' }}
         >
-          <SumungMascot className="w-24 h-24" />
+          <img
+            src={mascotSrc}
+            alt={`${department} 수뭉이`}
+            className="w-24 h-24 object-contain"
+          />
         </motion.div>
 
         {/* 닉네임 */}

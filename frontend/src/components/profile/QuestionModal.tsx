@@ -114,8 +114,8 @@ function FaqRow({ item }: { item: FaqItem }) {
       >
         <span className="text-sm font-medium text-white pr-3 leading-snug">{item.q}</span>
         {open
-          ? <ChevronUp  size={16} style={{ color: 'rgba(255,255,255,0.55)', flexShrink: 0 }} />
-          : <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.55)', flexShrink: 0 }} />
+          ? <ChevronUp  size={16} style={{ color: 'rgba(255,255,255,0.78)', flexShrink: 0 }} />
+          : <ChevronDown size={16} style={{ color: 'rgba(255,255,255,0.78)', flexShrink: 0 }} />
         }
       </button>
       <AnimatePresence initial={false}>
@@ -128,7 +128,7 @@ function FaqRow({ item }: { item: FaqItem }) {
           >
             <p
               className="px-4 pb-4 text-xs leading-relaxed"
-              style={{ color: 'rgba(255,255,255,0.65)' }}
+              style={{ color: 'rgba(255,255,255,0.88)' }}
             >
               {item.a}
             </p>
@@ -180,7 +180,7 @@ export default function QuestionModal({ visible, onClose }: QuestionModalProps) 
                 {/* 카테고리 레이블 */}
                 <p
                   className="text-[11px] font-bold uppercase tracking-widest mb-2 ml-1"
-                  style={{ color: 'rgba(255,255,255,0.55)' }}
+                  style={{ color: 'rgba(255,255,255,0.82)' }}
                 >
                   {section.category}
                 </p>

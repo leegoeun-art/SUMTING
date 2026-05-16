@@ -57,7 +57,7 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
                 </div>
                 {/* 매치 점수 뱃지 */}
                 <div
-                  className="absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full text-[11px] font-extrabold"
+                  className="font-numeral absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full text-[11px] font-bold"
                   style={{
                     background: '#ffffff',
                     color: '#C62A47',
@@ -70,15 +70,15 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
 
               {/* 이름 + 학과 */}
               <h2 className="text-xl font-extrabold text-white mb-1">{user.nickname}</h2>
-              <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.88)' }}>
                 {user.department}
               </p>
 
               {/* 매칭률 바 */}
               <div className="w-full mb-5">
-                <div className="flex justify-between text-[10px] mb-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                <div className="flex justify-between text-[10px] mb-1.5" style={{ color: 'rgba(255,255,255,0.82)' }}>
                   <span>키워드 매칭률</span>
-                  <span className="font-bold text-white">{user.matchScore}%</span>
+                  <span className="font-numeral font-bold text-white">{user.matchScore}%</span>
                 </div>
                 <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.2)' }}>
                   <motion.div
@@ -95,7 +95,7 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
               {user.keywords.length > 0 && (
                 <div className="w-full">
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-2 ml-1"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    style={{ color: 'rgba(255,255,255,0.78)' }}>
                     키워드
                   </p>
                   <div className="flex flex-wrap gap-2">

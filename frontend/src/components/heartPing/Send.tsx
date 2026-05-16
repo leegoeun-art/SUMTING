@@ -30,7 +30,7 @@ export default function Send({ item, onOpenChat }: SendProps) {
 
       <div className="flex-1 min-w-0">
         <h4 className="font-bold text-white text-sm">{item.user.nickname}</h4>
-        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
           {item.user.department}
         </p>
       </div>

@@ -44,7 +44,7 @@ export default function SuccessModal({ user, onStartChat, onClose, visible }: Su
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles size={16} className="text-yellow-300" />
                 <span className="text-xs font-bold tracking-widest uppercase"
-                  style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  style={{ color: 'rgba(255,255,255,0.92)' }}>
                   매칭 성공
                 </span>
                 <Sparkles size={16} className="text-yellow-300" />
@@ -71,7 +71,7 @@ export default function SuccessModal({ user, onStartChat, onClose, visible }: Su
                 </div>
                 {/* 매칭 점수 뱃지 */}
                 <div
-                  className="absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full text-[11px] font-extrabold"
+                  className="font-numeral absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full text-[11px] font-bold"
                   style={{
                     background: '#ffffff',
                     color: '#C62A47',
@@ -85,7 +85,7 @@ export default function SuccessModal({ user, onStartChat, onClose, visible }: Su
               {/* 닉네임 + 학과 */}
               <div className="text-center">
                 <h3 className="text-xl font-bold text-white">{user.nickname}</h3>
-                <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.88)' }}>
                   {user.department}
                 </p>
               </div>
@@ -112,9 +112,9 @@ export default function SuccessModal({ user, onStartChat, onClose, visible }: Su
               {/* 매칭 설명 */}
               <div
                 className="w-full px-4 py-3 rounded-2xl text-center text-xs"
-                style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}
+                style={{ background: 'rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.88)' }}
               >
-                키워드 {user.matchScore}% 일치 · 익명으로 보호되는 채팅 🔒
+                키워드 <span className="font-numeral">{user.matchScore}%</span> 일치 · 익명으로 보호되는 채팅 🔒
               </div>
             </div>
 
@@ -135,7 +135,7 @@ export default function SuccessModal({ user, onStartChat, onClose, visible }: Su
               <button
                 onClick={onClose}
                 className="w-full py-3 rounded-2xl text-sm font-medium transition-all active:scale-[0.97]"
-                style={{ color: 'rgba(255,255,255,0.55)' }}
+                style={{ color: 'rgba(255,255,255,0.80)' }}
               >
                 나중에 하기
               </button>

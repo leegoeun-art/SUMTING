@@ -87,7 +87,7 @@ export default function HomePage() {
       <div className="z-10 px-6 pt-5 pb-2 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <SumungMascot className="w-10 h-11" />
-          <h1 className="text-xl font-bold tracking-tight text-white">SUMTING</h1>
+          <h1 className="font-display text-xl font-bold tracking-tight text-white">SUMTING</h1>
         </div>
         <div className="flex gap-4">
           <button onClick={() => navigate('/heartpings')} className="relative p-2 text-white/80 hover:text-white">
@@ -104,10 +104,10 @@ export default function HomePage() {
             style={GLASS.cardLight}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.75)' }}>숨팅 종료까지</p>
+                <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.90)' }}>숨팅 종료까지</p>
                 <div className="flex items-center gap-2">
                   <Clock size={14} className="text-pink-400" />
-                  <span className="text-3xl font-mono font-bold text-white tracking-tighter">
+                  <span className="font-numeral text-3xl font-bold text-white tracking-tighter">
                     {timeLeft}
                   </span>
                 </div>
@@ -137,7 +137,7 @@ export default function HomePage() {
               className="text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff' }}
             >
-              {DAILY_LIMIT - usedToday}개 남음
+              <span className="font-numeral">{DAILY_LIMIT - usedToday}</span>개 남음
             </span>
           </div>
 
@@ -160,7 +160,7 @@ export default function HomePage() {
             })}
           </div>
 
-          <p className="text-[10px] mt-2.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <p className="text-[10px] mt-2.5" style={{ color: 'rgba(255,255,255,0.80)' }}>
             축제 3일간 최대 15개 · 하루 {DAILY_LIMIT}개 한도
           </p>
         </motion.div>
@@ -190,11 +190,11 @@ export default function HomePage() {
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
                       <h4 className="font-bold text-lg text-white">{u.nickname}</h4>
-                      <span className="text-xs font-bold text-white bg-white/25 px-2 py-1 rounded-full">
+                      <span className="font-numeral text-xs font-bold text-white bg-white/25 px-2 py-1 rounded-full">
                         {u.matchScore}% Match
                       </span>
                     </div>
-                    <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.65)' }}>{u.department}</p>
+                    <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.88)' }}>{u.department}</p>
                     <div className="flex flex-wrap gap-2">
                       {u.keywords.map(k => (
                         <span key={k} className="text-[10px] px-2 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)' }}>

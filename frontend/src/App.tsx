@@ -24,14 +24,14 @@ function AnimatedRoutes() {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="sync">
       <motion.div
         key={location.pathname}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="h-full w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: 'easeInOut' }}
+        className="h-full w-full absolute inset-0"
       >
         <Routes location={location}>
           <Route path="/" element={<StartPage />} />
@@ -52,7 +52,7 @@ function AnimatedRoutes() {
 
 export default function App() {
   return (
-    <div className="h-screen w-full max-w-[430px] mx-auto bg-black overflow-hidden relative font-sans text-white">
+    <div className="h-screen w-full max-w-[430px] mx-auto overflow-hidden relative font-sans text-white" style={{ background: '#FF7B8A' }}>
       <AnimatedRoutes />
     </div>
   );

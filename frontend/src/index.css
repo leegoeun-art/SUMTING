@@ -4,6 +4,16 @@ html, body, * {
   font-family: 'Gowun Dodum', sans-serif !important;
 }
 
+/* 영문 브랜딩 (SUMTING 타이틀 등) */
+.font-display {
+  font-family: 'Playfair Display', serif !important;
+}
+
+/* 숫자·타이머 전용 */
+.font-numeral {
+  font-family: 'Space Mono', monospace !important;
+}
+
 @keyframes heartBlink {
   0%, 100% { opacity: 1;    }
   50%       { opacity: 0.08; }

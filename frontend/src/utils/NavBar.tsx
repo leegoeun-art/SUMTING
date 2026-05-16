@@ -41,13 +41,13 @@ export default function NavBar() {
                 <Icon
                   size={20}
                   strokeWidth={isActive ? 2.5 : 1.8}
-                  style={{ color: isActive ? '#C62A47' : 'rgba(255,255,255,0.6)' }}
+                  style={{ color: isActive ? '#C62A47' : 'rgba(255,255,255,0.82)' }}
                   fill={isActive && path === '/heartpings' ? 'currentColor' : 'none'}
                 />
               </div>
               <span
                 className="text-[10px] mt-1 font-medium"
-                style={{ color: isActive ? '#ffffff' : 'rgba(255,255,255,0.55)' }}
+                style={{ color: isActive ? '#ffffff' : 'rgba(255,255,255,0.80)' }}
               >
                 {label}
               </span>

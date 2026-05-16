@@ -68,7 +68,7 @@ export default function StartPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="text-4xl font-extrabold text-white tracking-tight mb-1"
+          className="font-display text-4xl font-bold text-white tracking-tight mb-1"
         >
           SUMTING
         </motion.h1>

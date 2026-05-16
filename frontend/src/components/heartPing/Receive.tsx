@@ -56,7 +56,7 @@ export default function Receive({ user, onStartChat, onLater, onRejected }: Rece
         {/* 정보 */}
         <div className="flex-1 min-w-0">
           <h4 className="font-bold text-white text-sm">{user.nickname}</h4>
-          <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.88)' }}>
             {user.department}
           </p>
           <div className="flex flex-wrap gap-1">
@@ -126,7 +126,7 @@ export default function Receive({ user, onStartChat, onLater, onRejected }: Rece
               {/* 텍스트 */}
               <div className="text-center">
                 <p className="font-bold text-white text-base mb-1">하트핑을 거절할까요?</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.80)' }}>
                   거절하면 되돌릴 수 없어요
                 </p>
               </div>

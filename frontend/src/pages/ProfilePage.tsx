@@ -20,10 +20,13 @@ export default function ProfilePage() {
     navigate('/');
   };
 
-  if (!user) {
-    navigate('/');
-    return null;
-  }
+  // user가 없으면 골격 UI 표시 (로그인은 됐지만 프로필 미완성 or 로딩 중)
+  const displayUser = user ?? {
+    nickname: '익명의 수뭉이',
+    department: '학과 미등록',
+    age: 0,
+    height: 0,
+  };
 
   return (
     <GlowBackground>
@@ -45,24 +48,28 @@ export default function ProfilePage() {
             />
             <SumungMascot className="w-40 h-44 relative" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-1">{user.nickname || '익명의 수뭉이'}</h2>
-          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.7)' }}>{user.department}</p>
+          <h2 className="text-2xl font-bold text-white mb-1">{displayUser.nickname || '익명의 수뭉이'}</h2>
+          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.88)' }}>{displayUser.department}</p>
 
           <div className="flex gap-3">
-            <div
-              className="px-8 py-3 rounded-2xl text-center"
-              style={GLASS.cardLight}
-            >
-              <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.65)' }}>나이</span>
-              <span className="font-bold text-white text-sm">{user.age}세</span>
-            </div>
-            <div
-              className="px-8 py-3 rounded-2xl text-center"
-              style={GLASS.cardLight}
-            >
-              <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.65)' }}>키</span>
-              <span className="font-bold text-white text-sm">{user.height}cm</span>
-            </div>
+            {displayUser.age > 0 && (
+              <div
+                className="px-8 py-3 rounded-2xl text-center"
+                style={GLASS.cardLight}
+              >
+                <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.85)' }}>나이</span>
+                <span className="font-bold text-white text-sm"><span className="font-numeral">{displayUser.age}</span>세</span>
+              </div>
+            )}
+            {displayUser.height > 0 && (
+              <div
+                className="px-8 py-3 rounded-2xl text-center"
+                style={GLASS.cardLight}
+              >
+                <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.85)' }}>키</span>
+                <span className="font-bold text-white text-sm"><span className="font-numeral">{displayUser.height}</span>cm</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -70,7 +77,7 @@ export default function ProfilePage() {
         <div className="px-6 space-y-5">
           <section>
             <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
-              style={{ color: 'rgba(255,255,255,0.55)' }}>
+              style={{ color: 'rgba(255,255,255,0.80)' }}>
               계정 설정
             </h3>
             <div
@@ -83,7 +90,7 @@ export default function ProfilePage() {
 
           <section>
             <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
-              style={{ color: 'rgba(255,255,255,0.55)' }}>
+              style={{ color: 'rgba(255,255,255,0.80)' }}>
               고객지원
             </h3>
             <div
@@ -97,7 +104,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-10 text-center pb-4">
-          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>SUMTING Version 1.0.0 (Beta)</p>
+          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.62)' }}>SUMTING Version 1.0.0 (Beta)</p>
         </div>
       </div>
 
@@ -118,7 +125,7 @@ function MenuItem({
       className="w-full flex items-center gap-4 px-6 py-4 active:bg-white/10 transition-colors"
       style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}
     >
-      <div style={{ color: danger ? '#ffb3b3' : 'rgba(255,255,255,0.65)' }}>{icon}</div>
+      <div style={{ color: danger ? '#ffb3b3' : 'rgba(255,255,255,0.85)' }}>{icon}</div>
       <span
         className="text-sm font-medium"
         style={{ color: danger ? '#ffb3b3' : '#ffffff' }}

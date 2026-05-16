@@ -13,7 +13,6 @@ interface AppContextType {
   isFinished: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
-  logout: () => void;
   /** userId → 거절한 시각(ms) 맵 */
   rejectedUsers: Record<string, number>;
   /** 거절 처리 — localStorage에 저장하여 새로고침 후에도 유지 */
@@ -22,6 +21,8 @@ interface AppContextType {
   sentPings: RecommendedUser[];
   /** 하트핑 보내기 */
   addSentPing: (user: RecommendedUser) => void;
+  /** 로그아웃 — user/kakaoId 초기화 */
+  logout: () => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -64,6 +65,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setKakaoId(null);
     setIsAuthenticated(false);
+    setSentPings([]);
+    setRejectedUsers({});
+    localStorage.removeItem('sumting_rejected');
   };
 
   useEffect(() => {

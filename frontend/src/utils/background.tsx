@@ -3,19 +3,19 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import heartLottieUrl from '../assets/heart.lottie?url';
 
 export const COLORS = {
-  primary:     '#C62A47',
-  primaryMid:  '#F07085',
-  primaryPale: '#FFC4C4',
+  primary:     '#FF7B8A',  // 웜 로즈 핑크
+  primaryMid:  '#FFB3BA',  // 웜 파스텔 핑크
+  primaryPale: '#FFE0E4',  // 웜 블러쉬
   kakao:       '#FEE500',
 } as const;
 
-export const GRADIENT = 'linear-gradient(160deg, #C62A47 0%, #F07085 50%, #FFC4C4 100%)';
+export const GRADIENT = 'linear-gradient(160deg, #FF7B8A 0%, #FFB3BA 55%, #FFE0E4 100%)';
 
 // 자주 쓰이는 glass-morphism 스타일
 export const GLASS = {
-  card:      { background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)' },
-  cardLight: { background: 'rgba(255,255,255,0.2)',  border: '1px solid rgba(255,255,255,0.35)' },
-  icon:      { background: 'rgba(255,255,255,0.25)' },
+  card:      { background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)' },
+  cardLight: { background: 'rgba(255,255,255,0.28)', border: '1px solid rgba(255,255,255,0.42)' },
+  icon:      { background: 'rgba(255,255,255,0.30)' },
 } as const;
 
 // ── 하트 Lottie 배경 (StartPage 전용) ──────────────────────────
