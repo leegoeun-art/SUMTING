@@ -1,7 +1,6 @@
 package org.example.sumting.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.sumting.dto.HeartPingDto;
 import org.example.sumting.entity.Likes;
 import org.example.sumting.entity.User;
 import org.example.sumting.enums.LikeStatus;
@@ -19,11 +18,11 @@ public class HeartpingService {
     private final FirebasePushService firebasePushService;
 
     @Transactional
-    public void saveHeartPing(HeartPingDto heartPingDto) {
-        User sender = userRepository.findById(heartPingDto.getSenderId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다: " + heartPingDto.getSenderId()));
-        User receiver = userRepository.findById(heartPingDto.getReceiverId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다: " + heartPingDto.getReceiverId()));
+    public void saveHeartPing(Long senderId, Long receiverId) {
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다: " + senderId));
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다: " + receiverId));
 
         if (likesRepository.findBySenderAndReceiver(sender, receiver).isPresent()) {
             throw new IllegalStateException("이미 heartping을 보냈습니다.");

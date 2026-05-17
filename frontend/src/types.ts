@@ -20,7 +20,7 @@ export interface RecommendedUser {
   department: string;
   keywords: string[];
   matchScore: number;
-  status?: 'none' | 'pending' | 'received' | 'matched';
+  status?: 'none' | 'pending' | 'received' | 'matched' | 'exited' | 'rejected';
 }
 
 export interface Message {

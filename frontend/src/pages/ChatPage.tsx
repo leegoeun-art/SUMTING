@@ -10,8 +10,8 @@ import { GRADIENT, GLASS, COLORS } from '../utils/background';
 
 interface ChatMessageResponse {
   id: number;
-  senderId: number;
-  receiverId: number;
+  senderId: string;
+  receiverId: string;
   content: string;
   createdAt: string;
   isRead: boolean;
@@ -28,7 +28,7 @@ function formatTime(isoStr: string): string {
 function toDisplayMessage(m: ChatMessageResponse, kakaoId: string | null): IMessage {
   return {
     id:        m.id.toString(),
-    senderId:  m.senderId.toString() === kakaoId ? 'me' : m.senderId.toString(),
+    senderId:  m.senderId === kakaoId ? 'me' : m.senderId,
     text:      m.content,
     timestamp: formatTime(m.createdAt),
     isRead:    m.isRead,
@@ -49,14 +49,14 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!activeChat) return;
-    fetch(`/api/chat/read?partnerId=${activeChat.partner.id}`, { method: 'POST', credentials: 'include' });
+    fetch(`/api/chat/read?partnerUuid=${activeChat.partner.id}`, { method: 'POST', credentials: 'include' });
   }, [activeChat?.id]);
 
   useEffect(() => {
     if (!activeChat) return;
-    const partnerId = activeChat.partner.id;
+    const partnerUuid = activeChat.partner.id;
 
-    fetch(`/api/chat/messages?partnerId=${partnerId}`, { credentials: 'include' })
+    fetch(`/api/chat/messages?partnerUuid=${partnerUuid}`, { credentials: 'include' })
       .then(res => (res.ok ? res.json() : []))
       .then((data: ChatMessageResponse[]) =>
         setMessages(data.map(m => toDisplayMessage(m, kakaoId)))
@@ -69,11 +69,11 @@ export default function ChatPage() {
         client.subscribe('/user/queue/chat', frame => {
           const msg: ChatMessageResponse = JSON.parse(frame.body);
           if (
-            msg.senderId.toString() === partnerId ||
-            msg.receiverId.toString() === partnerId
+            msg.senderId === partnerUuid ||
+            msg.receiverId === partnerUuid
           ) {
             setMessages(prev => [...prev, toDisplayMessage(msg, kakaoId)]);
-            fetch(`/api/chat/read?partnerId=${partnerId}`, { method: 'POST', credentials: 'include' });
+            fetch(`/api/chat/read?partnerUuid=${partnerUuid}`, { method: 'POST', credentials: 'include' });
           }
         });
 
@@ -107,14 +107,14 @@ export default function ChatPage() {
 
   const handleReport = async () => {
     await fetch(
-      `/api/chat/report?partnerId=${activeChat.partner.id}&reason=${encodeURIComponent(reportReason)}`,
+      `/api/chat/report?partnerUuid=${activeChat.partner.id}&reason=${encodeURIComponent(reportReason)}`,
       { method: 'POST', credentials: 'include' }
     );
     navigate('/heartpings', { state: { tab: 'chat' } });
   };
 
   const handleLeave = async () => {
-    await fetch(`/api/chat/leave?partnerId=${activeChat.partner.id}`, {
+    await fetch(`/api/chat/leave?partnerUuid=${activeChat.partner.id}`, {
       method: 'POST',
       credentials: 'include',
     });
@@ -125,7 +125,7 @@ export default function ChatPage() {
     if (!input.trim() || !stompClientRef.current?.connected) return;
     stompClientRef.current.publish({
       destination: '/app/chat.send',
-      body: JSON.stringify({ receiverId: activeChat.partner.id, content: input }),
+      body: JSON.stringify({ receiverUuid: activeChat.partner.id, content: input }),
     });
     setInput('');
   };

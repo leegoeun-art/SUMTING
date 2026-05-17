@@ -2,8 +2,9 @@ package org.example.sumting.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.sumting.dto.HeartPingDto;
-import org.example.sumting.dto.ModifyHeartPingDto;
 import org.example.sumting.dto.SentHeartPingDto;
+import org.example.sumting.entity.User;
+import org.example.sumting.repository.UserRepository;
 import org.example.sumting.service.HeartpingService;
 import org.example.sumting.service.LoadHeartpingService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,12 +20,16 @@ public class HeartPingController {
 
     private final HeartpingService heartpingService;
     private final LoadHeartpingService loadHeartpingService;
+    private final UserRepository userRepository;
 
-
-    // 상대방에게 하트핑(좋아요)을 전송하고 Likes 엔티티를 저장한다.
+    // 상대방에게 하트핑(좋아요)을 전송한다. senderId는 서버 세션에서 추출한다.
     @PostMapping("/heartPing")
-    public void heartping(@RequestBody HeartPingDto heartPingDto){
-        heartpingService.saveHeartPing(heartPingDto);
+    public void heartping(@AuthenticationPrincipal OAuth2User oAuth2User,
+                          @RequestBody HeartPingDto heartPingDto) {
+        Long senderId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        User receiver = userRepository.findByUuid(heartPingDto.getReceiverUuid())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        heartpingService.saveHeartPing(senderId, receiver.getId());
     }
 
     // 현재 로그인한 사용자가 받은 하트핑 목록을 조회한다.
@@ -41,23 +46,23 @@ public class HeartPingController {
         return loadHeartpingService.loadSend(userId);
     }
 
-    // 상대방의 하트핑을 승인하고 MATCHED 상태로 전환된다
+    // 받은 하트핑을 수락하고 MATCHED 상태로 전환한다.
     @PostMapping("approveHeartPing")
-    public void approveHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User, @RequestBody Long senderId) {
-        Long userId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
-        heartpingService.approveHeartPing(userId, senderId);
+    public void approveHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User,
+                                 @RequestBody String senderUuid) {
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        User sender = userRepository.findByUuid(senderUuid)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        heartpingService.approveHeartPing(myId, sender.getId());
     }
 
-    // 상대방의 하트핑을 승인하고 REJECTED 상태로 전환된다
+    // 받은 하트핑을 거절하고 REJECTED 상태로 전환한다.
     @PostMapping("rejectHeartPing")
-    public void rejectHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User, @RequestBody Long senderId) {
-        Long userId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
-        heartpingService.rejectHeartPing(userId, senderId);
-    }
-
-    // 받은 하트핑의 수락/거절 상태를 변경한다. (미구현)
-    @PostMapping("/modifyHeartPing")
-    public void ModifyHeartPing(@RequestBody ModifyHeartPingDto modifyHeartPingDto){
-
+    public void rejectHeartPing(@AuthenticationPrincipal OAuth2User oAuth2User,
+                                @RequestBody String senderUuid) {
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        User sender = userRepository.findByUuid(senderUuid)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        heartpingService.rejectHeartPing(myId, sender.getId());
     }
 }

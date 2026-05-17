@@ -1,8 +1,10 @@
 CREATE TABLE users (
                        id BIGINT PRIMARY KEY COMMENT '카카오 고유 식별번호',
+                       uuid CHAR(36) NOT NULL UNIQUE COMMENT '내부 공개용 식별자 (UUID)',
                        heart INT DEFAULT 5 COMMENT '보유한 하트 개수',
                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '가입 일시'
 );
+-- 신규 유저 삽입 시 uuid는 애플리케이션에서 생성하여 저장해야 합니다.
 
 -- 2. 유저 프로필 및 키워드 테이블
 -- 1:1 관계를 통합하여 조회 성능 최적화

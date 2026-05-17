@@ -10,8 +10,8 @@ import { DEPARTMENT_MASCOT } from '../../constants';
 
 interface ChatMessageResponse {
   id: number;
-  senderId: number;
-  receiverId: number;
+  senderId: string;
+  receiverId: string;
   content: string;
   createdAt: string;
 }
@@ -88,7 +88,7 @@ const Chatting = forwardRef<ChattingHandle, ChattingProps>((_props, ref) => {
       onConnect: () => {
         client.subscribe('/user/queue/chat', frame => {
           const msg: ChatMessageResponse = JSON.parse(frame.body);
-          if (msg.senderId.toString() === kakaoId) return;
+          if (msg.senderId === kakaoId) return;
 
           const chatId = `c-${msg.senderId}`;
           setChatList(prev =>

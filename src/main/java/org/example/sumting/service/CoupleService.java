@@ -5,10 +5,13 @@ import org.example.sumting.dto.couples.ResponseCouplesDto;
 import org.example.sumting.entity.User;
 import org.example.sumting.entity.UserProfile;
 import org.example.sumting.repository.LikesRepository;
+import org.example.sumting.repository.ReportRepository;
 import org.example.sumting.repository.UserProfileRepository;
 import org.example.sumting.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +25,9 @@ public class CoupleService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final LikesRepository likesRepository;
+    private final ReportRepository reportRepository;
 
+    @Transactional(readOnly = true)
     public List<ResponseCouplesDto> loadCouples(Long userId) {
         UserProfile myProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -50,7 +55,12 @@ public class CoupleService {
                         l -> l.getStatus().name().toLowerCase()
                 ));
 
-        return userProfileRepository.findMatchingCouples(userId, myProfile.getGender(), myKws)
+        List<Long> excluded = new ArrayList<>();
+        excluded.addAll(reportRepository.findReportedIdsByReporterId(userId));
+        excluded.addAll(reportRepository.findReporterIdsByReportedId(userId));
+        if (excluded.isEmpty()) excluded.add(-1L);
+
+        return userProfileRepository.findMatchingCouples(userId, myProfile.getGender(), myKws, excluded)
                 .stream()
                 .map(up -> {
                     Long partnerId = up.getUserId();
@@ -59,6 +69,10 @@ public class CoupleService {
                     String status;
                     if ("matched".equals(out) || "matched".equals(in)) {
                         status = "matched";
+                    } else if ("exited".equals(out) || "exited".equals(in)) {
+                        status = "exited";
+                    } else if ("rejected".equals(out) || "rejected".equals(in)) {
+                        status = "rejected";
                     } else if ("pending".equals(in)) {
                         status = "received";
                     } else if ("pending".equals(out)) {
@@ -67,7 +81,7 @@ public class CoupleService {
                         status = "none";
                     }
                     return new ResponseCouplesDto(
-                            String.valueOf(partnerId),
+                            up.getUser().getUuid(),
                             up.getNickName(),
                             up.getDepartment(),
                             up.getMyKw1(),

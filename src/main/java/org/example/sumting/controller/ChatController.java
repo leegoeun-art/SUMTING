@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.example.sumting.dto.ChatMessageDto;
 import org.example.sumting.dto.ChatMessageResponseDto;
 import org.example.sumting.entity.Message;
+import org.example.sumting.entity.User;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.repository.LikesRepository;
 import org.example.sumting.repository.MessageRepository;
+import org.example.sumting.repository.UserRepository;
 import org.example.sumting.service.FirebasePushService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -22,16 +24,17 @@ public class ChatController {
 
     private final MessageRepository messageRepository;
     private final LikesRepository likesRepository;
+    private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final FirebasePushService firebasePushService;
 
-    // 클라이언트가 /app/chat.send로 메시지를 전송하면 호출된다.
-    // 두 사용자가 MATCHED 상태인지 확인 후 메시지를 저장하고, 발신자와 수신자 모두에게 실시간으로 전달한다.
     @MessageMapping("/chat.send")
     @Transactional
     public void send(@Payload ChatMessageDto dto, Principal principal) {
         Long senderId = extractKakaoId(principal);
-        Long receiverId = dto.getReceiverId();
+        User receiver = userRepository.findByUuid(dto.getReceiverUuid())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        Long receiverId = receiver.getId();
 
         if (!likesRepository.existsMatchBetween(senderId, receiverId, LikeStatus.MATCHED)) {
             return;
@@ -45,12 +48,16 @@ public class ChatController {
                 .build()
         );
 
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+        String senderUuid = sender.getUuid();
+        String receiverUuid = receiver.getUuid();
+
         ChatMessageResponseDto response = new ChatMessageResponseDto(
-            saved.getId(), saved.getSenderId(), saved.getReceiverId(),
+            saved.getId(), senderUuid, receiverUuid,
             saved.getContent(), saved.getCreatedAt(), false
         );
 
-        // 수신자와 발신자 모두에게 전송
         messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/chat", response);
         messagingTemplate.convertAndSendToUser(receiverId.toString(), "/queue/chat", response);
 

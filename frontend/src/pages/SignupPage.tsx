@@ -12,7 +12,7 @@ type View = 'profile' | 'myKeyword' | 'yourKeyword' | 'result';
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { kakaoId } = useAppContext();
+  const { kakaoId, setUser } = useAppContext();
 
   const [view, setView] = useState<View>('profile');
   const [profileData, setProfileData] = useState<SignupData | null>(null);
@@ -96,6 +96,11 @@ export default function SignupPage() {
 
   const handleEnter = async () => {
     await registerPushToken();
+    const res = await fetch('/api/me', { credentials: 'include', cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.department) setUser(data);
+    }
     navigate('/home');
   };
 

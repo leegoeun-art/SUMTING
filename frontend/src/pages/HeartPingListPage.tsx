@@ -32,7 +32,7 @@ interface HeartPingApiItem {
 interface SentItem {
   id:     string;
   user:   RecommendedUser;
-  status: 'accepted' | 'pending';
+  status: 'accepted' | 'pending' | 'rejected';
 }
 
 function toReceivedUser(item: HeartPingApiItem): RecommendedUser {
@@ -57,7 +57,11 @@ function toSentItem(item: HeartPingApiItem): SentItem {
       mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
       matchScore: 0,
     },
-    status: item.status?.toUpperCase() === 'MATCHED' ? 'accepted' : 'pending',
+    status: item.status?.toUpperCase() === 'MATCHED'
+      ? 'accepted'
+      : (item.status?.toUpperCase() === 'REJECTED' || item.status?.toUpperCase() === 'EXITED')
+        ? 'rejected'
+        : 'pending',
   };
 }
 

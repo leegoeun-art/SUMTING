@@ -29,8 +29,10 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     // 본인(userId)을 제외하고, 반대 성별이면서 상대방이 원하는 키워드(yourKw1~3)가
     // 내 키워드(myKws)와 하나라도 일치하는 유저 목록 반환 (커플 매칭 후보 조회)
     @Query("SELECT up FROM UserProfile up WHERE up.userId != :userId AND up.gender != :gender " +
-           "AND (up.yourKw1 IN :myKws OR up.yourKw2 IN :myKws OR up.yourKw3 IN :myKws)")
+           "AND (up.yourKw1 IN :myKws OR up.yourKw2 IN :myKws OR up.yourKw3 IN :myKws) " +
+           "AND up.userId NOT IN :excludedIds")
     List<UserProfile> findMatchingCouples(@Param("userId") Long userId,
                                           @Param("gender") Gender gender,
-                                          @Param("myKws") List<String> myKws);
+                                          @Param("myKws") List<String> myKws,
+                                          @Param("excludedIds") List<Long> excludedIds);
 }

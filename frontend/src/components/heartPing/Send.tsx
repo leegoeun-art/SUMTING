@@ -1,4 +1,4 @@
-import { Check, Clock } from 'lucide-react';
+import { Check, Clock, X } from 'lucide-react';
 import { RecommendedUser } from '../../types';
 import MascotImage from '../MascotImage';
 import { GLASS } from '../../utils/background';
@@ -6,7 +6,7 @@ import { GLASS } from '../../utils/background';
 interface SendItem {
   id: string;
   user: RecommendedUser;
-  status: 'accepted' | 'pending';
+  status: 'accepted' | 'pending' | 'rejected';
 }
 
 interface SendProps {
@@ -44,6 +44,13 @@ export default function Send({ item, onOpenChat }: SendProps) {
           >
             <Check size={12} strokeWidth={3} /> 수락됨
           </button>
+        ) : item.status === 'rejected' ? (
+          <span
+            className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full"
+            style={{ background: 'rgba(255,100,100,0.2)', color: 'rgba(255,150,150,0.9)' }}
+          >
+            <X size={12} strokeWidth={3} /> 거절됨
+          </span>
         ) : (
           <span
             className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full"

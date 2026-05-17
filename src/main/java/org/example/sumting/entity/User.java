@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -14,6 +15,9 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     private Long id; // 카카오 고유 식별번호 (Primary Key)
+
+    @Column(name = "uuid", updatable = false, nullable = false, unique = true)
+    private String uuid;
 
     private int heart = 5;
 
@@ -25,6 +29,7 @@ public class User {
     @Builder
     public User(Long id) {
         this.id = id;
+        this.uuid = UUID.randomUUID().toString();
     }
 
     public void updateFcmToken(String fcmToken) {

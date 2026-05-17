@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HeartPingDto {
-    private Long senderId;
-    private Long receiverId;
+    private String receiverUuid;
 }

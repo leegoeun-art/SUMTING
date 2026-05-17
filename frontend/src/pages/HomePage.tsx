@@ -48,7 +48,7 @@ function computeMatchScore(theirKeywords: string[], myIdealKeywords: string[]): 
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user, rejectedUsers, addSentPing, setActiveChat } = useAppContext();
+  const { user, setUser, rejectedUsers, addSentPing, setActiveChat } = useAppContext();
   const [timeLeft,        setTimeLeft]        = useState('');
   const [modalUser,       setModalUser]       = useState<RecommendedUser | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendedUser[]>([]);
@@ -86,20 +86,29 @@ export default function HomePage() {
     console.log(recommendations);
   }, []);
 
-  // 하트핑 보내기 — API 호출 + 상태 낙관적 업데이트 + 하트핑 탭으로 이동
-  const handleSendHeartPing = (u: RecommendedUser) => {
-    if (heartRemaining === 0) {
+  // 하트핑 보내기 — API 성공 후에만 UI 업데이트
+  const handleSendHeartPing = async (u: RecommendedUser) => {
+    if (!user || user.heart <= 0) {
       alert('오늘의 하트핑을 다 사용하셨습니다!');
       return;
     }
-    if (user) {
-      fetch('/api/heartPing', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senderId: Number(user.id), receiverId: Number(u.id) }),
-      }).catch(() => {});
+
+    const res = await fetch('/api/heartPing', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receiverUuid: u.id }),
+    }).catch(() => null);
+
+    if (!res || !res.ok) {
+      const msg = res?.status === 409
+        ? await res.text().catch(() => '하트가 부족합니다.')
+        : '오류가 발생했습니다. 다시 시도해주세요.';
+      alert(msg);
+      return;
     }
+
+    setUser(prev => prev ? { ...prev, heart: prev.heart - 1 } : prev);
     setRecommendations(prev => prev.map(r => r.id === u.id ? { ...r, status: 'pending' as const } : r));
     addSentPing(u);
     setModalUser(null);
@@ -286,6 +295,12 @@ export default function HomePage() {
                       <span className="absolute -top-2 -right-2 text-xs font-bold px-2 py-0.5 rounded-full"
                         style={{ background: 'rgba(255,255,255,0.25)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.4)' }}>
                         💌 보냄
+                      </span>
+                    )}
+                    {(u.status === 'exited' || u.status === 'rejected') && (
+                      <span className="absolute -top-2 -right-2 text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.25)' }}>
+                        ✗ 거절
                       </span>
                     )}
                   </div>

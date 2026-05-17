@@ -6,6 +6,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ChatMessageDto {
-    private Long receiverId;
+    private String receiverUuid;
     private String content;
 }

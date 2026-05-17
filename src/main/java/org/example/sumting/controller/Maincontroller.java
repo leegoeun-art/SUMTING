@@ -6,10 +6,12 @@ import org.example.sumting.dto.MatchedPartnerDto;
 import org.example.sumting.dto.ReadReceiptDto;
 import org.example.sumting.enums.LikeStatus;
 import org.example.sumting.entity.Report;
+import org.example.sumting.entity.User;
 import org.example.sumting.repository.LikesRepository;
 import org.example.sumting.repository.MessageRepository;
 import org.example.sumting.repository.ReportRepository;
 import org.example.sumting.repository.UserProfileRepository;
+import org.example.sumting.repository.UserRepository;
 import org.example.sumting.service.CoupleService;
 import org.example.sumting.service.HeartpingService;
 import org.example.sumting.service.FirebasePushService;
@@ -48,6 +50,7 @@ public class Maincontroller {
     private final LikesRepository likesRepository;
     private final MessageRepository messageRepository;
     private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     /*
@@ -139,17 +142,25 @@ public class Maincontroller {
     @GetMapping("/chat/messages")
     @Transactional
     public ResponseEntity<List<ChatMessageResponseDto>> getChatMessages(
-            @RequestParam Long partnerId,
+            @RequestParam String partnerUuid,
             @AuthenticationPrincipal OAuth2User oAuth2User) {
         Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        User partner = userRepository.findByUuid(partnerUuid).orElse(null);
+        if (partner == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        Long partnerId = partner.getId();
         if (!likesRepository.existsMatchBetween(myId, partnerId, LikeStatus.MATCHED)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         messageRepository.markAsRead(myId, partnerId);
         messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId));
+        String myUuid = userRepository.findById(myId).map(User::getUuid).orElse("");
         List<ChatMessageResponseDto> messages = messageRepository.findConversation(myId, partnerId)
             .stream()
-            .map(m -> new ChatMessageResponseDto(m.getId(), m.getSenderId(), m.getReceiverId(), m.getContent(), m.getCreatedAt(), m.isRead()))
+            .map(m -> {
+                String senderUuid = m.getSenderId().equals(myId) ? myUuid : partnerUuid;
+                String receiverUuid = m.getReceiverId().equals(myId) ? myUuid : partnerUuid;
+                return new ChatMessageResponseDto(m.getId(), senderUuid, receiverUuid, m.getContent(), m.getCreatedAt(), m.isRead());
+            })
             .toList();
         return ResponseEntity.ok(messages);
     }
@@ -158,9 +169,12 @@ public class Maincontroller {
     @PostMapping("/chat/read")
     @Transactional
     public ResponseEntity<?> markChatAsRead(
-            @RequestParam Long partnerId,
+            @RequestParam String partnerUuid,
             @AuthenticationPrincipal OAuth2User oAuth2User) {
         Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        User partner = userRepository.findByUuid(partnerUuid).orElse(null);
+        if (partner == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        Long partnerId = partner.getId();
         messageRepository.markAsRead(myId, partnerId);
         messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId));
         return ResponseEntity.ok().build();
@@ -170,10 +184,13 @@ public class Maincontroller {
     @PostMapping("/chat/report")
     @Transactional
     public ResponseEntity<?> reportUser(
-            @RequestParam Long partnerId,
+            @RequestParam String partnerUuid,
             @RequestParam String reason,
             @AuthenticationPrincipal OAuth2User oAuth2User) {
         Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        User partner = userRepository.findByUuid(partnerUuid)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        Long partnerId = partner.getId();
         reportRepository.save(Report.builder()
                 .reporterId(myId)
                 .reportedId(partnerId)
@@ -187,15 +204,18 @@ public class Maincontroller {
     @PostMapping("/chat/leave")
     @Transactional
     public ResponseEntity<?> leaveChat(
-            @RequestParam Long partnerId,
+            @RequestParam String partnerUuid,
             @AuthenticationPrincipal OAuth2User oAuth2User) {
         Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
-        likesRepository.updateStatusBetween(myId, partnerId, LikeStatus.MATCHED, LikeStatus.EXITED);
+        User partner = userRepository.findByUuid(partnerUuid)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        likesRepository.updateStatusBetween(myId, partner.getId(), LikeStatus.MATCHED, LikeStatus.EXITED);
         return ResponseEntity.ok().build();
     }
 
     // 현재 사용자와 MATCHED 상태인 모든 상대방 목록을 조회한다.
     @GetMapping("/chat/matches")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<MatchedPartnerDto>> getMatches(@AuthenticationPrincipal OAuth2User oAuth2User) {
         Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
         List<MatchedPartnerDto> partners = likesRepository.findAllMatchedByUserId(myId, LikeStatus.MATCHED)
@@ -208,7 +228,7 @@ public class Maincontroller {
                         String lastMessage = msgs.isEmpty() ? null : msgs.get(0).getContent();
                         String lastTime = msgs.isEmpty() ? null : msgs.get(0).getCreatedAt().toString();
                         long unreadCount = messageRepository.countUnread(myId, partnerId);
-                        return new MatchedPartnerDto(String.valueOf(partnerId), p.getNickName(), p.getDepartment(), "default", lastMessage, lastTime, unreadCount);
+                        return new MatchedPartnerDto(p.getUser().getUuid(), p.getNickName(), p.getDepartment(), "default", lastMessage, lastTime, unreadCount);
                     })
                     .orElse(null);
             })

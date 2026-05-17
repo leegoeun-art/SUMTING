@@ -44,7 +44,7 @@ public class ProfileController {
                     List<String> idealKeywords = Stream.of(p.getYourKw1(), p.getYourKw2(), p.getYourKw3())
                             .filter(Objects::nonNull).toList();
                     return ResponseEntity.ok(new MeResponseDto(
-                            String.valueOf(kakaoId), p.getNickName(), remainHeart, "default",
+                            p.getUser().getUuid(), p.getNickName(), remainHeart, "default",
                             p.getDepartment(), p.getAge(), p.getHeight(),
                             gender, keywords, idealKeywords
                     ));

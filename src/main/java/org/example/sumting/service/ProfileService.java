@@ -68,7 +68,7 @@ public class ProfileService {
 
     @Transactional
     public String saveProfile(ProfileDto dto) {
-        User user = userRepository.findById(Long.parseLong(dto.getUser_id()))
+        User user = userRepository.findByUuid(dto.getUser_id())
                 .orElseThrow(() -> new RuntimeException("User not found: " + dto.getUser_id()));
 
         Gender gender = dto.isGender() ? Gender.M : Gender.F;

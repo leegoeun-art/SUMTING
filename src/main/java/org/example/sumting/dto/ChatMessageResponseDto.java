@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChatMessageResponseDto {
     private Long id;
-    private Long senderId;
-    private Long receiverId;
+    private String senderId;
+    private String receiverId;
     private String content;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

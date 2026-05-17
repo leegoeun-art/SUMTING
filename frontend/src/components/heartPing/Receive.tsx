@@ -22,8 +22,8 @@ export default function Receive({ user, onStartChat, onRejected }: ReceiveProps)
     fetch('/api/approveHeartPing', {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Number(user.id)),
+      headers: { 'Content-Type': 'text/plain' },
+      body: user.id,
     }).catch(() => {});
     setShowSuccess(true);
   };
@@ -34,8 +34,8 @@ export default function Receive({ user, onStartChat, onRejected }: ReceiveProps)
     fetch('/api/rejectHeartPing', {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Number(user.id)),
+      headers: { 'Content-Type': 'text/plain' },
+      body: user.id,
     }).catch(() => {});
     setShowRejectConfirm(false);
     onRejected(user.id);
