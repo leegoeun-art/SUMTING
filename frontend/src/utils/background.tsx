@@ -9,7 +9,7 @@ export const COLORS = {
   kakao:       '#FEE500',
 } as const;
 
-export const GRADIENT = 'linear-gradient(160deg, #FF8C78 0%, #FFB8A5 55%, #FFE2D5 100%)';
+export const GRADIENT = 'linear-gradient(160deg, #FFD8C8 0%, #FFBCA8 35%, #FF9B88 65%, #E87868 100%)';
 
 // 자주 쓰이는 glass-morphism 스타일
 export const GLASS = {
@@ -47,30 +47,30 @@ const HEARTS: HeartDot[] = [
 
 export function LottieHeartBackground() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {HEARTS.map((h) => (
-        <div
-          key={h.id}
-          className="absolute"
-          style={{
-            top:       h.top,
-            left:      h.left,
-            right:     h.right,
-            width:     h.size,
-            height:    h.size,
-            animation: `heartBlink ${h.duration}s ease-in-out ${h.delay}s infinite`,
-            opacity:   h.opacity,
-          }}
-        >
-          <DotLottieReact
-            src={heartLottieUrl}
-            loop
-            autoplay
-            style={{ width: h.size, height: h.size }}
-          />
-        </div>
-      ))}
-    </div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {HEARTS.map((h) => (
+            <div
+                key={h.id}
+                className="absolute"
+                style={{
+                  top:       h.top,
+                  left:      h.left,
+                  right:     h.right,
+                  width:     h.size,
+                  height:    h.size,
+                  animation: `heartBlink ${h.duration}s ease-in-out ${h.delay}s infinite`,
+                  opacity:   h.opacity,
+                }}
+            >
+              <DotLottieReact
+                  src={heartLottieUrl}
+                  loop
+                  autoplay
+                  style={{ width: h.size, height: h.size }}
+              />
+            </div>
+        ))}
+      </div>
   );
 }
 
@@ -82,24 +82,24 @@ interface GlowBackgroundProps {
 
 export function GlowBackground({ children, className = '' }: GlowBackgroundProps) {
   return (
-    <div
-      className={`h-full w-full flex flex-col relative overflow-hidden ${className}`}
-      style={{ background: GRADIENT }}
-    >
       <div
-        className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.25) 0%, transparent 70%)' }}
-      />
-      <div
-        className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }}
-      />
-      {/* 바텀 스크림 — NavBar 가독성 확보 */}
-      <div
-        className="absolute bottom-0 left-0 w-full h-40 pointer-events-none z-10"
-        style={{ background: 'linear-gradient(to top, rgba(100,10,25,0.55) 0%, transparent 100%)' }}
-      />
-      {children}
-    </div>
+          className={`h-full w-full flex flex-col relative overflow-hidden ${className}`}
+          style={{ background: GRADIENT }}
+      >
+        <div
+            className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.25) 0%, transparent 70%)' }}
+        />
+        <div
+            className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }}
+        />
+        {/* 바텀 스크림 — NavBar 가독성 확보 */}
+        <div
+            className="absolute bottom-0 left-0 w-full h-40 pointer-events-none z-10"
+            style={{ background: 'linear-gradient(to top, rgba(140,55,20,0.48) 0%, transparent 100%)' }}
+        />
+        {children}
+      </div>
   );
 }
