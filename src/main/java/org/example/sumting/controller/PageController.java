@@ -52,6 +52,11 @@ public class PageController {
         return "forward:/index.html";
     }
 
+    @GetMapping("/profiles")
+    public String profiles() {
+        return "forward:/index.html";
+    }
+
     @GetMapping("/ending")
     public String ending() {
         return "forward:/index.html";

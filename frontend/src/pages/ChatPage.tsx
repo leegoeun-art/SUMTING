@@ -63,8 +63,10 @@ export default function ChatPage() {
       )
       .catch(() => {});
 
+    const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsHost = import.meta.env.PROD ? window.location.host : 'localhost:8080';
     const client = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
+      brokerURL: `${wsProto}://${wsHost}/ws`,
       onConnect: () => {
         client.subscribe('/user/queue/chat', frame => {
           const msg: ChatMessageResponse = JSON.parse(frame.body);

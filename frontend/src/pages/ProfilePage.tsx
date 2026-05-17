@@ -20,14 +20,14 @@ export default function ProfilePage() {
     await fetch('/logout', { method: 'POST', credentials: 'include' });
     logout();
     window.location.href =
-      'https://kauth.kakao.com/oauth/logout?client_id=31a7d5d4e54711631ace5fb8be607dc2&logout_redirect_uri=http://localhost:3000/';
+      'https://kauth.kakao.com/oauth/logout?client_id=31a7d5d4e54711631ace5fb8be607dc2&logout_redirect_uri=https://sumting.co.kr/';
   };
 
   const handleWithdraw = async () => {
     await fetch('/api/me', { method: 'DELETE', credentials: 'include' });
     logout();
     window.location.href =
-      'https://kauth.kakao.com/oauth/logout?client_id=31a7d5d4e54711631ace5fb8be607dc2&logout_redirect_uri=http://localhost:3000/';
+      'https://kauth.kakao.com/oauth/logout?client_id=31a7d5d4e54711631ace5fb8be607dc2&logout_redirect_uri=https://sumting.co.kr/';
   };
 
   // user가 없으면 골격 UI 표시 (로그인은 됐지만 프로필 미완성 or 로딩 중)
