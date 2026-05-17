@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Clock, Heart } from 'lucide-react';
+import { Bell, Clock, Heart, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
@@ -12,6 +12,7 @@ import heartLottieUrl from '../assets/heart.lottie?url';
 import { RecommendedUser } from '../types';
 import { FESTIVAL_END_TIME, DEPARTMENT_MASCOT } from '../constants';
 import ProfileModal from '../components/home/ProfileModal';
+import { registerPushToken } from '../firebase';
 
 const DAILY_LIMIT = 5;
 const MS_24H = 24 * 60 * 60 * 1000;
@@ -46,6 +47,12 @@ function computeMatchScore(theirKeywords: string[], myIdealKeywords: string[]): 
   return Math.round((matchCount / 3) * 100);
 }
 
+function isNotifOff() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission !== 'granted') return true;
+  return localStorage.getItem('sumting_notif_enabled') === 'false';
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const { user, setUser, rejectedUsers, addSentPing, setActiveChat } = useAppContext();
@@ -53,6 +60,22 @@ export default function HomePage() {
   const [modalUser,       setModalUser]       = useState<RecommendedUser | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendedUser[]>([]);
   const [loadingCouples,  setLoadingCouples]  = useState(true);
+  const [showNotifBanner, setShowNotifBanner] = useState(
+    () => isNotifOff() && sessionStorage.getItem('sumting_notif_banner_dismissed') !== '1'
+  );
+
+  const handleBannerEnable = async () => {
+    await registerPushToken();
+    if ('Notification' in window && Notification.permission === 'granted') {
+      localStorage.setItem('sumting_notif_enabled', 'true');
+      setShowNotifBanner(false);
+    }
+  };
+
+  const handleBannerDismiss = () => {
+    sessionStorage.setItem('sumting_notif_banner_dismissed', '1');
+    setShowNotifBanner(false);
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -172,6 +195,24 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+
+        {showNotifBanner && (
+          <div className="z-10 mx-4 mt-2 mb-1 flex items-center gap-3 px-4 py-3 rounded-2xl"
+            style={{ background: 'rgba(198,42,71,0.22)', border: '1px solid rgba(198,42,71,0.4)' }}>
+            <Bell size={16} style={{ color: '#FF8C78', flexShrink: 0 }} />
+            <p className="text-xs text-white flex-1">하트핑·채팅 알림을 켜보세요</p>
+            <button
+              onClick={handleBannerEnable}
+              className="text-xs font-bold px-3 py-1 rounded-full"
+              style={{ background: '#C62A47', color: '#fff' }}
+            >
+              켜기
+            </button>
+            <button onClick={handleBannerDismiss} style={{ color: 'rgba(255,255,255,0.6)' }}>
+              <X size={14} />
+            </button>
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto z-10 px-6 pb-24">
           {/* Timer Section */}

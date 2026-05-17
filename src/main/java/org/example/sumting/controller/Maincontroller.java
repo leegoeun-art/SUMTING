@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -135,6 +136,14 @@ public class Maincontroller {
             @AuthenticationPrincipal OAuth2User oAuth2User) {
         Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
         firebasePushService.registerFcmToken(body.get("fcmToken"), kakaoId);
+        return ResponseEntity.ok().build();
+    }
+
+    // FCM 토큰을 DB에서 삭제한다 (알림 끄기).
+    @DeleteMapping("/push/register")
+    public ResponseEntity<?> unregisterPushToken(@AuthenticationPrincipal OAuth2User oAuth2User) {
+        Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        firebasePushService.registerFcmToken(null, kakaoId);
         return ResponseEntity.ok().build();
     }
 
