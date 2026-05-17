@@ -37,14 +37,19 @@ public class HeartpingService {
         likesRepository.save(likes);
 
         // 상대방이 이미 나에게 heartping을 보낸 경우 → 양쪽 모두 MATCHED 처리
-        likesRepository.findBySenderAndReceiverAndStatus(receiver, sender, LikeStatus.PENDING)
-                .ifPresent(reverseLike -> {
+        boolean isMatch = likesRepository.findBySenderAndReceiverAndStatus(receiver, sender, LikeStatus.PENDING)
+                .map(reverseLike -> {
                     reverseLike.updateStatus(LikeStatus.MATCHED);
                     likes.updateStatus(LikeStatus.MATCHED);
+                    return true;
+                }).orElse(false);
 
-                    firebasePushService.sendMatchNotification(sender.getId());
-                    firebasePushService.sendMatchNotification(receiver.getId());
-                });
+        if (isMatch) {
+            firebasePushService.sendMatchNotification(sender.getId());
+            firebasePushService.sendMatchNotification(receiver.getId());
+        } else {
+            firebasePushService.sendHeartpingNotification(receiver.getId());
+        }
     }
 
     @Transactional

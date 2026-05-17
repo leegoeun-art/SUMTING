@@ -45,6 +45,26 @@ public class FirebasePushService {
         }
     }
 
+    public void sendHeartpingNotification(Long receiverId) {
+        User user = userRepository.findById(receiverId).orElse(null);
+        if (user == null || user.getFcmToken() == null) return;
+
+        Message message = Message.builder()
+                .setToken(user.getFcmToken())
+                .setNotification(Notification.builder()
+                        .setTitle("누군가 하트핑을 보냈어요 💛")
+                        .setBody("지금 확인해보세요!")
+                        .build())
+                .putData("type", "heartping")
+                .build();
+
+        try {
+            FirebaseMessaging.getInstance().send(message);
+        } catch (FirebaseMessagingException e) {
+            // 알림 실패해도 하트핑은 정상 동작
+        }
+    }
+
     public void sendMatchNotification(Long kakaoUserId) {
         User user = userRepository.findById(kakaoUserId).orElse(null);
         if (user == null || user.getFcmToken() == null) return;
