@@ -89,33 +89,6 @@ export default function SuccessModal({ user, onStartChat, onClose, visible }: Su
                   {user.department}
                 </p>
               </div>
-
-              {/* 키워드 */}
-              {user.keywords.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-2">
-                  {user.keywords.map((k) => (
-                    <span
-                      key={k}
-                      className="text-xs px-3 py-1 rounded-full font-medium"
-                      style={{
-                        background: 'rgba(255,255,255,0.2)',
-                        border: '1px solid rgba(255,255,255,0.3)',
-                        color: 'rgba(255,255,255,0.9)',
-                      }}
-                    >
-                      #{k}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* 매칭 설명 */}
-              <div
-                className="w-full px-4 py-3 rounded-2xl text-center text-xs"
-                style={{ background: 'rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.88)' }}
-              >
-                키워드 <span className="font-numeral">{user.matchScore}%</span> 일치 · 익명으로 보호되는 채팅 🔒
-              </div>
             </div>
 
             {/* 버튼 영역 */}
