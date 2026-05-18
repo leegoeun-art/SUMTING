@@ -8,6 +8,7 @@ import { useAppContext } from '../context/AppContext';
 import { Message as IMessage } from '../types';
 import MascotImage from '../components/MascotImage';
 import { GRADIENT, GLASS, COLORS } from '../utils/background';
+import HpProfileModal from '../components/heartPing/HpProfileModal';
 
 interface ChatMessageResponse {
   id: number;
@@ -46,6 +47,7 @@ export default function ChatPage() {
   const [reportStep, setReportStep]     = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [uploading, setUploading]    = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const stompClientRef              = useRef<Client | null>(null);
   const bottomRef                   = useRef<HTMLDivElement | null>(null);
   const fileInputRef                = useRef<HTMLInputElement | null>(null);
@@ -168,9 +170,13 @@ export default function ChatPage() {
           <ChevronLeft size={22} />
         </button>
         <div className="flex items-center gap-3 ml-1 flex-1">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
+          <button
+            className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden active:opacity-75"
+            style={GLASS.icon}
+            onClick={() => setProfileOpen(true)}
+          >
             <MascotImage type={activeChat.partner.mascotType} className="w-8 h-8" />
-          </div>
+          </button>
           <div>
             <h3 className="font-bold text-sm text-white">{activeChat.partner.nickname}</h3>
             <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.88)' }}>{activeChat.partner.department} · 익명 채팅</p>
@@ -195,9 +201,13 @@ export default function ChatPage() {
         {messages.map((m) => (
           <div key={m.id} className={`flex ${m.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
             {m.senderId !== 'me' && (
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center mr-2 self-end mb-4 flex-shrink-0" style={GLASS.icon}>
+              <button
+                className="w-8 h-8 rounded-xl flex items-center justify-center mr-2 self-end mb-4 flex-shrink-0 active:opacity-75"
+                style={GLASS.icon}
+                onClick={() => setProfileOpen(true)}
+              >
                 <MascotImage type={activeChat.partner.mascotType} className="w-6 h-6" />
-              </div>
+              </button>
             )}
             <div className={`flex flex-col gap-1 max-w-[72%] ${m.senderId === 'me' ? 'items-end' : 'items-start'}`}>
               <div
@@ -268,6 +278,11 @@ export default function ChatPage() {
           </button>
         </div>
       </div>
+
+      <HpProfileModal
+        user={profileOpen ? activeChat.partner : null}
+        onClose={() => setProfileOpen(false)}
+      />
 
       <AnimatePresence>
         {menuOpen && (

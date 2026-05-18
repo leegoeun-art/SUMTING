@@ -95,7 +95,7 @@ export default function HpProfileModal({ user, onClose }: HpProfileModalProps) {
                       letterSpacing: '0.05em',
                     }}
                   >
-                    ✨ 찰떡궁합 ✨
+                    💗 찰떡궁합 💗
                   </motion.div>
                 )}
               </div>

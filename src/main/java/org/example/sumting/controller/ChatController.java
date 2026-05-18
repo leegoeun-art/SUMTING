@@ -103,7 +103,13 @@ public class ChatController {
                         String lastMessage = msgs.isEmpty() ? null : msgs.get(0).getContent();
                         String lastTime = msgs.isEmpty() ? null : msgs.get(0).getCreatedAt().toString();
                         long unreadCount = messageRepository.countUnread(myId, partnerId);
-                        return new MatchedPartnerDto(p.getUser().getUuid(), p.getNickName(), p.getDepartment(), "default", lastMessage, lastTime, unreadCount);
+                        return new MatchedPartnerDto(
+                            p.getUser().getUuid(), p.getNickName(), p.getDepartment(), "default",
+                            lastMessage, lastTime, unreadCount,
+                            p.getAge(), p.getHeight(),
+                            p.getMyKw1(), p.getMyKw2(), p.getMyKw3(),
+                            p.getYourKw1(), p.getYourKw2(), p.getYourKw3()
+                        );
                     })
                     .orElse(null);
             })

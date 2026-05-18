@@ -32,6 +32,14 @@ interface MatchedPartnerApiItem {
   lastMessage:  string | null;
   lastTime:     string | null;
   unreadCount:  number;
+  age:          number | null;
+  height:       number | null;
+  myKw1:        string | null;
+  myKw2:        string | null;
+  myKw3:        string | null;
+  yourKw1:      string | null;
+  yourKw2:      string | null;
+  yourKw3:      string | null;
 }
 
 interface ChatItem {
@@ -47,16 +55,25 @@ export interface ChattingHandle {
   refresh: () => void;
 }
 
-function toApiChatItem(item: MatchedPartnerApiItem): ChatItem {
+function computeMatchScore(theirKeywords: string[], myIdealKeywords: string[]): number {
+  const matchCount = theirKeywords.filter(k => myIdealKeywords.includes(k)).length;
+  return Math.round((matchCount / 3) * 100);
+}
+
+function toApiChatItem(item: MatchedPartnerApiItem, idealKeywords: string[]): ChatItem {
+  const keywords = [item.myKw1, item.myKw2, item.myKw3].filter((k): k is string => !!k);
   return {
     id:          `c-${item.userId}`,
     partner: {
-      id:         item.userId,
-      nickname:   item.nickname,
-      department: item.department,
-      keywords:   [],
-      mascotType: item.mascotType ?? DEPARTMENT_MASCOT[item.department] ?? 'basic',
-      matchScore: 0,
+      id:           item.userId,
+      nickname:     item.nickname,
+      department:   item.department,
+      keywords,
+      yourKeywords: [item.yourKw1, item.yourKw2, item.yourKw3].filter((k): k is string => !!k),
+      mascotType:   DEPARTMENT_MASCOT[item.department] ?? 'basic',
+      matchScore:   computeMatchScore(keywords, idealKeywords),
+      age:          item.age ?? undefined,
+      height:       item.height ?? undefined,
     },
     lastMessage: item.lastMessage
       ? item.lastMessage.startsWith('/api/chat/image/') ? '사진을 보냈습니다.' : item.lastMessage
@@ -66,22 +83,24 @@ function toApiChatItem(item: MatchedPartnerApiItem): ChatItem {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface ChattingProps {}
+interface ChattingProps {
+  onProfileClick?: (user: RecommendedUser) => void;
+}
 
-const Chatting = forwardRef<ChattingHandle, ChattingProps>((_props, ref) => {
+const Chatting = forwardRef<ChattingHandle, ChattingProps>(({ onProfileClick }, ref) => {
   const navigate = useNavigate();
-  const { setActiveChat, kakaoId } = useAppContext();
+  const { setActiveChat, kakaoId, user } = useAppContext();
   const [chatList, setChatList] = useState<ChatItem[]>([]);
 
   const loadMatches = () => {
+    const idealKeywords = user?.idealKeywords ?? [];
     fetch('/api/chat/matches', { credentials: 'include' })
       .then(res => (res.ok ? res.json() : []))
-      .then((data: MatchedPartnerApiItem[]) => setChatList(data.map(toApiChatItem)))
+      .then((data: MatchedPartnerApiItem[]) => setChatList(data.map(item => toApiChatItem(item, idealKeywords))))
       .catch(() => {});
   };
 
-  useEffect(() => { loadMatches(); }, [kakaoId]);
+  useEffect(() => { loadMatches(); }, [kakaoId, user]);
 
   const stompRef = useRef<Client | null>(null);
 
@@ -145,42 +164,45 @@ const Chatting = forwardRef<ChattingHandle, ChattingProps>((_props, ref) => {
   return (
     <div className="space-y-3">
       {chatList.map((chat) => (
-        <button
+        <div
           key={chat.id}
+          className="w-full flex items-center gap-4 p-4 rounded-2xl active:scale-[0.98] transition-transform cursor-pointer"
+          style={GLASS.card}
           onClick={() => {
             setActiveChat({ id: chat.id, partner: chat.partner, unreadCount: chat.unread });
             setChatList(prev => prev.map(c => c.id === chat.id ? { ...c, unread: 0 } : c));
             navigate('/chat');
           }}
-          className="w-full flex items-center gap-4 p-4 rounded-2xl text-left active:scale-[0.98] transition-transform"
-          style={GLASS.card}
         >
-          <div className="relative flex-shrink-0">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
-              <MascotImage type={chat.partner.mascotType} className="w-11 h-11" />
-            </div>
-            {chat.unread > 0 && (
-              <div
-                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center"
-                style={{ background: '#ffffff' }}
-              >
-                <span className="text-[8px] font-bold" style={{ color: '#C62A47' }}>
-                  {chat.unread > 9 ? '9+' : chat.unread}
-                </span>
+          <button
+            className="relative flex-shrink-0"
+            onClick={(e) => { e.stopPropagation(); onProfileClick?.(chat.partner); }}
+          >
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden" style={GLASS.icon}>
+                <MascotImage type={chat.partner.mascotType} className="w-11 h-11" />
               </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="font-bold text-white text-sm">{chat.partner.nickname}</h4>
-              {chat.lastTime && (
-                <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.72)' }}>{chat.lastTime}</span>
+              {chat.unread > 0 && (
+                <div
+                  className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center"
+                  style={{ background: '#ffffff' }}
+                >
+                  <span className="text-[8px] font-bold" style={{ color: '#C62A47' }}>
+                    {chat.unread > 9 ? '9+' : chat.unread}
+                  </span>
+                </div>
               )}
+            </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="font-bold text-white text-sm">{chat.partner.nickname}</h4>
+                {chat.lastTime && (
+                  <span className="text-[10px]" style={{ color: 'rgba(255,255,255,0.72)' }}>{chat.lastTime}</span>
+                )}
+              </div>
+              <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.82)' }}>{chat.lastMessage}</p>
             </div>
-            <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.82)' }}>{chat.lastMessage}</p>
           </div>
-        </button>
-      ))}
+        ))}
     </div>
   );
 });
