@@ -12,6 +12,7 @@ import { DEPARTMENT_MASCOT } from '../constants';
 import Receive from '../components/heartPing/Receive';
 import SendCard from '../components/heartPing/Send';
 import Chatting, { ChattingHandle } from '../components/heartPing/Chatting';
+import HpProfileModal from '../components/heartPing/HpProfileModal';
 
 /* ── 하트핑 API 공통 응답 형태 ── */
 interface HeartPingApiItem {
@@ -36,27 +37,40 @@ interface SentItem {
   status: 'accepted' | 'pending' | 'rejected';
 }
 
-function toReceivedUser(item: HeartPingApiItem): RecommendedUser {
+function computeMatchScore(theirKeywords: string[], myIdealKeywords: string[]): number {
+  const matchCount = theirKeywords.filter(k => myIdealKeywords.includes(k)).length;
+  return Math.round((matchCount / 3) * 100);
+}
+
+function toReceivedUser(item: HeartPingApiItem, idealKeywords: string[]): RecommendedUser {
+  const keywords = [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k);
   return {
-    id:         item.user_id,
-    nickname:   item.nickname,
-    department: item.department,
-    keywords:   [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
-    mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
-    matchScore: 0,
+    id:           item.user_id,
+    nickname:     item.nickname,
+    department:   item.department,
+    age:          item.age,
+    height:       item.height,
+    keywords,
+    yourKeywords: [item.your_kw1, item.your_kw2, item.your_kw3].filter((k): k is string => !!k),
+    mascotType:   DEPARTMENT_MASCOT[item.department] ?? 'basic',
+    matchScore:   computeMatchScore(keywords, idealKeywords),
   };
 }
 
-function toSentItem(item: HeartPingApiItem): SentItem {
+function toSentItem(item: HeartPingApiItem, idealKeywords: string[]): SentItem {
+  const keywords = [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k);
   return {
     id:   item.user_id,
     user: {
-      id:         item.user_id,
-      nickname:   item.nickname,
-      department: item.department,
-      keywords:   [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
-      mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
-      matchScore: 0,
+      id:           item.user_id,
+      nickname:     item.nickname,
+      department:   item.department,
+      age:          item.age,
+      height:       item.height,
+      keywords,
+      yourKeywords: [item.your_kw1, item.your_kw2, item.your_kw3].filter((k): k is string => !!k),
+      mascotType:   DEPARTMENT_MASCOT[item.department] ?? 'basic',
+      matchScore:   computeMatchScore(keywords, idealKeywords),
     },
     status: item.status?.toUpperCase() === 'MATCHED'
       ? 'accepted'
@@ -84,7 +98,7 @@ const TABS: { key: TabType; label: string }[] = [
 ];
 
 export default function HeartPingListPage() {
-  const { addRejected, sentPings, setActiveChat } = useAppContext();
+  const { user, addRejected, sentPings, setActiveChat } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
   const initialTab = (location.state as { tab?: TabType } | null)?.tab ?? 'received';
@@ -94,6 +108,9 @@ export default function HeartPingListPage() {
   const [receivedList, setReceivedList] = useState<RecommendedUser[]>([]);
   const [apiSentList,  setApiSentList]  = useState<SentItem[]>([]);
   const [refreshing,   setRefreshing]   = useState(false);
+  const [profileUser,  setProfileUser]  = useState<RecommendedUser | null>(null);
+
+  const idealKeywords = user?.idealKeywords ?? [];
 
   const loadReceived = () => {
     setRefreshing(true);
@@ -103,7 +120,7 @@ export default function HeartPingListPage() {
         setReceivedList(
           data
             .filter(item => item.status?.toUpperCase() === 'PENDING')
-            .map(toReceivedUser)
+            .map(item => toReceivedUser(item, idealKeywords))
         )
       )
       .catch(() => {})
@@ -114,7 +131,7 @@ export default function HeartPingListPage() {
     setRefreshing(true);
     fetch('/api/sendHeartPing', { credentials: 'include' })
       .then(res => (res.ok ? res.json() : []))
-      .then((data: HeartPingApiItem[]) => setApiSentList(data.map(toSentItem)))
+      .then((data: HeartPingApiItem[]) => setApiSentList(data.map(item => toSentItem(item, idealKeywords))))
       .catch(() => {})
       .finally(() => setRefreshing(false));
   };
@@ -199,6 +216,7 @@ export default function HeartPingListPage() {
                   user={u}
                   onStartChat={handleStartChat}
                   onRejected={handleRejected}
+                  onProfileClick={setProfileUser}
                 />
               ))}
               {receivedList.length === 0 && <EmptyState label="아직 받은 하트핑이 없어요" />}
@@ -215,6 +233,7 @@ export default function HeartPingListPage() {
                   key={item.id}
                   item={item}
                   onOpenChat={(u) => { setActiveChat({ id: `c-${u.id}`, partner: u, unreadCount: 0 }); navigate('/chat'); }}
+                  onProfileClick={setProfileUser}
                 />
               ))}
               {sentPings
@@ -223,6 +242,7 @@ export default function HeartPingListPage() {
                   <SendCard
                     key={`ctx-${u.id}`}
                     item={{ id: `ctx-${u.id}`, user: u, status: 'pending' }}
+                    onProfileClick={setProfileUser}
                   />
                 ))
               }
@@ -244,6 +264,8 @@ export default function HeartPingListPage() {
       </div>
 
       <NavBar />
+
+      <HpProfileModal user={profileUser} onClose={() => setProfileUser(null)} />
     </GlowBackground>
   );
 }
