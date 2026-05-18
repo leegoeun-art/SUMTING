@@ -56,7 +56,6 @@ public class ChatController {
     private String uploadDir;
 
     @MessageMapping("/chat.send")
-    @Transactional
     public void send(@Payload ChatMessageDto dto, Principal principal) {
         Long senderId = extractKakaoId(principal);
         User receiver = userRepository.findByUuid(dto.getReceiverUuid())

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ChevronLeft, Send, Plus, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, Send, Plus, Camera, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Client } from '@stomp/stompjs';
@@ -38,6 +38,8 @@ function toDisplayMessage(m: ChatMessageResponse, kakaoId: string | null): IMess
   };
 }
 
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
 export default function ChatPage() {
   const navigate = useNavigate();
   const { activeChat, kakaoId } = useAppContext();
@@ -52,6 +54,7 @@ export default function ChatPage() {
   const stompClientRef              = useRef<Client | null>(null);
   const bottomRef                   = useRef<HTMLDivElement | null>(null);
   const fileInputRef                = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef              = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!activeChat) return;
@@ -68,6 +71,7 @@ export default function ChatPage() {
     const wsHost = import.meta.env.PROD ? window.location.host : 'localhost:8080';
     const client = new Client({
       brokerURL: `${wsProto}://${wsHost}/ws`,
+      reconnectDelay: 500,
       onConnect: () => {
         client.subscribe('/user/queue/chat', frame => {
           const msg: ChatMessageResponse = JSON.parse(frame.body);
@@ -127,15 +131,40 @@ export default function ChatPage() {
     navigate('/heartpings', { state: { tab: 'chat' } });
   };
 
+  const compressImage = (file: File): Promise<Blob> =>
+    new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const MAX_DIM = 1920;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) { height = Math.round(height * MAX_DIM / width); width = MAX_DIM; }
+          else { width = Math.round(width * MAX_DIM / height); height = MAX_DIM; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.85);
+      };
+      img.src = objectUrl;
+    });
+
   const sendImage = async (file: File) => {
-    if (!stompClientRef.current?.connected) return;
     setUploading(true);
     try {
+      const compressed = await compressImage(file);
       const form = new FormData();
-      form.append('file', file);
+      form.append('file', new File([compressed], 'image.jpg', { type: 'image/jpeg' }));
       const res = await fetch('/api/chat/upload', { method: 'POST', body: form, credentials: 'include' });
       if (!res.ok) return;
       const { url } = await res.json();
+      for (let i = 0; i < 20 && !stompClientRef.current?.connected; i++) {
+        await new Promise(r => setTimeout(r, 200));
+      }
+      if (!stompClientRef.current?.connected) return;
       stompClientRef.current.publish({
         destination: '/app/chat.send',
         body: JSON.stringify({ receiverUuid: activeChat!.partner.id, content: url }),
@@ -249,10 +278,26 @@ export default function ChatPage() {
           >
             <Plus size={20} />
           </button>
+          <button
+            style={{ color: uploading ? 'rgba(255,255,255,0.40)' : 'rgba(255,255,255,0.80)' }}
+            className="flex-shrink-0"
+            disabled={uploading}
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            <Camera size={20} />
+          </button>
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) { sendImage(f); e.target.value = ''; } }}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            {...(!isIOS && { capture: 'environment' })}
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) { sendImage(f); e.target.value = ''; } }}
           />

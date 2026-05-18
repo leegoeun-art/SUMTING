@@ -177,7 +177,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-10 text-center pb-4">
-          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.62)' }}>SUMTING Version 1.0.0 (Beta)</p>
+          <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.62)' }}>SUMTING Version 1.0.0</p>
         </div>
       </div>
 
