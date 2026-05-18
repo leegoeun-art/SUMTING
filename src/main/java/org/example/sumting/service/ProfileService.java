@@ -34,7 +34,7 @@ public class ProfileService {
         "반듯한", "의젓한", "당당한", "늠름한", "용감한", "활기찬", "생기있는", "에너지넘치는",
         "차분한", "여유로운", "느긋한", "평화로운", "안락한", "아늑한", "편안한", "아담한",
         "소중한", "특별한", "독특한", "신비로운", "매력적인", "빛살같은", "꿈같은", "동화같은",
-        "하늘같은", "봄같은", "여름같은", "가을같은", "겨울같은", "무지개같은", "구름같은", "별같은",
+        "하늘같은", "봄같은", "여름같은", "가을같은", "겨울같은", "구름같은", "별같은",
         "꽃같은", "나비같은", "햇살같은", "달빛같은", "눈송이같은", "이슬같은", "샘물같은", "바람같은",
         "든든한", "믿음직한", "진실된", "솔직한", "천진한", "순진한", "해맑은", "명랑한",
         "총명한", "영리한", "지혜로운", "섬세한", "감성적인", "따뜻따뜻한", "사근사근한", "싱그러운"
@@ -67,9 +67,9 @@ public class ProfileService {
     }
 
     @Transactional
-    public String saveProfile(ProfileDto dto) {
-        User user = userRepository.findByUuid(dto.getUser_id())
-                .orElseThrow(() -> new RuntimeException("User not found: " + dto.getUser_id()));
+    public String saveProfile(Long kakaoId, ProfileDto dto) {
+        User user = userRepository.findById(kakaoId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + kakaoId));
 
         Gender gender = dto.isGender() ? Gender.M : Gender.F;
         String nickname = generateNickname();
