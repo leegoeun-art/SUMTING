@@ -131,7 +131,7 @@ public class ChatController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         messageRepository.markAsRead(myId, partnerId);
-        messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId));
+        messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId, java.time.LocalDateTime.now()));
         String myUuid = userRepository.findById(myId).map(User::getUuid).orElse("");
         List<ChatMessageResponseDto> messages = messageRepository.findConversation(myId, partnerId)
             .stream()
@@ -154,7 +154,7 @@ public class ChatController {
         if (partner == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         Long partnerId = partner.getId();
         messageRepository.markAsRead(myId, partnerId);
-        messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId));
+        messagingTemplate.convertAndSendToUser(partnerId.toString(), "/queue/chat-read", new ReadReceiptDto(myId, java.time.LocalDateTime.now()));
         return ResponseEntity.ok().build();
     }
 

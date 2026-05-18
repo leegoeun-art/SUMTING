@@ -31,6 +31,7 @@ export interface Message {
   senderId: string;
   text: string;
   timestamp: string;
+  createdAt: string;
   isRead: boolean;
 }
 

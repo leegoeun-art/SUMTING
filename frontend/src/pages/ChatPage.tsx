@@ -33,6 +33,7 @@ function toDisplayMessage(m: ChatMessageResponse, kakaoId: string | null): IMess
     senderId:  m.senderId === kakaoId ? 'me' : m.senderId,
     text:      m.content,
     timestamp: formatTime(m.createdAt),
+    createdAt: m.createdAt,
     isRead:    m.isRead,
   };
 }
@@ -54,11 +55,6 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!activeChat) return;
-    fetch(`/api/chat/read?partnerUuid=${activeChat.partner.id}`, { method: 'POST', credentials: 'include' });
-  }, [activeChat?.id]);
-
-  useEffect(() => {
-    if (!activeChat) return;
     const partnerUuid = activeChat.partner.id;
 
     fetch(`/api/chat/messages?partnerUuid=${partnerUuid}`, { credentials: 'include' })
@@ -75,18 +71,18 @@ export default function ChatPage() {
       onConnect: () => {
         client.subscribe('/user/queue/chat', frame => {
           const msg: ChatMessageResponse = JSON.parse(frame.body);
-          if (
-            msg.senderId === partnerUuid ||
-            msg.receiverId === partnerUuid
-          ) {
+          if (msg.senderId === partnerUuid || msg.receiverId === partnerUuid) {
             setMessages(prev => [...prev, toDisplayMessage(msg, kakaoId)]);
-            fetch(`/api/chat/read?partnerUuid=${partnerUuid}`, { method: 'POST', credentials: 'include' });
+            if (msg.senderId === partnerUuid) {
+              fetch(`/api/chat/read?partnerUuid=${partnerUuid}`, { method: 'POST', credentials: 'include' });
+            }
           }
         });
 
-        client.subscribe('/user/queue/chat-read', () => {
+        client.subscribe('/user/queue/chat-read', frame => {
+          const { readAt } = JSON.parse(frame.body) as { readAt: string };
           setMessages(prev => prev.map(m =>
-            m.senderId === 'me' ? { ...m, isRead: true } : m
+            m.senderId === 'me' && m.createdAt <= readAt ? { ...m, isRead: true } : m
           ));
         });
       },
