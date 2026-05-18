@@ -6,6 +6,8 @@ import imgMusic      from '../assets/music.png';
 import imgSport      from '../assets/sport.png';
 import imgRibbonBoy  from '../assets/ribbonboy.png';
 import imgRibbonGirl from '../assets/ribbongirl.png';
+import imgTeach      from '../assets/teach.png';
+import imgDance      from '../assets/dance.png';
 
 const MASCOT_IMAGES: Record<string, string> = {
   basic:      imgBasic,
@@ -16,6 +18,8 @@ const MASCOT_IMAGES: Record<string, string> = {
   sport:      imgSport,
   ribbonboy:  imgRibbonBoy,
   ribbongirl: imgRibbonGirl,
+  teach:      imgTeach,
+  dance:      imgDance,
 };
 
 interface MascotImageProps {

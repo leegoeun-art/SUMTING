@@ -59,10 +59,10 @@ export const DEPARTMENT_MASCOT: Record<string, string> = {
   '가족복지학과':       'ribbongirl',
   '국가안보학과':       'ribbongirl',
   // 사범대학
-  '국어교육과': 'ribbonboy',
-  '영어교육과': 'ribbonboy',
-  '교육학과':   'ribbonboy',
-  '수학교육과': 'ribbonboy',
+  '국어교육과': 'teach',
+  '영어교육과': 'teach',
+  '교육학과':   'teach',
+  '수학교육과': 'teach',
   // 경영경제대학
   '경제금융학부':   'business',
   '경영학부':       'business',
@@ -86,7 +86,7 @@ export const DEPARTMENT_MASCOT: Record<string, string> = {
   '조형예술전공':       'art',
   '생활예술전공':       'art',
   '스포츠건강관리전공': 'sport',
-  '무용예술전공':       'sport',
+  '무용예술전공':       'dance',
   '음악학부':           'music',
   // 자유전공학부대학
   '자유전공(인문계열)':   'basic',

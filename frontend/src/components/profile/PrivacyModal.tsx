@@ -44,38 +44,50 @@ export default function PrivacyModal({ visible, onClose }: PrivacyModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[90] flex flex-col"
-          style={{ background: GRADIENT }}
+          className="fixed inset-0 z-[90] flex items-center justify-center px-4"
+          style={{ background: 'rgba(60,5,15,0.55)', backdropFilter: 'blur(8px)' }}
+          onClick={onClose}
         >
-          {/* 헤더 */}
-          <div
-            className="flex items-center justify-between px-5 pt-6 pb-4 flex-shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}
+          <motion.div
+            key="privacy-card"
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.92, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            className="w-full max-w-sm flex flex-col rounded-[28px] overflow-hidden"
+            style={{ background: GRADIENT, maxHeight: '80dvh' }}
+            onClick={e => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-white">개인정보처리방침</h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full transition-all active:scale-90"
-              style={{ background: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.8)' }}
+            {/* 헤더 */}
+            <div
+              className="flex items-center justify-between px-5 pt-5 pb-4 flex-shrink-0"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}
             >
-              <X size={18} />
-            </button>
-          </div>
+              <h2 className="text-lg font-bold text-white">개인정보처리방침</h2>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full transition-all active:scale-90"
+                style={{ background: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.8)' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-          {/* 본문 */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 pb-10">
-            <p className="text-xs leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.70)' }}>
-              숨팅(이하 "서비스")은 이용자의 개인정보를 소중히 여기며 아래와 같이 처리합니다.
-            </p>
-            {SECTIONS.map((s) => (
-              <div key={s.title} className="rounded-2xl px-4 py-4" style={GLASS.card}>
-                <p className="text-xs font-bold text-white mb-1.5">{s.title}</p>
-                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  {s.body}
-                </p>
-              </div>
-            ))}
-          </div>
+            {/* 본문 */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 pb-6">
+              <p className="text-xs leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.70)' }}>
+                숨팅(이하 "서비스")은 이용자의 개인정보를 소중히 여기며 아래와 같이 처리합니다.
+              </p>
+              {SECTIONS.map((s) => (
+                <div key={s.title} className="rounded-2xl px-4 py-4" style={GLASS.card}>
+                  <p className="text-xs font-bold text-white mb-1.5">{s.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                    {s.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

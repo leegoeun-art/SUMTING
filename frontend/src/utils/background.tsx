@@ -9,12 +9,12 @@ export const COLORS = {
   kakao:       '#FEE500',
 } as const;
 
-export const GRADIENT = 'linear-gradient(160deg, #FFD8C8 0%, #FFBCA8 35%, #FF9B88 65%, #E87868 100%)';
+export const GRADIENT = '#F07868';
 
 // 자주 쓰이는 glass-morphism 스타일
 export const GLASS = {
-  card:      { background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)' },
-  cardLight: { background: 'rgba(255,255,255,0.28)', border: '1px solid rgba(255,255,255,0.42)' },
+  card:      { background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.35)', boxShadow: '0 8px 24px rgba(140,40,20,0.12)' },
+  cardLight: { background: 'rgba(255,255,255,0.28)', border: '1px solid rgba(255,255,255,0.42)', boxShadow: '0 8px 24px rgba(140,40,20,0.12)' },
   icon:      { background: 'rgba(255,255,255,0.30)' },
 } as const;
 
@@ -86,19 +86,6 @@ export function GlowBackground({ children, className = '' }: GlowBackgroundProps
           className={`h-full w-full flex flex-col relative overflow-hidden ${className}`}
           style={{ background: GRADIENT }}
       >
-        <div
-            className="absolute top-[-5%] left-[10%] w-52 h-52 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(255,200,200,0.25) 0%, transparent 70%)' }}
-        />
-        <div
-            className="absolute bottom-[15%] right-[-5%] w-56 h-56 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(198,42,71,0.2) 0%, transparent 70%)' }}
-        />
-        {/* 바텀 스크림 — NavBar 가독성 확보 */}
-        <div
-            className="absolute bottom-0 left-0 w-full h-40 pointer-events-none z-10"
-            style={{ background: 'linear-gradient(to top, rgba(140,55,20,0.48) 0%, transparent 100%)' }}
-        />
         {children}
       </div>
   );

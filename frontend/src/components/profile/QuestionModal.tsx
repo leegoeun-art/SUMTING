@@ -21,8 +21,8 @@ const FAQ_SECTIONS: { category: string; items: FaqItem[] }[] = [
         a: '네, 축제 기간 동안 완전 무료로 이용할 수 있어요.',
       },
       {
-        q: '같은 학교 학생만 이용할 수 있나요?',
-        a: '네, 숨팅은 우리 학교 재학생만 이용 가능한 캠퍼스 전용 서비스예요.',
+        q: '누구나 이용할 수 있나요?',
+        a: '숨팅은 상명대학교 재학생을 위해 만들어진 서비스지만, 설레는 인연을 찾는 모든 분께 열려 있어요. 학교와 상관없이 누구든 환영해요 💌',
       },
     ],
   },
@@ -71,6 +71,10 @@ const FAQ_SECTIONS: { category: string; items: FaqItem[] }[] = [
   {
     category: '🔒 익명 & 개인정보',
     items: [
+      {
+        q: '숨팅은 어떤 정보를 수집하나요?',
+        a: '숨팅은 실제 이름, 학번, 사진을 일절 수집하지 않아요. 매칭에 사용되는 정보는 직접 선택하신 키워드, 학과, 나이뿐이에요. 개인을 특정할 수 있는 민감한 정보는 요구하지 않으니 안심하고 이용하셔도 돼요.',
+      },
       {
         q: '상대방이 제 실제 이름이나 학번을 알 수 있나요?',
         a: '아니요. 숨팅에서는 닉네임과 학과만 공개돼요. 실명, 학번, 카카오 계정 정보는 절대 노출되지 않아요.',
@@ -155,44 +159,54 @@ export default function QuestionModal({ visible, onClose }: QuestionModalProps) 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[90] flex flex-col"
-          style={{ background: GRADIENT }}
+          className="fixed inset-0 z-[90] flex items-center justify-center px-4"
+          style={{ background: 'rgba(60,5,15,0.55)', backdropFilter: 'blur(8px)' }}
+          onClick={onClose}
         >
-          {/* 헤더 */}
-          <div
-            className="flex items-center justify-between px-5 pt-6 pb-4 flex-shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}
+          <motion.div
+            key="faq-card"
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.92, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            className="w-full max-w-sm flex flex-col rounded-[28px] overflow-hidden"
+            style={{ background: GRADIENT, maxHeight: '80dvh' }}
+            onClick={e => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-white">자주 묻는 질문</h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full transition-all active:scale-90"
-              style={{ background: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.8)' }}
+            {/* 헤더 */}
+            <div
+              className="flex items-center justify-between px-5 pt-5 pb-4 flex-shrink-0"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}
             >
-              <X size={18} />
-            </button>
-          </div>
+              <h2 className="text-lg font-bold text-white">자주 묻는 질문</h2>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full transition-all active:scale-90"
+                style={{ background: 'rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.8)' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-          {/* FAQ 목록 */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 pb-10">
-            {FAQ_SECTIONS.map((section) => (
-              <div key={section.category}>
-                {/* 카테고리 레이블 */}
-                <p
-                  className="text-[11px] font-bold uppercase tracking-widest mb-2 ml-1"
-                  style={{ color: 'rgba(255,255,255,0.82)' }}
-                >
-                  {section.category}
-                </p>
-                {/* 아코디언 카드 */}
-                <div className="rounded-2xl overflow-hidden" style={GLASS.card}>
-                  {section.items.map((item) => (
-                    <FaqRow key={item.q} item={item} />
-                  ))}
+            {/* FAQ 목록 */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 pb-6">
+              {FAQ_SECTIONS.map((section) => (
+                <div key={section.category}>
+                  <p
+                    className="text-[11px] font-bold uppercase tracking-widest mb-2 ml-1"
+                    style={{ color: 'rgba(255,255,255,0.82)' }}
+                  >
+                    {section.category}
+                  </p>
+                  <div className="rounded-2xl overflow-hidden" style={GLASS.card}>
+                    {section.items.map((item) => (
+                      <FaqRow key={item.q} item={item} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

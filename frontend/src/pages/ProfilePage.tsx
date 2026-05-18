@@ -75,60 +75,38 @@ export default function ProfilePage() {
     <GlowBackground>
       <Helmet><title>프로필 - 숨팅</title></Helmet>
 
-      <div className="flex-1 overflow-y-auto pb-28 z-10">
-
+      <div className="flex-1 overflow-y-auto pb-24 z-10">
 
         {/* 유저 정보 */}
-        <div className="flex flex-col items-center px-6 mb-8">
-          <div className="relative mb-4">
+        <div className="flex items-center justify-center gap-5 px-6 pt-8 mb-6">
+          <div className="relative flex-shrink-0">
             <div
               className="absolute inset-0 rounded-full scale-150 blur-[40px]"
               style={{ background: 'rgba(255,255,255,0.2)' }}
             />
-            <MascotImage type={user?.mascotType ?? 'basic'} className="w-40 h-44 relative" />
+            <MascotImage type={user?.mascotType ?? 'basic'} className="w-24 h-28 relative" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-1">{displayUser.nickname || '익명의 수뭉이'}</h2>
-          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.88)' }}>{displayUser.department}</p>
-
-          <div className="flex gap-3">
-            {displayUser.age > 0 && (
-              <div
-                className="px-8 py-3 rounded-2xl text-center"
-                style={GLASS.cardLight}
-              >
-                <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.85)' }}>나이</span>
-                <span className="font-bold text-white text-sm"><span className="font-numeral">{displayUser.age}</span>세</span>
-              </div>
-            )}
-            {displayUser.height > 0 && (
-              <div
-                className="px-8 py-3 rounded-2xl text-center"
-                style={GLASS.cardLight}
-              >
-                <span className="block text-[10px] mb-1" style={{ color: 'rgba(255,255,255,0.85)' }}>키</span>
-                <span className="font-bold text-white text-sm"><span className="font-numeral">{displayUser.height}</span>cm</span>
-              </div>
+          <div>
+            <h2 className="text-xl font-bold text-white mb-0.5">{displayUser.nickname || '익명의 수뭉이'}</h2>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.88)' }}>{displayUser.department}</p>
+            {(displayUser.age > 0 || displayUser.height > 0) && (
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                {[displayUser.age > 0 && `${displayUser.age}세`, displayUser.height > 0 && `${displayUser.height}cm`]
+                  .filter(Boolean).join(' · ')}
+              </p>
             )}
           </div>
         </div>
 
         {/* 메뉴 섹션 */}
-        <div className="px-6 space-y-5">
+        <div className="px-6 space-y-4">
           {user?.keywords && user.keywords.length > 0 && (
             <section>
-              <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
-                style={{ color: 'rgba(255,255,255,0.80)' }}>
-                나의 키워드
-              </h3>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-center"
+                style={{ color: 'rgba(255,255,255,0.78)' }}>자기소개 키워드</p>
+              <div className="flex flex-wrap gap-2 justify-center">
                 {user.keywords.map(kw => (
-                  <span
-                    key={kw}
-                    className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
-                    style={GLASS.cardLight}
-                  >
-                    {kw}
-                  </span>
+                  <span key={kw} className="px-4 py-2 rounded-2xl text-sm font-medium text-white" style={GLASS.cardLight}>{kw}</span>
                 ))}
               </div>
             </section>
@@ -136,29 +114,17 @@ export default function ProfilePage() {
 
           {user?.idealKeywords && user.idealKeywords.length > 0 && (
             <section>
-              <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
-                style={{ color: 'rgba(255,255,255,0.80)' }}>
-                원하는 키워드
-              </h3>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-center"
+                style={{ color: 'rgba(255,255,255,0.78)' }}>이상형 키워드</p>
+              <div className="flex flex-wrap gap-2 justify-center">
                 {user.idealKeywords.map(kw => (
-                  <span
-                    key={kw}
-                    className="px-4 py-2 rounded-2xl text-sm font-medium text-white"
-                    style={GLASS.cardLight}
-                  >
-                    {kw}
-                  </span>
+                  <span key={kw} className="px-4 py-2 rounded-2xl text-sm font-medium text-white" style={GLASS.cardLight}>{kw}</span>
                 ))}
               </div>
             </section>
           )}
 
           <section>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
-              style={{ color: 'rgba(255,255,255,0.80)' }}>
-              알림
-            </h3>
             <div className="rounded-3xl overflow-hidden" style={GLASS.card}>
               <button
                 onClick={handleToggleNotification}
@@ -184,10 +150,6 @@ export default function ProfilePage() {
           </section>
 
           <section>
-            <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3 ml-1"
-              style={{ color: 'rgba(255,255,255,0.80)' }}>
-              고객지원
-            </h3>
             <div
               className="rounded-3xl overflow-hidden"
               style={GLASS.card}

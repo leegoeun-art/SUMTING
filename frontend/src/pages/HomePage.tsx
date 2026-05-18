@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
-import { Bell, Clock, Heart, RefreshCw, X } from 'lucide-react';
+import { Bell, Clock, Heart, RefreshCw, Sparkles, X } from 'lucide-react';
+import facemoong from '../assets/facemoong.png';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
@@ -193,29 +194,16 @@ export default function HomePage() {
             className="z-10 px-6 pt-5 pb-2 flex justify-between items-center"
             style={{ background: 'linear-gradient(180deg, rgba(140,50,20,0.14) 0%, transparent 100%)' }}
         >
-          <div className="flex items-center gap-2.5">
-            <div
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(198,42,71,0.22)', border: '1px solid rgba(198,42,71,0.35)' }}
-            >
-              <Heart size={15} fill="#C62A47" className="" />
-            </div>
-            <h1
-                className="font-display text-xl font-bold tracking-tight"
-                style={{
-                  background: 'linear-gradient(135deg, #7A1528 0%, #C62A47 50%, #FF8C78 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-            >SUMTING</h1>
+          <div className="flex items-center gap-2">
+            <img src={facemoong} alt="숨팅" className="w-7 h-7 object-contain" />
+            <h1 className="font-display text-xl font-bold tracking-tight text-white">SUMTING</h1>
           </div>
           <div className="flex gap-4">
-            <button onClick={loadCouples} className="p-2" style={{ color: '#7A1528' }}>
-              <RefreshCw size={20} className={loadingCouples ? 'animate-spin' : ''} />
+            <button onClick={loadCouples} className="p-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              <RefreshCw size={18} className={loadingCouples ? 'animate-spin' : ''} />
             </button>
-            <button onClick={() => navigate('/heartpings')} className="relative p-2" style={{ color: '#7A1528' }}>
-              <Bell size={24} />
+            <button onClick={() => navigate('/heartpings')} className="relative p-2" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              <Bell size={20} />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: '#C62A47' }} />
             </button>
           </div>
@@ -258,10 +246,10 @@ export default function HomePage() {
             <div className="backdrop-blur-md px-6 py-5 rounded-[32px] w-full"
                  style={GLASS.cardLight}>
               <div className="flex flex-col items-center gap-3">
-                <p className="text-xs font-medium tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.90)' }}>숨팅 종료까지</p>
+                <p className="text-sm font-semibold text-white">숨팅 종료까지</p>
                 <div className="flex items-center gap-3">
                   <Clock size={18} style={{ color: '#E87060' }} />
-                  <span className="font-numeral text-5xl font-semibold text-white" style={{ letterSpacing: '0.08em' }}>
+                  <span className="font-numeral text-4xl font-semibold text-white" style={{ letterSpacing: '0.08em' }}>
                     {timeLeft}
                   </span>
                 </div>
@@ -298,11 +286,11 @@ export default function HomePage() {
                 return (
                     <Heart
                         key={i}
-                        size={28}
-                        fill={used ? 'rgba(255,255,255,0.10)' : 'rgba(255,248,240,0.88)'}
-                        stroke={used ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.55)'}
-                        strokeWidth={1.2}
-                        style={{ filter: used ? 'none' : 'drop-shadow(0 0 7px rgba(255,240,230,0.7))' }}
+                        size={34}
+                        fill={used ? 'transparent' : 'rgba(255,248,240,0.90)'}
+                        stroke={used ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.6)'}
+                        strokeWidth={1.5}
+                        style={{ filter: used ? 'none' : 'drop-shadow(0 0 8px rgba(255,240,230,0.8))' }}
                     />
                 );
               })}
@@ -315,8 +303,12 @@ export default function HomePage() {
 
           {/* User Recommendation */}
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="font-bold text-lg text-white">오늘의 인연</h3>
+            <div className="flex items-center gap-3">
+              <Sparkles size={14} style={{ color: 'rgba(255,255,255,0.6)', flexShrink: 0 }} />
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.35)' }} />
+              <h3 className="text-base font-bold text-white">오늘의 인연</h3>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.35)' }} />
+              <Sparkles size={14} style={{ color: 'rgba(255,255,255,0.6)', flexShrink: 0 }} />
             </div>
 
             <div className="grid grid-cols-1 gap-6">
