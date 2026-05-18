@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { ChevronLeft, Send, Plus, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
@@ -134,6 +135,7 @@ export default function ChatPage() {
 
   return (
     <div className="h-full w-full flex flex-col relative" style={{ background: GRADIENT }}>
+      <Helmet><title>채팅 - 숨팅</title></Helmet>
       {/* 헤더 */}
       <div
         className="flex items-center px-4 py-3 border-b flex-shrink-0"

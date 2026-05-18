@@ -32,7 +32,15 @@
       "Bash(Remove-Item *)",
       "PowerShell(Remove-Item *)",
       "Bash(mysql *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\somga\\\\Desktop\\\\SUMTING\" -Directory | Where-Object { $_.Name -ne 'frontend' -and $_.Name -ne 'node_modules' } | Select-Object -ExpandProperty Name)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\somga\\\\Desktop\\\\SUMTING\" -Directory | Where-Object { $_.Name -ne 'frontend' -and $_.Name -ne 'node_modules' } | Select-Object -ExpandProperty Name)",
+      "Bash(git -C C:/Users/somga/Desktop/SUMTING log --oneline --all)",
+      "Bash(git -C C:/Users/somga/Desktop/SUMTING show 859caa6 --stat)",
+      "Bash(git -C C:/Users/somga/Desktop/SUMTING log --all --full-history -- \"src/main/resources/firebase-service-account.json\")",
+      "Bash(git -C C:/Users/somga/Desktop/SUMTING log --all --full-history -- \"src/main/resources/application.properties\")",
+      "Bash(git -C C:/Users/somga/Desktop/SUMTING log --all --full-history -- \"frontend/src/firebase.ts\")",
+      "Bash(git -C C:/Users/somga/Desktop/SUMTING show 170db38:src/main/resources/application.properties)",
+      "Bash(git *)",
+      "Bash(gh pr *)"
     ]
   }
 }

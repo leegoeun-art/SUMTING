@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, MoreHorizontal } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -128,6 +129,7 @@ export default function HeartPingListPage() {
 
   return (
     <GlowBackground>
+      <Helmet><title>하트핑 - 숨팅</title></Helmet>
 
       {/* 헤더 */}
       <div className="px-6 pt-6 pb-3 flex items-center justify-between flex-shrink-0 z-10">

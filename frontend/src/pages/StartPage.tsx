@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SumungMascot from '../components/SumungMascot';
@@ -48,6 +49,11 @@ export default function StartPage() {
 
   return (
     <GlowBackground className="items-center">
+      <Helmet>
+        <title>숨팅 (SUMTING) - 대학 축제 48시간 익명 매칭</title>
+        <meta name="description" content="대학 축제에서 설레는 인연을 만나보세요. 숨팅은 48시간 한정 익명 매칭 서비스입니다. 하트핑을 보내고 새로운 만남을 시작하세요." />
+      </Helmet>
+
       {/* Lottie 하트 배경 */}
       <LottieHeartBackground />
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Settings, HelpCircle, FileText, BellOff, BellRing } from 'lucide-react';
 
 import { useAppContext } from '../context/AppContext';
@@ -72,6 +73,7 @@ export default function ProfilePage() {
 
   return (
     <GlowBackground>
+      <Helmet><title>프로필 - 숨팅</title></Helmet>
 
       <div className="flex-1 overflow-y-auto pb-28 z-10">
         {/* 상단 버튼 */}

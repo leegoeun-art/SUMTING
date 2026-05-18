@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { KEYWORD_CATEGORIES } from '../constants';
@@ -63,34 +64,50 @@ export default function SignupPage() {
     setView('result');
   };
 
+  const helmet = (
+    <Helmet>
+      <title>회원가입 - 숨팅 (SUMTING)</title>
+      <meta name="description" content="숨팅에 가입하고 대학 축제에서 나만의 매칭을 시작해보세요." />
+    </Helmet>
+  );
+
   if (view === 'profile') {
     return (
-      <Profile
-        onComplete={(data) => { setProfileData(data); setView('myKeyword'); }}
-        onBack={() => navigate(-1)}
-      />
+      <>
+        {helmet}
+        <Profile
+          onComplete={(data) => { setProfileData(data); setView('myKeyword'); }}
+          onBack={() => navigate(-1)}
+        />
+      </>
     );
   }
 
   if (view === 'myKeyword') {
     return (
-      <MyKeyword
-        selected={myKeywords}
-        onSelect={selectMyKw}
-        onNext={() => setView('yourKeyword')}
-        onBack={() => setView('profile')}
-      />
+      <>
+        {helmet}
+        <MyKeyword
+          selected={myKeywords}
+          onSelect={selectMyKw}
+          onNext={() => setView('yourKeyword')}
+          onBack={() => setView('profile')}
+        />
+      </>
     );
   }
 
   if (view === 'yourKeyword') {
     return (
-      <YourKeyword
-        selected={yourKeywords}
-        onSelect={selectYourKw}
-        onNext={handleSubmit}
-        onBack={() => setView('myKeyword')}
-      />
+      <>
+        {helmet}
+        <YourKeyword
+          selected={yourKeywords}
+          onSelect={selectYourKw}
+          onNext={handleSubmit}
+          onBack={() => setView('myKeyword')}
+        />
+      </>
     );
   }
 
@@ -105,11 +122,14 @@ export default function SignupPage() {
   };
 
   return (
-    <SignUpResult
-      nickname={nickname}
-      department={profileData?.department ?? ''}
-      keywords={myKeywords}
-      onEnter={handleEnter}
-    />
+    <>
+      {helmet}
+      <SignUpResult
+        nickname={nickname}
+        department={profileData?.department ?? ''}
+        keywords={myKeywords}
+        onEnter={handleEnter}
+      />
+    </>
   );
 }

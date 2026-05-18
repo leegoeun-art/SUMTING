@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /home
+Disallow: /heartpings
+Disallow: /chat
+Disallow: /profiles
+
+Sitemap: https://sumting.co.kr/sitemap.xml

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { Bell, Clock, Heart, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -53,6 +54,12 @@ function isNotifOff() {
   return localStorage.getItem('sumting_notif_enabled') === 'false';
 }
 
+function isIosNonPwa() {
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = ('standalone' in navigator) && (navigator as { standalone?: boolean }).standalone === true;
+  return isIos && !isStandalone;
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const { user, setUser, rejectedUsers, addSentPing, setActiveChat } = useAppContext();
@@ -62,6 +69,9 @@ export default function HomePage() {
   const [loadingCouples,  setLoadingCouples]  = useState(true);
   const [showNotifBanner, setShowNotifBanner] = useState(
     () => isNotifOff() && sessionStorage.getItem('sumting_notif_banner_dismissed') !== '1'
+  );
+  const [showIosBanner, setShowIosBanner] = useState(
+    () => isIosNonPwa() && sessionStorage.getItem('sumting_notif_banner_dismissed') !== '1'
   );
 
   const handleBannerEnable = async () => {
@@ -75,6 +85,7 @@ export default function HomePage() {
   const handleBannerDismiss = () => {
     sessionStorage.setItem('sumting_notif_banner_dismissed', '1');
     setShowNotifBanner(false);
+    setShowIosBanner(false);
   };
 
   useEffect(() => {
@@ -165,6 +176,7 @@ export default function HomePage() {
 
   return (
       <GlowBackground>
+        <Helmet><title>홈 - 숨팅</title></Helmet>
 
         {/* Header */}
         <div
@@ -196,7 +208,20 @@ export default function HomePage() {
           </div>
         </div>
 
-        {showNotifBanner && (
+        {showIosBanner && (
+          <div className="z-10 mx-4 mt-2 mb-1 flex items-center gap-3 px-4 py-3 rounded-2xl"
+            style={{ background: 'rgba(198,42,71,0.22)', border: '1px solid rgba(198,42,71,0.4)' }}>
+            <Bell size={16} style={{ color: '#FF8C78', flexShrink: 0 }} />
+            <p className="text-xs text-white flex-1">
+              알림을 받으려면 <span className="font-bold">공유 → 홈 화면에 추가</span>해주세요
+            </p>
+            <button onClick={handleBannerDismiss} style={{ color: 'rgba(255,255,255,0.6)' }}>
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
+        {showNotifBanner && !showIosBanner && (
           <div className="z-10 mx-4 mt-2 mb-1 flex items-center gap-3 px-4 py-3 rounded-2xl"
             style={{ background: 'rgba(198,42,71,0.22)', border: '1px solid rgba(198,42,71,0.4)' }}>
             <Bell size={16} style={{ color: '#FF8C78', flexShrink: 0 }} />
