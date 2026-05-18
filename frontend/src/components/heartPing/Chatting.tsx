@@ -58,7 +58,9 @@ function toApiChatItem(item: MatchedPartnerApiItem): ChatItem {
       mascotType: item.mascotType ?? DEPARTMENT_MASCOT[item.department] ?? 'basic',
       matchScore: 0,
     },
-    lastMessage: item.lastMessage ?? '매칭되었어요! 먼저 인사해 보세요 👋',
+    lastMessage: item.lastMessage
+      ? item.lastMessage.startsWith('/api/chat/image/') ? '사진을 보냈습니다.' : item.lastMessage
+      : '매칭되었어요! 먼저 인사해 보세요 👋',
     lastTime:    item.lastTime ? formatTime(item.lastTime) : '',
     unread:      item.unreadCount,
   };
@@ -99,7 +101,7 @@ const Chatting = forwardRef<ChattingHandle, ChattingProps>((_props, ref) => {
           setChatList(prev =>
             prev.map(chat =>
               chat.id === chatId
-                ? { ...chat, lastMessage: msg.content, lastTime: formatTime(msg.createdAt), unread: chat.unread + 1 }
+                ? { ...chat, lastMessage: msg.content.startsWith('/api/chat/image/') ? '사진을 보냈습니다.' : msg.content, lastTime: formatTime(msg.createdAt), unread: chat.unread + 1 }
                 : chat
             )
           );

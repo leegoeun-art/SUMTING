@@ -32,7 +32,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [kakaoId, setKakaoId] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<RecommendedUser | null>(null);
-  const [activeChat, setActiveChat] = useState<Chat | null>(null);
+  const [activeChat, setActiveChatState] = useState<Chat | null>(() => {
+    try {
+      const stored = sessionStorage.getItem('sumting_active_chat');
+      return stored ? (JSON.parse(stored) as Chat) : null;
+    } catch { return null; }
+  });
+
+  const setActiveChat: Dispatch<SetStateAction<Chat | null>> = (value) => {
+    setActiveChatState(prev => {
+      const next = typeof value === 'function' ? value(prev) : value;
+      if (next) sessionStorage.setItem('sumting_active_chat', JSON.stringify(next));
+      else sessionStorage.removeItem('sumting_active_chat');
+      return next;
+    });
+  };
   const [isFinished, setIsFinished] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -69,6 +83,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSentPings([]);
     setRejectedUsers({});
     localStorage.removeItem('sumting_rejected');
+    sessionStorage.removeItem('sumting_active_chat');
   };
 
   useEffect(() => {
