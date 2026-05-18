@@ -3,7 +3,6 @@ package org.example.sumting.service;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import org.example.sumting.entity.User;
 import org.example.sumting.repository.UserRepository;
@@ -30,11 +29,9 @@ public class FirebasePushService {
 
         Message message = Message.builder()
                 .setToken(user.getFcmToken())
-                .setNotification(Notification.builder()
-                        .setTitle("새 메시지가 도착했어요 💬")
-                        .setBody(preview)
-                        .build())
                 .putData("type", "chat")
+                .putData("title", "새 메시지가 도착했어요 💬")
+                .putData("body", preview)
                 .putData("senderId", senderId.toString())
                 .build();
 
@@ -51,11 +48,9 @@ public class FirebasePushService {
 
         Message message = Message.builder()
                 .setToken(user.getFcmToken())
-                .setNotification(Notification.builder()
-                        .setTitle("누군가 하트핑을 보냈어요 💛")
-                        .setBody("지금 확인해보세요!")
-                        .build())
                 .putData("type", "heartping")
+                .putData("title", "누군가 하트핑을 보냈어요 💛")
+                .putData("body", "지금 확인해보세요!")
                 .build();
 
         try {
@@ -71,10 +66,9 @@ public class FirebasePushService {
 
         Message message = Message.builder()
                 .setToken(user.getFcmToken())
-                .setNotification(Notification.builder()
-                        .setTitle("매칭 성공!")
-                        .setBody("서로 마음이 통했어요! 지금 채팅을 시작해보세요.")
-                        .build())
+                .putData("type", "match")
+                .putData("title", "매칭 성공!")
+                .putData("body", "서로 마음이 통했어요! 지금 채팅을 시작해보세요.")
                 .build();
 
         try {
