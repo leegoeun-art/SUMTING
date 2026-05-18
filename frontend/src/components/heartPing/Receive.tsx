@@ -54,12 +54,12 @@ export default function Receive({ user, onStartChat, onRejected, onProfileClick 
       <>
         {/* ── 카드 ── */}
         <div
-            className="flex items-center gap-4 p-4 rounded-2xl"
-            style={GLASS.card}
+            className="rounded-2xl overflow-hidden"
+            style={{ ...GLASS.card, border: '1px solid rgba(255,180,160,0.7)' }}
         >
           {/* 마스코트 + 정보 (클릭 시 프로필 모달) */}
           <button
-              className="flex items-center gap-4 flex-1 min-w-0 text-left active:opacity-75"
+              className="flex items-center gap-4 p-4 w-full text-left active:opacity-75"
               onClick={() => onProfileClick?.(user)}
           >
             <div
@@ -80,29 +80,32 @@ export default function Receive({ user, onStartChat, onRejected, onProfileClick 
                         className="text-[9px] px-1.5 py-0.5 rounded"
                         style={{ background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)' }}
                     >
-                  #{k}
-                </span>
+                      #{k}
+                    </span>
                 ))}
               </div>
             </div>
           </button>
 
-          {/* 수락 / 거절 버튼 */}
-          <div className="flex flex-col gap-2 flex-shrink-0">
-            <button
-                onClick={handleAccept}
-                className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90"
-                style={{ background: '#ffffff', boxShadow: '0 4px 10px rgba(198,42,71,0.3)' }}
-            >
-              <Check size={16} strokeWidth={3} style={{ color: '#C62A47' }} />
-            </button>
-            <button
-                onClick={handleReject}
-                className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90"
-                style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)' }}
-            >
-              <X size={16} className="text-white" />
-            </button>
+          {/* 구분선 + 수락 / 거절 버튼 */}
+          <div className="px-4 pb-4">
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', marginBottom: '12px' }} />
+            <div className="flex gap-2">
+              <button
+                  onClick={handleReject}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95"
+                  style={{ background: 'rgba(255,255,255,0.22)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}
+              >
+                <X size={14} strokeWidth={2.5} /> 거절
+              </button>
+              <button
+                  onClick={handleAccept}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95"
+                  style={{ background: 'rgba(255,255,255,0.92)', color: '#C62A47', boxShadow: '0 2px 8px rgba(198,42,71,0.25)' }}
+              >
+                <Check size={14} strokeWidth={3} /> 수락하기
+              </button>
+            </div>
           </div>
         </div>
 
