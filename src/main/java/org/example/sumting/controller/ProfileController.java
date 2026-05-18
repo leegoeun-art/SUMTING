@@ -54,8 +54,10 @@ public class ProfileController {
 
     // 사용자 프로필(닉네임, 학과, 나이, 키, 성별, 키워드 등)을 저장하고 닉네임을 반환한다.
     @PostMapping("/profile")
-    public Map<String, String> profile(@RequestBody ProfileDto profileDto) {
-        String nickname = profileService.saveProfile(profileDto);
+    public Map<String, String> profile(@AuthenticationPrincipal OAuth2User oAuth2User,
+                                       @RequestBody ProfileDto profileDto) {
+        Long kakaoId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        String nickname = profileService.saveProfile(kakaoId, profileDto);
         return Map.of("nickname", nickname);
     }
 

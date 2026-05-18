@@ -25,7 +25,9 @@ public class FirebasePushService {
         User user = userRepository.findById(receiverId).orElse(null);
         if (user == null || user.getFcmToken() == null) return;
 
-        String preview = content.length() > 40 ? content.substring(0, 40) + "…" : content;
+        String preview = content.startsWith("/api/chat/image/")
+                ? "사진이 전송되었습니다"
+                : (content.length() > 40 ? content.substring(0, 40) + "…" : content);
 
         Message message = Message.builder()
                 .setToken(user.getFcmToken())
