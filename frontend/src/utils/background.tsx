@@ -9,7 +9,7 @@ export const COLORS = {
   kakao:       '#FEE500',
 } as const;
 
-export const GRADIENT = '#F07868';
+export const GRADIENT = '#F58E7E';
 
 // 자주 쓰이는 glass-morphism 스타일
 export const GLASS = {
