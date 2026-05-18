@@ -45,8 +45,10 @@ export default function ChatPage() {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [reportStep, setReportStep]     = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [uploading, setUploading]    = useState(false);
   const stompClientRef              = useRef<Client | null>(null);
   const bottomRef                   = useRef<HTMLDivElement | null>(null);
+  const fileInputRef                = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!activeChat) return;
@@ -127,6 +129,24 @@ export default function ChatPage() {
     navigate('/heartpings', { state: { tab: 'chat' } });
   };
 
+  const sendImage = async (file: File) => {
+    if (!stompClientRef.current?.connected) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/chat/upload', { method: 'POST', body: form, credentials: 'include' });
+      if (!res.ok) return;
+      const { url } = await res.json();
+      stompClientRef.current.publish({
+        destination: '/app/chat.send',
+        body: JSON.stringify({ receiverUuid: activeChat!.partner.id, content: url }),
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const send = () => {
     if (!input.trim() || !stompClientRef.current?.connected) return;
     stompClientRef.current.publish({
@@ -188,7 +208,9 @@ export default function ChatPage() {
                     : { background: 'rgba(255,255,255,0.25)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)' }
                 }
               >
-                {m.text}
+                {m.text.startsWith('/api/chat/image/') ? (
+                  <img src={m.text} className="max-w-[200px] rounded-xl" />
+                ) : m.text}
               </div>
               <div className="flex items-center gap-1">
                 {m.senderId === 'me' && (
@@ -210,18 +232,30 @@ export default function ChatPage() {
         style={{ borderTop: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,140,120,0.2)', backdropFilter: 'blur(12px)' }}
       >
         <div
-          className="flex items-center gap-2 rounded-[24px] px-4 py-2"
+          className="flex items-center gap-2 rounded-[24px] px-4 py-2 overflow-hidden"
           style={{ background: 'rgba(255,255,255,0.25)', border: '1px solid rgba(255,255,255,0.4)' }}
         >
-          <button style={{ color: 'rgba(255,255,255,0.80)' }} className="flex-shrink-0">
+          <button
+            style={{ color: uploading ? 'rgba(255,255,255,0.40)' : 'rgba(255,255,255,0.80)' }}
+            className="flex-shrink-0"
+            disabled={uploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
             <Plus size={20} />
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) { sendImage(f); e.target.value = ''; } }}
+          />
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && send()}
             placeholder="메시지를 입력하세요"
-            className="flex-1 bg-transparent outline-none text-sm py-2"
+            className="flex-1 min-w-0 bg-transparent outline-none text-sm py-2"
             style={{ color: '#ffffff' }}
           />
           <button

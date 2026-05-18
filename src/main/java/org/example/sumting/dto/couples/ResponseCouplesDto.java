@@ -15,5 +15,8 @@ public class ResponseCouplesDto {
     private String my_kw1;
     private String my_kw2;
     private String my_kw3;
+    private String your_kw1;
+    private String your_kw2;
+    private String your_kw3;
     private String status; // "none" | "pending" | "matched"
 }

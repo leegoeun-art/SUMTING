@@ -89,6 +89,9 @@ public class CoupleService {
                             up.getMyKw1(),
                             up.getMyKw2(),
                             up.getMyKw3(),
+                            up.getYourKw1(),
+                            up.getYourKw2(),
+                            up.getYourKw3(),
                             status);
                 })
                 .toList();

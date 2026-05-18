@@ -1,6 +1,14 @@
 package org.example.sumting.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 import org.example.sumting.dto.ChatMessageResponseDto;
 import org.example.sumting.dto.MatchedPartnerDto;
 import org.example.sumting.dto.ReadReceiptDto;
@@ -53,6 +61,9 @@ public class Maincontroller {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+
+    @Value("${app.chat.upload-dir:./chat-uploads}")
+    private String uploadDir;
 
     /*
     // 현재 로그인한 사용자의 프로필 정보를 반환한다. 프로필이 없으면 204 No Content를 반환한다.
@@ -120,6 +131,49 @@ public class Maincontroller {
     }
 
      */
+
+    // 채팅 이미지를 업로드하고 접근 URL을 반환한다.
+    @PostMapping("/chat/upload")
+    public ResponseEntity<Map<String, String>> uploadChatImage(
+            @RequestParam MultipartFile file,
+            @AuthenticationPrincipal OAuth2User oAuth2User) throws IOException {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return ResponseEntity.badRequest().build();
+        }
+        Path dir = Paths.get(uploadDir);
+        Files.createDirectories(dir);
+        String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "img";
+        int dot = originalName.lastIndexOf('.');
+        String ext = dot >= 0 ? originalName.substring(dot) : ".jpg";
+        String filename = UUID.randomUUID() + ext;
+        Files.copy(file.getInputStream(), dir.resolve(filename));
+        return ResponseEntity.ok(Map.of("url", "/api/chat/image/" + filename));
+    }
+
+    // 채팅 이미지를 서빙한다. 해당 메시지의 송수신자만 접근 가능하다.
+    @GetMapping("/chat/image/{filename}")
+    public ResponseEntity<byte[]> getChatImage(
+            @PathVariable String filename,
+            @AuthenticationPrincipal OAuth2User oAuth2User) throws IOException {
+        if (filename.contains("..") || filename.contains("/") || filename.contains("\\")) {
+            return ResponseEntity.badRequest().build();
+        }
+        Long myId = ((Number) oAuth2User.getAttributes().get("id")).longValue();
+        String url = "/api/chat/image/" + filename;
+        if (messageRepository.countMessageWithUrlForUser(url, myId) == 0) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Path filePath = Paths.get(uploadDir).resolve(filename);
+        if (!Files.exists(filePath)) {
+            return ResponseEntity.notFound().build();
+        }
+        byte[] data = Files.readAllBytes(filePath);
+        String ct = Files.probeContentType(filePath);
+        return ResponseEntity.ok()
+                .header("Content-Type", ct != null ? ct : "image/jpeg")
+                .body(data);
+    }
 
     // [테스트용] 현재 로그인한 사용자에게 매칭 푸시 알림을 직접 전송한다.
     @PostMapping("/push/test")
