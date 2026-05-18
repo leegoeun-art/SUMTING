@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Settings, HelpCircle, FileText, BellOff, BellRing } from 'lucide-react';
+import { HelpCircle, FileText, BellOff, BellRing } from 'lucide-react';
 
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
@@ -76,12 +76,7 @@ export default function ProfilePage() {
       <Helmet><title>프로필 - 숨팅</title></Helmet>
 
       <div className="flex-1 overflow-y-auto pb-28 z-10">
-        {/* 상단 버튼 */}
-        <div className="flex justify-end items-center px-6 pt-6 mb-2">
-          <button className="p-2 -mr-2" style={{ color: 'rgba(255,255,255,0.75)' }}>
-            <Settings size={22} />
-          </button>
-        </div>
+
 
         {/* 유저 정보 */}
         <div className="flex flex-col items-center px-6 mb-8">
@@ -203,14 +198,14 @@ export default function ProfilePage() {
                 <button
                   onClick={() => setShowLogout(true)}
                   className="flex-1 py-4 text-sm font-medium active:bg-white/10 transition-colors"
-                  style={{ color: '#ffb3b3', borderRight: '1px solid rgba(255,255,255,0.15)' }}
+                  style={{ color: '#ff4444', borderRight: '1px solid rgba(255,255,255,0.15)' }}
                 >
                   로그아웃
                 </button>
                 <button
                   onClick={() => setShowWithdraw(true)}
                   className="flex-1 py-4 text-sm font-medium active:bg-white/10 transition-colors"
-                  style={{ color: '#ffb3b3' }}
+                  style={{ color: '#ff4444' }}
                 >
                   탈퇴
                 </button>
