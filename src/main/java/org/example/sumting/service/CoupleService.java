@@ -84,6 +84,8 @@ public class CoupleService {
                             up.getUser().getUuid(),
                             up.getNickName(),
                             up.getDepartment(),
+                            up.getAge(),
+                            up.getHeight(),
                             up.getMyKw1(),
                             up.getMyKw2(),
                             up.getMyKw3(),

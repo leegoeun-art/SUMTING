@@ -10,6 +10,8 @@ public class ResponseCouplesDto {
     private String user_id;
     private String nickname;
     private String department;
+    private Integer age;
+    private Integer height;
     private String my_kw1;
     private String my_kw2;
     private String my_kw3;
