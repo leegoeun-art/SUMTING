@@ -19,51 +19,11 @@ export default defineConfig(({mode}) => {
       host: true,
       hmr: process.env.DISABLE_HMR !== 'true',
       proxy: {
-        '/api': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/oauth2': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/login': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/logout': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/api/couples': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/api/heartPing': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/api/receiveHeartPing': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/api/sendHeartPing': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/api/approveHeartPing': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/api/push/test': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        '/api': {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-          // 필요한 경우 주소 뒤의 쿼리 스트링(?partnerId=...)까지 안전하게 전달합니다.
-        }
+        '/api': { target: env.BACKEND_URL || 'http://localhost:8080', changeOrigin: true },
+        '/oauth2': { target: env.BACKEND_URL || 'http://localhost:8080', changeOrigin: true },
+        '/login': { target: env.BACKEND_URL || 'http://localhost:8080', changeOrigin: true },
+        '/logout': { target: env.BACKEND_URL || 'http://localhost:8080', changeOrigin: true },
+        '/ws': { target: (env.BACKEND_URL || 'http://localhost:8080').replace(/^http/, 'ws'), changeOrigin: true, ws: true },
       },
     },
   };

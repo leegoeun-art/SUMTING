@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, MoreHorizontal } from 'lucide-react';
+import { Heart, MoreHorizontal, RefreshCw } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import SumungMascot from '../components/SumungMascot';
@@ -93,9 +93,10 @@ export default function HeartPingListPage() {
   const [tab,          setTab]          = useState<TabType>(initialTab);
   const [receivedList, setReceivedList] = useState<RecommendedUser[]>([]);
   const [apiSentList,  setApiSentList]  = useState<SentItem[]>([]);
+  const [refreshing,   setRefreshing]   = useState(false);
 
-  useEffect(() => {
-    if (tab !== 'received') return;
+  const loadReceived = () => {
+    setRefreshing(true);
     fetch('/api/receiveHeartPing', { credentials: 'include' })
       .then(res => (res.ok ? res.json() : []))
       .then((data: HeartPingApiItem[]) =>
@@ -105,15 +106,27 @@ export default function HeartPingListPage() {
             .map(toReceivedUser)
         )
       )
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setRefreshing(false));
+  };
+
+  const loadSent = () => {
+    setRefreshing(true);
+    fetch('/api/sendHeartPing', { credentials: 'include' })
+      .then(res => (res.ok ? res.json() : []))
+      .then((data: HeartPingApiItem[]) => setApiSentList(data.map(toSentItem)))
+      .catch(() => {})
+      .finally(() => setRefreshing(false));
+  };
+
+  useEffect(() => {
+    if (tab !== 'received') return;
+    loadReceived();
   }, [tab]);
 
   useEffect(() => {
     if (tab !== 'sent') return;
-    fetch('/api/sendHeartPing', { credentials: 'include' })
-      .then(res => (res.ok ? res.json() : []))
-      .then((data: HeartPingApiItem[]) => setApiSentList(data.map(toSentItem)))
-      .catch(() => {});
+    loadSent();
   }, [tab]);
 
   const handleStartChat = (user: RecommendedUser) => {
@@ -139,18 +152,16 @@ export default function HeartPingListPage() {
           {tab === 'chat'     && '1:1 채팅'}
         </h2>
         <div className="flex items-center gap-2">
-          <div className="flex gap-1">
-            {[0, 1, 2].map((i) => (
-              <div key={i}
-                className="rounded-full transition-all"
-                style={{
-                  width:      i === 0 ? '16px' : '6px',
-                  height:     '6px',
-                  background: i === 0 ? '#ffffff' : 'rgba(255,255,255,0.3)',
-                }}
-              />
-            ))}
-          </div>
+          <button
+            onClick={() => {
+              if (tab === 'received') loadReceived();
+              else if (tab === 'sent') loadSent();
+              else chattingRef.current?.refresh();
+            }}
+            style={{ color: 'rgba(255,255,255,0.85)' }}
+          >
+            <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+          </button>
           <button style={{ color: 'rgba(255,255,255,0.85)' }}><MoreHorizontal size={20} /></button>
         </div>
       </div>

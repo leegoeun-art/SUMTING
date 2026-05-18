@@ -40,7 +40,9 @@
       "Bash(git -C C:/Users/somga/Desktop/SUMTING log --all --full-history -- \"frontend/src/firebase.ts\")",
       "Bash(git -C C:/Users/somga/Desktop/SUMTING show 170db38:src/main/resources/application.properties)",
       "Bash(git *)",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\somga\\\\Desktop\\\\SUMTING\" -Recurse | Where-Object { $_.Extension -eq \".java\" } | Select-Object -First 20 FullName)",
+      "PowerShell(cmd /c dir \"C:\\\\Users\\\\somga\\\\Desktop\\\\SUMTING\\\\src\\\\main\\\\java\" /s /b 2>&1 | Select-Object -First 30)"
     ]
   }
 }

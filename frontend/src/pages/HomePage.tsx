@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
-import { Bell, Clock, Heart, X } from 'lucide-react';
+import { Bell, Clock, Heart, RefreshCw, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import MascotImage from '../components/MascotImage';
@@ -110,15 +110,17 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // GET /api/couples — 추천 상대 목록 로드
-  useEffect(() => {
+  const loadCouples = () => {
+    setLoadingCouples(true);
     fetch('/api/couples', { credentials: 'include' })
         .then(res => (res.ok ? res.json() : []))
         .then((data: CouplesApiItem[]) => setRecommendations(data.map(toRecommendedUser)))
         .catch(() => {})
         .finally(() => setLoadingCouples(false));
-    console.log(recommendations);
-  }, []);
+  };
+
+  // GET /api/couples — 추천 상대 목록 로드
+  useEffect(() => { loadCouples(); }, []);
 
   // 하트핑 보내기 — API 성공 후에만 UI 업데이트
   const handleSendHeartPing = async (u: RecommendedUser) => {
@@ -201,6 +203,9 @@ export default function HomePage() {
             >SUMTING</h1>
           </div>
           <div className="flex gap-4">
+            <button onClick={loadCouples} className="p-2" style={{ color: '#7A1528' }}>
+              <RefreshCw size={20} className={loadingCouples ? 'animate-spin' : ''} />
+            </button>
             <button onClick={() => navigate('/heartpings')} className="relative p-2" style={{ color: '#7A1528' }}>
               <Bell size={24} />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: '#C62A47' }} />

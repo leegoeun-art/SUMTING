@@ -101,10 +101,13 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  if (!activeChat) {
-    navigate('/heartpings');
-    return null;
-  }
+  useEffect(() => {
+    if (!activeChat) {
+      navigate('/heartpings');
+    }
+  }, [activeChat, navigate]);
+
+  if (!activeChat) return null;
 
   const closeMenu = () => { setMenuOpen(false); setConfirmLeave(false); setReportStep(false); setReportReason(''); };
 

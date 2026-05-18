@@ -44,6 +44,7 @@ interface ChatItem {
 
 export interface ChattingHandle {
   addChat: (user: RecommendedUser) => void;
+  refresh: () => void;
 }
 
 function toApiChatItem(item: MatchedPartnerApiItem): ChatItem {
@@ -71,12 +72,14 @@ const Chatting = forwardRef<ChattingHandle, ChattingProps>((_props, ref) => {
   const { setActiveChat, kakaoId } = useAppContext();
   const [chatList, setChatList] = useState<ChatItem[]>([]);
 
-  useEffect(() => {
+  const loadMatches = () => {
     fetch('/api/chat/matches', { credentials: 'include' })
       .then(res => (res.ok ? res.json() : []))
       .then((data: MatchedPartnerApiItem[]) => setChatList(data.map(toApiChatItem)))
       .catch(() => {});
-  }, [kakaoId]);
+  };
+
+  useEffect(() => { loadMatches(); }, [kakaoId]);
 
   const stompRef = useRef<Client | null>(null);
 
@@ -110,6 +113,7 @@ const Chatting = forwardRef<ChattingHandle, ChattingProps>((_props, ref) => {
   }, [kakaoId]);
 
   useImperativeHandle(ref, () => ({
+    refresh: loadMatches,
     addChat: (user: RecommendedUser) => {
       setChatList(prev => {
         if (prev.some(c => c.partner.id === user.id)) return prev;
