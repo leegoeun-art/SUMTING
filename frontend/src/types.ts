@@ -18,7 +18,10 @@ export interface RecommendedUser {
   nickname: string;
   mascotType: string;
   department: string;
+  age?: number;
+  height?: number;
   keywords: string[];
+  yourKeywords?: string[];
   matchScore: number;
   status?: 'none' | 'pending' | 'received' | 'matched' | 'exited' | 'rejected';
 }

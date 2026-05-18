@@ -3,6 +3,7 @@ package org.example.sumting.config;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.sumting.service.CustomOAuth2UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,6 +26,9 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final ClientRegistrationRepository clientRegistrationRepository;
 
+    @Value("${app.oauth2.success-url:https://sumting.co.kr/?from=login}")
+    private String oauth2SuccessUrl;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -43,7 +47,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .defaultSuccessUrl("https://sumting.co.kr/?from=login", true)
+                        .defaultSuccessUrl(oauth2SuccessUrl, true)
                 )
 
                 .exceptionHandling(ex -> ex

@@ -70,9 +70,15 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
 
                   {/* 이름 + 학과 */}
                   <h2 className="text-xl font-extrabold text-white mb-1">{user.nickname}</h2>
-                  <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.88)' }}>
-                    {user.department}
-                  </p>
+                  <div className="flex flex-col items-center gap-0.5 mb-5">
+                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.88)' }}>{user.department}</p>
+                    {(user.age != null || user.height != null) && (
+                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        {[user.age != null && `${user.age}세`, user.height != null && `${user.height}cm`]
+                          .filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+                  </div>
 
                   {/* 매칭률 바 */}
                   <div className="w-full mb-5">
@@ -91,12 +97,12 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
                     </div>
                   </div>
 
-                  {/* 키워드 칩 */}
+                  {/* 소개 키워드 */}
                   {user.keywords.length > 0 && (
                       <div className="w-full">
                         <p className="text-[10px] font-bold uppercase tracking-widest mb-2 ml-1"
                            style={{ color: 'rgba(255,255,255,0.78)' }}>
-                          키워드
+                          자기소개 키워드
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {user.keywords.map((k) => (
@@ -109,8 +115,33 @@ export default function ProfileModal({ user, onSendHeartPing, onClose }: Profile
                                     color: 'rgba(255,255,255,0.9)',
                                   }}
                               >
-                        #{k}
-                      </span>
+                                #{k}
+                              </span>
+                          ))}
+                        </div>
+                      </div>
+                  )}
+
+                  {/* 이상형 키워드 */}
+                  {user.yourKeywords && user.yourKeywords.length > 0 && (
+                      <div className="w-full mt-3">
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 ml-1"
+                           style={{ color: 'rgba(255,255,255,0.78)' }}>
+                          이상형 키워드
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {user.yourKeywords.map((k) => (
+                              <span
+                                  key={k}
+                                  className="text-xs px-3 py-1.5 rounded-full font-medium"
+                                  style={{
+                                    background: 'rgba(255,255,255,0.18)',
+                                    border: '1px solid rgba(255,255,255,0.3)',
+                                    color: 'rgba(255,255,255,0.9)',
+                                  }}
+                              >
+                                #{k}
+                              </span>
                           ))}
                         </div>
                       </div>

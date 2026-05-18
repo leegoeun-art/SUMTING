@@ -23,22 +23,30 @@ interface CouplesApiItem {
   user_id:    string;
   nickname:   string;
   department: string;
+  age:        number | null;
+  height:     number | null;
   my_kw1:     string | null;
   my_kw2:     string | null;
   my_kw3:     string | null;
+  your_kw1:   string | null;
+  your_kw2:   string | null;
+  your_kw3:   string | null;
   status:     string;
 }
 
 /** API 응답 → RecommendedUser 변환 */
 function toRecommendedUser(item: CouplesApiItem): RecommendedUser {
   return {
-    id:         item.user_id,
-    nickname:   item.nickname,
-    department: item.department,
-    keywords:   [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
-    mascotType: DEPARTMENT_MASCOT[item.department] ?? 'basic',
-    matchScore: 0,
-    status:     (item.status as RecommendedUser['status']) ?? 'none',
+    id:           item.user_id,
+    nickname:     item.nickname,
+    department:   item.department,
+    age:          item.age ?? undefined,
+    height:       item.height ?? undefined,
+    keywords:     [item.my_kw1, item.my_kw2, item.my_kw3].filter((k): k is string => !!k),
+    yourKeywords: [item.your_kw1, item.your_kw2, item.your_kw3].filter((k): k is string => !!k),
+    mascotType:   DEPARTMENT_MASCOT[item.department] ?? 'basic',
+    matchScore:   0,
+    status:       (item.status as RecommendedUser['status']) ?? 'none',
   };
 }
 
@@ -247,19 +255,16 @@ export default function HomePage() {
         <div className="flex-1 overflow-y-auto z-10 px-6 pb-24">
           {/* Timer Section */}
           <div className="my-6 flex flex-col items-center">
-            <div className="backdrop-blur-md px-6 py-4 rounded-[32px] w-full"
+            <div className="backdrop-blur-md px-6 py-5 rounded-[32px] w-full"
                  style={GLASS.cardLight}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.90)' }}>숨팅 종료까지</p>
-                  <div className="flex items-center gap-2">
-                    <Clock size={14} style={{ color: '#E87060' }} />
-                    <span className="font-numeral text-3xl font-bold text-white tracking-tighter">
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-xs font-medium tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.90)' }}>숨팅 종료까지</p>
+                <div className="flex items-center gap-3">
+                  <Clock size={18} style={{ color: '#E87060' }} />
+                  <span className="font-numeral text-5xl font-semibold text-white" style={{ letterSpacing: '0.08em' }}>
                     {timeLeft}
                   </span>
-                  </div>
                 </div>
-                <SumungMascot className="w-28 h-30 -mb-4" />
               </div>
             </div>
           </div>
@@ -351,7 +356,7 @@ export default function HomePage() {
                       className="group relative rounded-[32px] p-6 transition-all active:scale-[0.98]"
                       style={GLASS.card}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 mb-3">
                       <div className="relative flex-shrink-0">
                         <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
                              style={GLASS.icon}>
@@ -383,41 +388,51 @@ export default function HomePage() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-bold text-lg text-white">{u.nickname}</h4>
-                          {u.matchScore > 0 && (
-                              <span
-                                  className="font-numeral text-xs font-bold"
-                                  style={{ color: '#FF6B6B' }}
-                              >
-                          {u.matchScore}% Match
-                        </span>
-                          )}
-                        </div>
-                        <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.88)' }}>{u.department}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {u.keywords.map(k => {
-                            const matched = idealKeywords.includes(k);
-                            return (
-                                <span
-                                    key={k}
-                                    className="inline-flex items-center gap-0.5 text-[10px] px-2 py-1 rounded-lg font-semibold"
-                                    style={matched
-                                        ? { background: 'rgba(232,80,80,0.22)', color: '#FF6B6B', border: '1px solid rgba(232,80,80,0.4)' }
-                                        : { background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)' }
-                                    }
-                                >
-                            #{k}
-                                  {matched && (
-                                      <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
-                                        <path d="M2 5l2.5 2.5L8 3" stroke="#FF6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                      </svg>
-                                  )}
-                          </span>
-                            );
-                          })}
-                        </div>
+                        <h4 className="font-bold text-lg text-white mb-1">{u.nickname}</h4>
+                        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.88)' }}>
+                          {[
+                            u.department,
+                            u.age != null ? `${u.age}세` : null,
+                            u.height != null ? `${u.height}cm` : null,
+                          ].filter(Boolean).join(' · ')}
+                        </p>
                       </div>
+                    </div>
+                    <div className="absolute top-4 right-5 flex items-center gap-1">
+                      {Array.from({ length: 3 }).map((_, i) => {
+                        const filled = i < Math.round(u.matchScore / 33);
+                        return (
+                          <Heart
+                            key={i}
+                            size={16}
+                            fill={filled ? '#FF6B6B' : 'rgba(255,255,255,0.15)'}
+                            stroke={filled ? '#FF6B6B' : 'rgba(255,255,255,0.25)'}
+                            strokeWidth={1.5}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {u.keywords.map(k => {
+                        const matched = idealKeywords.includes(k);
+                        return (
+                            <span
+                                key={k}
+                                className="inline-flex items-center gap-0.5 text-[10px] px-2 py-1 rounded-lg font-semibold"
+                                style={matched
+                                    ? { background: 'rgba(232,80,80,0.22)', color: '#FF6B6B', border: '1px solid rgba(232,80,80,0.4)' }
+                                    : { background: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)' }
+                                }
+                            >
+                        #{k}
+                              {matched && (
+                                  <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+                                    <path d="M2 5l2.5 2.5L8 3" stroke="#FF6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                              )}
+                      </span>
+                        );
+                      })}
                     </div>
                   </motion.div>
               ))}

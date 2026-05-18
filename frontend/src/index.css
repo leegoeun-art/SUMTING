@@ -11,7 +11,7 @@ html, body, * {
 
 /* 숫자·타이머 전용 */
 .font-numeral {
-  font-family: 'DM Mono', monospace !important;
+  font-family: 'Nunito', sans-serif !important;
 }
 
 @keyframes heartBlink {
